@@ -1,0 +1,300 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ── Light tokens (default) ─────────────────────────────────────── */
+:root {
+  --bg-base:        #f8fafc;   /* slate-50 */
+  --bg-surface:     #ffffff;
+  --bg-subtle:      #f1f5f9;   /* slate-100 */
+  --border:         #e2e8f0;   /* slate-200 */
+  --border-subtle:  #f1f5f9;
+  --text-primary:   #0f172a;   /* slate-900 */
+  --text-secondary: #475569;   /* slate-600 */
+  --text-muted:     #94a3b8;   /* slate-400 */
+  --accent:         #2563eb;   /* blue-600 */
+  --accent-subtle:  #eff6ff;   /* blue-50 */
+  --sidebar-bg:     #ffffff;
+  --sidebar-border: #e2e8f0;
+  --header-bg:      #ffffff;
+
+  /* Panel tokens — adapts per theme */
+  --panel-bg:       #ffffff;
+  --panel-surface:  #f1f5f9;   /* slate-100 */
+  --panel-border:   #e2e8f0;   /* slate-200 */
+  --panel-text:     #0f172a;   /* slate-900 */
+  --panel-muted:    #475569;   /* slate-600 */
+
+  /* Tooltip */
+  --tooltip-bg:     #1e293b;
+  --tooltip-text:   #f8fafc;
+}
+
+/* ── Dark tokens ────────────────────────────────────────────────── */
+.dark {
+  --bg-base:        #0f172a;   /* slate-900 */
+  --bg-surface:     #1e293b;   /* slate-800 */
+  --bg-subtle:      #334155;   /* slate-700 */
+  --border:         #334155;
+  --border-subtle:  #1e293b;
+  --text-primary:   #f1f5f9;   /* slate-100 */
+  --text-secondary: #94a3b8;   /* slate-400 */
+  --text-muted:     #64748b;   /* slate-500 */
+  --accent:         #3b82f6;   /* blue-500 */
+  --accent-subtle:  #1e3a5f;
+  --sidebar-bg:     #1e293b;
+  --sidebar-border: #334155;
+  --header-bg:      #1e293b;
+
+  /* Panel tokens in dark mode — go full dark */
+  --panel-bg:       #0f172a;   /* slate-900 */
+  --panel-surface:  #1e293b;   /* slate-800 */
+  --panel-border:   #334155;   /* slate-700 */
+  --panel-text:     #f1f5f9;
+  --panel-muted:    #64748b;
+
+  --tooltip-bg:     #334155;
+  --tooltip-text:   #f8fafc;
+}
+
+/* ── Custom scrollbar ───────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 99px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ── Apply tokens to structural elements ───────────────────────── */
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  transition: background-color 0.15s, color 0.15s;
+}
+
+/* Sidebar */
+#sidebar-container {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+  color: var(--text-primary);
+}
+
+.dark #sidebar-container button {
+  color: var(--text-secondary);
+}
+
+.dark #sidebar-container button:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+/* App header */
+.dark header {
+  background-color: var(--header-bg) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+/* Generic surface cards */
+.dark .bg-white {
+  background-color: var(--bg-surface) !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50\/75 {
+  background-color: var(--bg-subtle) !important;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-200 {
+  border-color: var(--border) !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+/* Tables — use theme border everywhere so no black/white borders */
+table {
+  border-color: var(--border);
+}
+table thead tr,
+table tbody tr,
+table tfoot tr {
+  border-color: var(--border);
+}
+/* Tailwind divide-y uses currentColor by default; override globally */
+[class*="divide-y"] > * + * {
+  border-color: var(--border) !important;
+}
+[class*="divide-x"] > * + * {
+  border-color: var(--border) !important;
+}
+
+.dark table thead tr {
+  background-color: var(--bg-surface) !important;
+}
+
+.dark table tbody tr:hover {
+  background-color: rgba(255,255,255,0.03) !important;
+}
+
+/* Inputs */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--bg-subtle) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* React Flow canvas in dark mode */
+.dark .react-flow__background {
+  background-color: var(--bg-base) !important;
+}
+
+.dark .react-flow__controls {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border) !important;
+}
+
+.dark .react-flow__controls-button {
+  background-color: var(--bg-surface) !important;
+  border-bottom-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.dark .react-flow__controls-button svg {
+  fill: var(--text-primary) !important;
+}
+.dark .react-flow__controls-button:hover {
+  background-color: var(--bg-subtle) !important;
+}
+.dark .react-flow__controls-button:disabled svg {
+  fill: var(--text-muted) !important;
+}
+
+.dark .react-flow__minimap {
+  background-color: var(--bg-surface) !important;
+}
+
+/* ── Theme-aware panel (dark terminal / control-center style) ─── */
+.theme-panel {
+  background-color: var(--panel-bg);
+  border-color: var(--panel-border);
+  color: var(--panel-text);
+}
+.theme-panel-surface {
+  background-color: var(--panel-surface);
+  border-color: var(--panel-border);
+  color: var(--panel-text);
+}
+
+/* ── Tooltip ────────────────────────────────────────────────────── */
+.theme-tooltip {
+  background-color: var(--tooltip-bg);
+  color: var(--tooltip-text);
+}
+.theme-tooltip-arrow-left {
+  border-right-color: var(--tooltip-bg);
+}
+
+/* ── Notification bell dropdown ─────────────────────────────────── */
+.theme-dropdown {
+  background-color: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+
+/* ── Platform admin theme system ───────────────────────────────── */
+.admin-shell {
+  --chart-grid: #e2e8f0;
+  --chart-crosshair: #94a3b8;
+  --chart-surface: #ffffff;
+}
+.dark .admin-shell {
+  --chart-grid: #334155;
+  --chart-crosshair: #64748b;
+  --chart-surface: #1e293b;
+}
+
+.admin-sidebar {
+  background: var(--sidebar-bg);
+  color: var(--text-secondary);
+  border-right: 1px solid var(--sidebar-border);
+}
+.admin-nav-active {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.admin-page input::placeholder,
+.admin-page textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Admin-specific utility fallbacks for components that predate the token system. */
+.dark .admin-shell .bg-red-50 { background-color: rgba(127, 29, 29, .22) !important; }
+.dark .admin-shell .text-red-700 { color: #fca5a5 !important; }
+.dark .admin-shell .border-red-200 { border-color: rgba(248, 113, 113, .30) !important; }
+.dark .admin-shell .bg-amber-50 { background-color: rgba(146, 64, 14, .20) !important; }
+.dark .admin-shell .bg-amber-100 { background-color: rgba(146, 64, 14, .28) !important; }
+.dark .admin-shell .text-amber-700 { color: #fcd34d !important; }
+.dark .admin-shell .border-amber-200 { border-color: rgba(245, 158, 11, .30) !important; }
+.dark .admin-shell .bg-indigo-50 { background-color: rgba(49, 46, 129, .22) !important; }
+.dark .admin-shell .text-indigo-800 { color: #c7d2fe !important; }
+.dark .admin-shell .bg-emerald-50 { background-color: rgba(6, 78, 59, .22) !important; }
+.dark .admin-shell .text-emerald-600 { color: #6ee7b7 !important; }
+.dark .admin-shell .bg-slate-900 { background-color: #0b1220 !important; }
+.dark .admin-shell .bg-slate-700 { background-color: #334155 !important; }
+.dark .admin-shell .text-slate-300 { color: #cbd5e1 !important; }
+.dark .admin-shell .text-slate-200 { color: #e2e8f0 !important; }
+
+/* Native form controls should remain legible in both themes. */
+.admin-shell option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+/* Opacity utility variants used by legacy admin cards. */
+.dark .admin-shell .bg-white\/70 { background-color: rgba(30, 41, 59, .70) !important; }
+.dark .admin-shell .bg-white\/50 { background-color: rgba(30, 41, 59, .50) !important; }
+.dark .admin-shell .bg-slate-50\/50 { background-color: rgba(51, 65, 85, .50) !important; }
+.dark .admin-shell .bg-slate-50\/75 { background-color: rgba(51, 65, 85, .75) !important; }
