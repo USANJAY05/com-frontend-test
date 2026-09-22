@@ -20,26 +20,38 @@ function formatInr(n: number) {
   return `₹${(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 }
 
+async function fetchJsonOrNull<T>(path: string): Promise<T | null> {
+  const r = await apiFetch(path);
+  if (!r.ok) return null;
+  return r.json();
+}
+
 export default function OverviewPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [series, setSeries] = useState<TimeSeries | null>(null);
   const [activity, setActivity] = useState<AuditRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     Promise.all([
-      apiFetch('/api/platform/stats').then((r) => r.json()),
-      apiFetch('/api/platform/timeseries').then((r) => r.json()),
-      apiFetch('/api/platform/audit-log').then((r) => r.json())
+      fetchJsonOrNull<Stats>('/api/platform/stats'),
+      fetchJsonOrNull<TimeSeries>('/api/platform/timeseries'),
+      fetchJsonOrNull<AuditRow[]>('/api/platform/audit-log')
     ]).then(([s, t, a]) => {
       setStats(s);
       setSeries(t);
       setActivity(Array.isArray(a) ? a.slice(0, 8) : []);
+      if (!s || !t) setError(true);
     }).finally(() => setLoading(false));
   }, []);
 
-  if (loading || !stats || !series) {
+  if (loading) {
     return <div className="flex items-center justify-center h-64 text-slate-400"><Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading overview…</div>;
+  }
+
+  if (error || !stats || !series) {
+    return <div className="flex items-center justify-center h-64 text-rose-400 text-sm">Could not load overview data. Check the backend logs for /api/platform/stats and /api/platform/timeseries.</div>;
   }
 
   return (
