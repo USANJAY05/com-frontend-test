@@ -66,20 +66,6 @@ export interface UserRow {
   role: string | null;
 }
 
-export interface CallRow {
-  id: string;
-  orgId: string;
-  orgName: string;
-  callerNumber: string;
-  agentName: string;
-  language: string;
-  durationSeconds: number;
-  sentiment: string | null;
-  recordingUrl: string | null;
-  transcript: string | null;
-  summary: string | null;
-  createdAt: string;
-}
 
 export interface AuditRow {
   id: string;
