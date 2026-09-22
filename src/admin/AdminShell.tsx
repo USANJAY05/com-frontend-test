@@ -16,8 +16,8 @@ const NAV: { path: string; label: string; icon: React.ElementType }[] = [
   { path: 'organizations',  label: 'Organizations',      icon: Building2 },
   { path: 'users',          label: 'Users',              icon: Users },
   { path: 'activity',       label: 'Activity',           icon: ScrollText },
-  { path: 'cost',           label: 'Cost',               icon: IndianRupee },
-  { path: 'settings',       label: 'Pricing & Features', icon: Settings },
+  { path: 'cost',           label: 'Cost & Pricing',     icon: IndianRupee },
+  { path: 'settings',       label: 'Features',           icon: Settings },
   { path: 'prompts',        label: 'Prompts',             icon: MessageSquareText },
 ];
 
@@ -81,8 +81,8 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
           <Route path="organizations" element={<PageWrap title="Organizations"><OrganizationsPage /></PageWrap>} />
           <Route path="users"         element={<PageWrap title="Users"><UsersPage /></PageWrap>} />
           <Route path="activity"      element={<PageWrap title="Activity"><ActivityPage /></PageWrap>} />
-          <Route path="cost"          element={<PageWrap title="Cost"><CostPage /></PageWrap>} />
-          <Route path="settings"      element={<PageWrap title="Pricing & Features"><SettingsPage /></PageWrap>} />
+          <Route path="cost"          element={<PageWrap title="Cost & Pricing"><CostPage /></PageWrap>} />
+          <Route path="settings"      element={<PageWrap title="Features"><SettingsPage /></PageWrap>} />
           <Route path="prompts"       element={<PageWrap title="Prompts"><PromptsPage /></PageWrap>} />
           <Route path="*"             element={<Navigate to="overview" replace />} />
         </Routes>

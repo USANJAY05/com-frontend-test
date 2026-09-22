@@ -3,6 +3,7 @@ import { Search, Loader2, ScrollText, Clock3 } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { AuditRow } from './types';
 import Widget from '../components/ui/Widget';
+import KpiCard from '../components/ui/KpiCard';
 
 export default function ActivityPage() {
   const [rows, setRows] = useState<AuditRow[]>([]);
@@ -38,14 +39,8 @@ export default function ActivityPage() {
 
   return (
     <div className="grid grid-cols-12 gap-4">
-      <Widget colSpan={3} icon={ScrollText} accent="#2a78d6" padding="md">
-        <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">Total events</span>
-        <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{rows.length}</div>
-      </Widget>
-      <Widget colSpan={3} icon={Clock3} accent="#4a3aa7" padding="md">
-        <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">Events, last 24h</span>
-        <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{eventsLast24h}</div>
-      </Widget>
+      <KpiCard colSpan={3} label="Total events" value={rows.length} icon={ScrollText} iconBg="#2a78d61a" iconColor="#2a78d6" />
+      <KpiCard colSpan={3} label="Events, last 24h" value={eventsLast24h} icon={Clock3} iconBg="#4a3aa71a" iconColor="#4a3aa7" />
 
       <Widget
         colSpan={12}

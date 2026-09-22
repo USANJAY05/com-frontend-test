@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, Save, Phone, Cpu, Archive } from 'lucide-react';
+import { Loader2, Save, Phone, Cpu, Archive, Zap } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import Widget from '../components/ui/Widget';
+import KpiCard from '../components/ui/KpiCard';
 
 // Every provider's identity (key/kind/label) is defined in code — see the
 // backend's platform/costProviders.js KNOWN_PROVIDERS. This page can only
@@ -62,6 +63,14 @@ export default function CostPage() {
   const [archive, setArchive] = useState<CostArchiveEntry[]>([]);
   const [loadingArchive, setLoadingArchive] = useState(true);
 
+  // Base platform-wide voice-call pricing — was its own "Pricing &
+  // Features" page, split from every other cost figure (per-provider call/
+  // AI rates below). Folded in here so "cost" and "pricing" live in one
+  // section instead of two.
+  const [costPerMinuteInr, setCostPerMinuteInr] = useState('0');
+  const [savingPrice, setSavingPrice] = useState(false);
+  const [priceSaved, setPriceSaved] = useState(false);
+
   const load = () => {
     setLoading(true);
     apiFetch('/api/platform/cost-providers')
@@ -74,9 +83,33 @@ export default function CostPage() {
       .then((r) => r.json())
       .then((data) => setArchive(Array.isArray(data) ? data : []))
       .finally(() => setLoadingArchive(false));
+
+    apiFetch('/api/platform/pricing')
+      .then((r) => r.json())
+      .then((data) => setCostPerMinuteInr(String(data.costPerMinuteInr ?? '')))
+      .catch(() => {});
   };
 
   useEffect(load, []);
+
+  const savePricing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingPrice(true);
+    setPriceSaved(false);
+    try {
+      const res = await apiFetch('/api/platform/pricing', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ costPerMinuteInr: Number(costPerMinuteInr) })
+      });
+      if (res.ok) {
+        setPriceSaved(true);
+        setTimeout(() => setPriceSaved(false), 2000);
+      }
+    } finally {
+      setSavingPrice(false);
+    }
+  };
 
   const callProviders = providers.filter((p) => p.kind === 'call');
   const aiProviders = providers.filter((p) => p.kind === 'ai');
@@ -119,17 +152,43 @@ export default function CostPage() {
         <div className="col-span-12 bg-red-50 border border-red-200 text-red-700 text-xs font-medium rounded-xl px-4 py-3">{error}</div>
       )}
 
-      <Widget colSpan={3} icon={Phone} accent="#0d9488" padding="md">
-        <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">Active call providers</span>
-        <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{activeCallProviderCount}</div>
-      </Widget>
-      <Widget colSpan={3} icon={Cpu} accent="#4a3aa7" padding="md">
-        <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">Active AI providers</span>
-        <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{activeAiProviderCount}</div>
-      </Widget>
-      <Widget colSpan={3} icon={Archive} accent="#b45309" padding="md">
-        <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">Deleted orgs archived</span>
-        <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{archive.length}</div>
+      <KpiCard colSpan={3} label="Cost per minute" value={`₹${costPerMinuteInr || 0}`} icon={Zap} iconBg="#f59e0b1a" iconColor="#f59e0b" />
+      <KpiCard colSpan={3} label="Active call providers" value={activeCallProviderCount} icon={Phone} iconBg="#0d94881a" iconColor="#0d9488" />
+      <KpiCard colSpan={3} label="Active AI providers" value={activeAiProviderCount} icon={Cpu} iconBg="#4a3aa71a" iconColor="#4a3aa7" />
+      <KpiCard colSpan={3} label="Deleted orgs archived" value={archive.length} icon={Archive} iconBg="#b453091a" iconColor="#b45309" />
+
+      <Widget
+        colSpan={12}
+        title="Voice call pricing"
+        subtitle="Base platform-wide rate applied to every org's billing calculation immediately — no redeploy needed. For per-provider call/AI rates and tax, see the sections below."
+        icon={Zap}
+        accent="#f59e0b"
+        padding="md"
+      >
+        <form onSubmit={savePricing} className="flex items-end gap-3">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1">
+              Cost per minute (INR)
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={costPerMinuteInr}
+              onChange={(e) => setCostPerMinuteInr(e.target.value)}
+              className="w-40 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={savingPrice}
+            className="flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-slate-800 disabled:opacity-50"
+          >
+            {savingPrice ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Save
+          </button>
+          {priceSaved && <span className="text-xs text-emerald-600 font-medium">Saved</span>}
+        </form>
       </Widget>
 
       <ProviderSection

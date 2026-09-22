@@ -3,6 +3,7 @@ import { Search, Loader2, Users as UsersIcon, UserX } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { UserRow } from './types';
 import Widget from '../components/ui/Widget';
+import KpiCard from '../components/ui/KpiCard';
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -26,14 +27,8 @@ export default function UsersPage() {
 
   return (
     <div className="grid grid-cols-12 gap-4">
-      <Widget colSpan={3} icon={UsersIcon} accent="#2a78d6" padding="md">
-        <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">Registered users</span>
-        <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{users.length}</div>
-      </Widget>
-      <Widget colSpan={3} icon={UserX} accent="#e11d48" padding="md">
-        <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">Unassigned to an org</span>
-        <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{unassignedCount}</div>
-      </Widget>
+      <KpiCard colSpan={3} label="Registered users" value={users.length} icon={UsersIcon} iconBg="#2a78d61a" iconColor="#2a78d6" />
+      <KpiCard colSpan={3} label="Unassigned to an org" value={unassignedCount} icon={UserX} iconBg="#e11d481a" iconColor="#e11d48" />
 
       <Widget
         colSpan={12}
