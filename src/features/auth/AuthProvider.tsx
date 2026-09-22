@@ -172,7 +172,18 @@ function CognitoAuthProvider({ children }: { children: React.ReactNode }) {
       try {
         configureCognito();
         const current = await getCognitoUser();
-        if (!current) { await signInWithCognito(); return; }
+        if (!current) {
+          const alreadyAttempted = sessionStorage.getItem('cognito_signin_attempted') === '1';
+          if (alreadyAttempted) {
+            setErrorMsg('Sign-in did not complete. This usually means the redirect URI is not registered as an allowed callback URL on the Cognito app client, or the app client has no login method enabled.');
+            setInitState('error');
+            return;
+          }
+          sessionStorage.setItem('cognito_signin_attempted', '1');
+          await signInWithCognito();
+          return;
+        }
+        sessionStorage.removeItem('cognito_signin_attempted');
         const session = await (await import('aws-amplify/auth')).fetchAuthSession();
         const claims = session.tokens?.idToken?.payload ?? {};
         setUser(extractCognitoUser(current, claims));
