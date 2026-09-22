@@ -168,6 +168,14 @@ function CognitoAuthProvider({ children }: { children: React.ReactNode }) {
     if (started.current) return;
     started.current = true;
     if (!isCognitoConfigured()) { setErrorMsg('AWS Cognito frontend configuration is incomplete.'); setInitState('error'); return; }
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get('error');
+    if (oauthError) {
+      sessionStorage.removeItem('cognito_signin_attempted');
+      setErrorMsg(`Cognito rejected the sign-in request: ${oauthError}${params.get('error_description') ? ` (${params.get('error_description')})` : ''}.`);
+      setInitState('error');
+      return;
+    }
     (async () => {
       try {
         configureCognito();
@@ -175,6 +183,7 @@ function CognitoAuthProvider({ children }: { children: React.ReactNode }) {
         if (!current) {
           const alreadyAttempted = sessionStorage.getItem('cognito_signin_attempted') === '1';
           if (alreadyAttempted) {
+            sessionStorage.removeItem('cognito_signin_attempted');
             setErrorMsg('Sign-in did not complete. This usually means the redirect URI is not registered as an allowed callback URL on the Cognito app client, or the app client has no login method enabled.');
             setInitState('error');
             return;
