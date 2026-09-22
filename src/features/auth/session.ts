@@ -7,7 +7,7 @@ const provider = String(import.meta.env.VITE_AUTH_PROVIDER || 'cognito').toLower
 export async function getSessionToken(): Promise<string | null> {
   if (provider === 'cognito') { try { configureCognito(); return await getCognitoToken(); } catch { return null; } }
   if (provider === 'identity_platform') {
-    const user = identityAuth.currentUser;
+    const user = identityAuth?.currentUser;
     if (!user) return null;
     try { return await user.getIdToken(); } catch { return null; }
   }

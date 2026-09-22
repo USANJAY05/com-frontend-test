@@ -206,13 +206,14 @@ function IdentityPlatformProvider({ children }: { children: React.ReactNode }) {
 
     (async () => {
       try {
-        await getRedirectResult(identityAuth);
-        unsubscribe = onAuthStateChanged(identityAuth, async currentUser => {
+        const auth = identityAuth!;
+        await getRedirectResult(auth);
+        unsubscribe = onAuthStateChanged(auth, async currentUser => {
           if (!mounted) return;
           if (!currentUser) {
             if (!redirectStarted.current) {
               redirectStarted.current = true;
-              await signInWithRedirect(identityAuth, new GoogleAuthProvider());
+              await signInWithRedirect(auth, new GoogleAuthProvider());
             }
             return;
           }
@@ -233,12 +234,13 @@ function IdentityPlatformProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const getToken = useCallback(async () => {
-    const currentUser = identityAuth.currentUser;
+    const currentUser = identityAuth?.currentUser;
     if (!currentUser) throw new Error('Identity Platform user is not authenticated');
     return currentUser.getIdToken();
   }, []);
 
   const logout = useCallback(() => {
+    if (!identityAuth) return;
     void signOut(identityAuth).then(() => { window.location.assign('/login'); });
   }, []);
 
