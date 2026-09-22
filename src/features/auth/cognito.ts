@@ -24,7 +24,7 @@ export function configureCognito() {
         loginWith: {
           oauth: {
             domain: config.domain,
-            scopes: ['openid', 'email'],
+            scopes: ['openid', 'email', 'profile'],
             redirectSignIn: [config.redirectSignIn],
             redirectSignOut: [config.redirectSignOut],
             responseType: 'code',
