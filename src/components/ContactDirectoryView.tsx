@@ -13,7 +13,6 @@ import {
   AlertCircle,
   Phone,
   Mail,
-  Building,
   CheckCircle2,
   FolderOpen,
   Settings2
@@ -54,14 +53,10 @@ export default function ContactDirectoryView({
   callLogs = [],
   primaryObjectKey
 }: ContactDirectoryViewProps) {
-  // Loan-specific fields (employer/income/credit score/DTI) only make
-  // sense for lending — every other industry's contacts are real Industry
-  // Objects records bridged into this same Lead shape (see
-  // src/lib/objectContacts.ts), so those fields are hidden rather than
-  // asking e.g. an automotive org to fill in a "credit score" for a test
-  // drive contact. financialInfo still gets a harmless default under the
-  // hood so existing lending-only code paths keep working unchanged.
-  const isLending = !industry || industry === 'lending';
+  // Contact Directory is a lightweight address book (name/phone/email +
+  // groups) shared across every industry — loan-specific details
+  // (amount requested, employer, income, credit score/DTI) belong to
+  // Leads/Pipeline, not here, so this view never displays or collects them.
   const { stages: pipelineStages } = usePipelineStages();
   // Navigation & filtering state
   const [searchTerm, setSearchTerm] = useState('');
@@ -145,12 +140,7 @@ export default function ContactDirectoryView({
   const [formName, setFormName] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formEmail, setFormEmail] = useState('');
-  const [formAmount, setFormAmount] = useState('25000');
   const [formSource, setFormSource] = useState('Manual Entry');
-  const [formEmployer, setFormEmployer] = useState('');
-  const [formIncome, setFormIncome] = useState('6000');
-  const [formCredit, setFormCredit] = useState('720');
-  const [formDti, setFormDti] = useState('0.25');
   const [formNotes, setFormNotes] = useState('');
 
   // Bulk Upload State
@@ -185,12 +175,7 @@ export default function ContactDirectoryView({
     setFormName('');
     setFormPhone('');
     setFormEmail('');
-    setFormAmount('25000');
     setFormSource('Manual Entry');
-    setFormEmployer('');
-    setFormIncome('6000');
-    setFormCredit('720');
-    setFormDti('0.25');
     setFormNotes('Registered individually.');
     setFormGroupIds([]);
     setIsAddModalOpen(true);
@@ -202,12 +187,7 @@ export default function ContactDirectoryView({
     setFormName(lead.name);
     setFormPhone(lead.phone);
     setFormEmail(lead.email);
-    setFormAmount(lead.amountRequested.toString());
     setFormSource(lead.source);
-    setFormEmployer(lead.financialInfo?.employer || '');
-    setFormIncome((lead.financialInfo?.monthlyIncome || 6000).toString());
-    setFormCredit((lead.financialInfo?.creditScore || 720).toString());
-    setFormDti((lead.financialInfo?.debtToIncome || 0.25).toString());
     setFormNotes(lead.notes || '');
     setFormGroupIds(lead.groupIds || []);
     setIsAddModalOpen(true);
@@ -239,16 +219,9 @@ export default function ContactDirectoryView({
             name: formName,
             phone: formPhone,
             email: formEmail,
-            amountRequested: parseFloat(formAmount) || 0,
             source: formSource,
             notes: formNotes,
             groupIds: formGroupIds,
-            financialInfo: {
-              employer: formEmployer || 'Self-Employed',
-              monthlyIncome: parseFloat(formIncome) || 0,
-              creditScore: parseInt(formCredit) || 700,
-              debtToIncome: parseFloat(formDti) || 0.3
-            }
           };
           return updatedLead;
         }
@@ -276,7 +249,7 @@ export default function ContactDirectoryView({
         name: formName,
         phone: formPhone,
         email: formEmail,
-        amountRequested: parseFloat(formAmount) || 0,
+        amountRequested: 0,
         score: 0,
         source: formSource,
         status: 'New',
@@ -284,12 +257,6 @@ export default function ContactDirectoryView({
         createdAt: new Date().toISOString(),
         notes: formNotes,
         groupIds: formGroupIds,
-        financialInfo: {
-          employer: formEmployer || 'Self-Employed',
-          monthlyIncome: parseFloat(formIncome) || 0,
-          creditScore: parseInt(formCredit) || 700,
-          debtToIncome: parseFloat(formDti) || 0.3
-        }
       };
       setLeads([newLead, ...leads]);
     }
@@ -527,32 +494,6 @@ export default function ContactDirectoryView({
             },
             { key: 'phone', header: 'Phone Number', cell: (lead) => <span className="font-mono text-slate-600">{formatPhone(lead.phone)}</span> },
             { key: 'email', header: 'Email Address', cell: (lead) => <span className="text-slate-500">{lead.email}</span> },
-            ...(isLending ? [
-              { key: 'amount', header: 'Loan Amt Requested', cell: (lead: Lead) => <span className="font-semibold text-slate-800">${lead.amountRequested.toLocaleString()}</span> },
-              {
-                key: 'employment',
-                header: 'Employment & Wages',
-                cell: (lead: Lead) => (
-                  <div className="space-y-0.5">
-                    <p className="font-medium text-slate-700 flex items-center">
-                      <Building className="h-3 w-3 mr-1 text-slate-400" />
-                      {lead.financialInfo?.employer || 'Unspecified'}
-                    </p>
-                    <p className="text-slate-400 text-[10px]">Wages: ${lead.financialInfo?.monthlyIncome.toLocaleString()}/mo</p>
-                  </div>
-                ),
-              },
-              {
-                key: 'credit',
-                header: 'Credit / DTI',
-                cell: (lead: Lead) => (
-                  <div className="space-y-0.5 font-mono">
-                    <p className="font-semibold text-slate-700">CS: {lead.financialInfo?.creditScore || 'N/A'}</p>
-                    <p className="text-[10px] text-slate-400">DTI: {((lead.financialInfo?.debtToIncome || 0) * 100).toFixed(0)}%</p>
-                  </div>
-                ),
-              },
-            ] as Column<Lead>[] : []),
             {
               key: 'source',
               header: 'Source',

@@ -3,18 +3,10 @@ import { Building2, Users, PhoneCall, Clock, Loader2, IndianRupee, Archive, Acti
 import { apiFetch } from '../lib/api';
 import { Stats, TimeSeries, AuditRow } from './types';
 import Widget from '../components/ui/Widget';
+import KpiCard from '../components/ui/KpiCard';
 import LineChart from './charts/LineChart';
 import BarChart from './charts/BarChart';
 import DistributionBars from './charts/DistributionBars';
-
-function StatWidget({ label, value, icon, accent }: { label: string; value: string | number; icon: React.ElementType; accent: string }) {
-  return (
-    <Widget colSpan={3} icon={icon} accent={accent} padding="md">
-      <span className="text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)]">{label}</span>
-      <div className="text-2xl font-semibold text-slate-900 dark:text-[var(--text-primary)] mt-1">{value}</div>
-    </Widget>
-  );
-}
 
 function formatInr(n: number) {
   return `₹${(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -56,10 +48,38 @@ export default function OverviewPage() {
 
   return (
     <div className="grid grid-cols-12 gap-4">
-      <StatWidget label="Organizations" value={stats.totalOrganizations} icon={Building2} accent="#2a78d6" />
-      <StatWidget label="Registered users" value={stats.totalUsers} icon={Users} accent="#1baf7a" />
-      <StatWidget label="Total calls" value={stats.totalCalls} icon={PhoneCall} accent="#eb6834" />
-      <StatWidget label="Signups, last 30 days" value={series.signupsByDay.reduce((s, d) => s + d.count, 0)} icon={Clock} accent="#4a3aa7" />
+      <KpiCard
+        colSpan={3}
+        label="Organizations"
+        value={stats.totalOrganizations}
+        icon={Building2}
+        iconBg="#2a78d61a"
+        iconColor="#2a78d6"
+      />
+      <KpiCard
+        colSpan={3}
+        label="Registered users"
+        value={stats.totalUsers}
+        icon={Users}
+        iconBg="#1baf7a1a"
+        iconColor="#1baf7a"
+      />
+      <KpiCard
+        colSpan={3}
+        label="Total calls"
+        value={stats.totalCalls}
+        icon={PhoneCall}
+        iconBg="#eb68341a"
+        iconColor="#eb6834"
+      />
+      <KpiCard
+        colSpan={3}
+        label="Signups, last 30 days"
+        value={series.signupsByDay.reduce((s, d) => s + d.count, 0)}
+        icon={Clock}
+        iconBg="#4a3aa71a"
+        iconColor="#4a3aa7"
+      />
 
       {/* Platform-wide cost — summed from each org's own accrued/locked-in
           figures (never today's rate applied retroactively). See the
