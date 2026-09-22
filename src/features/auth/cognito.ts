@@ -50,5 +50,9 @@ export async function getCognitoUser() {
 }
 export async function signOutCognito() {
   configureCognito();
-  await signOut({ global: true });
+  try { await signOut({ global: true }); } catch { /* ignore, still proceed to clear the Hosted UI session */ }
+  const logoutUri = config.redirectSignOut;
+  window.location.assign(
+    `${config.domain}/logout?client_id=${encodeURIComponent(config.userPoolClientId)}&logout_uri=${encodeURIComponent(logoutUri)}`,
+  );
 }

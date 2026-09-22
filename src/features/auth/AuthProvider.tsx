@@ -202,7 +202,7 @@ function CognitoAuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const getToken = useCallback(() => getCognitoToken(), []);
-  const logout = useCallback(() => { void signOutCognito().then(() => window.location.assign('/login')); }, []);
+  const logout = useCallback(() => { void signOutCognito(); }, []);
   if (initState === 'loading') return <LoadingSplash />;
   if (initState === 'error') return <ErrorSplash message={errorMsg} hint="Check VITE_COGNITO_USER_POOL_ID, VITE_COGNITO_CLIENT_ID, VITE_COGNITO_REGION and VITE_COGNITO_DOMAIN." />;
   return <AuthContext.Provider value={{ ready: true, user, getToken, logout }}>{children}</AuthContext.Provider>;
