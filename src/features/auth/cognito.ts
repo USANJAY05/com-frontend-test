@@ -35,9 +35,9 @@ export function configureCognito() {
   });
   configured = true;
 }
-export async function signInWithCognito() {
+export async function signInWithCognito(provider?: 'Google' | 'Facebook' | 'Amazon' | 'Apple') {
   configureCognito();
-  await signInWithRedirect({ provider: 'Google' });
+  await signInWithRedirect(provider ? { provider } : undefined);
 }
 export async function getCognitoToken() {
   configureCognito();
