@@ -52,6 +52,7 @@ export function recordToLead(record: ObjectRecord, stages: ObjectStage[]): Lead 
     name: firstDefined(record, ['name', 'customerName', 'studentName', 'contactName']) || 'Unnamed Contact',
     phone: firstDefined(record, ['phone', 'parentPhone']),
     email: firstDefined(record, ['email']),
+    gender: firstDefined(record, ['gender', 'sex']),
     amountRequested: Number(record.budget || record.orderValue || 0),
     score: 0,
     source: firstDefined(record, ['source', 'channel']),
@@ -70,11 +71,12 @@ export function recordToLead(record: ObjectRecord, stages: ObjectStage[]): Lead 
 // matches one of this object's real stage labels; otherwise it's dropped
 // rather than guessed (same rule as workflowEngine.js's lending-pack
 // bridge on the backend).
-export function leadToRecordPatch(lead: Lead, stages: ObjectStage[]): { stageKey?: string; notes?: string; tags?: string[] } {
-  const patch: { stageKey?: string; notes?: string; tags?: string[] } = {
+export function leadToRecordPatch(lead: Lead, stages: ObjectStage[]): { stageKey?: string; notes?: string; tags?: string[]; gender?: string } {
+  const patch: { stageKey?: string; notes?: string; tags?: string[]; gender?: string } = {
     notes: lead.notes,
     tags: lead.tags,
   };
+  if (lead.gender) patch.gender = lead.gender;
   const stage = stages.find((s) => s.label.toLowerCase() === lead.status.toLowerCase());
   if (stage) patch.stageKey = stage.key;
   return patch;
@@ -95,11 +97,13 @@ export function leadToRecordCreate(lead: Lead, fields: ObjectField[]): Record<st
   const nameField = fields.find((f) => f.type === 'text' && f.required) || fields.find((f) => f.type === 'text');
   const phoneField = fields.find((f) => f.type === 'phone') || fields.find((f) => f.key === 'phone');
   const emailField = fields.find((f) => f.type === 'email') || fields.find((f) => f.key === 'email');
+  const genderField = fields.find((f) => f.key === 'gender' || f.key === 'sex') || fields.find((f) => f.label?.toLowerCase() === 'gender' || f.label?.toLowerCase() === 'sex');
   const amountField = fields.find((f) => f.type === 'currency' || f.type === 'number');
 
   if (nameField) data[nameField.key] = lead.name;
   if (phoneField) data[phoneField.key] = lead.phone;
   if (emailField && lead.email) data[emailField.key] = lead.email;
+  if (genderField && lead.gender) data[genderField.key] = lead.gender;
   if (amountField && lead.amountRequested) data[amountField.key] = lead.amountRequested;
 
   return data;

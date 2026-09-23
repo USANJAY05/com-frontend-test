@@ -42,6 +42,7 @@ interface ContactDirectoryViewProps {
   // to hit the right delete/update route (see App.tsx's own primaryObject
   // state). Undefined for lending orgs.
   primaryObjectKey?: string;
+  primaryObjectFields?: { id: string; key: string; label: string; type: string; required?: boolean }[];
 }
 
 const NO_GROUP = '__no_group__';
@@ -51,7 +52,8 @@ export default function ContactDirectoryView({
   setLeads,
   industry,
   callLogs = [],
-  primaryObjectKey
+  primaryObjectKey,
+  primaryObjectFields = []
 }: ContactDirectoryViewProps) {
   // Contact Directory is a lightweight address book (name/phone/email +
   // groups) shared across every industry — loan-specific details
@@ -140,6 +142,7 @@ export default function ContactDirectoryView({
   const [formName, setFormName] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formEmail, setFormEmail] = useState('');
+  const [formGender, setFormGender] = useState('');
   const [formSource, setFormSource] = useState('Manual Entry');
   const [formNotes, setFormNotes] = useState('');
 
@@ -175,6 +178,7 @@ export default function ContactDirectoryView({
     setFormName('');
     setFormPhone('');
     setFormEmail('');
+    setFormGender('');
     setFormSource('Manual Entry');
     setFormNotes('Registered individually.');
     setFormGroupIds([]);
@@ -187,6 +191,7 @@ export default function ContactDirectoryView({
     setFormName(lead.name);
     setFormPhone(lead.phone);
     setFormEmail(lead.email);
+    setFormGender(lead.gender || '');
     setFormSource(lead.source);
     setFormNotes(lead.notes || '');
     setFormGroupIds(lead.groupIds || []);
@@ -202,10 +207,10 @@ export default function ContactDirectoryView({
   // or as a backstop), but an edit also fires its PATCH here directly
   // instead of waiting on that effect, so the save is immediate and not
   // silently dependent on the debounced diff ever detecting the change.
-  const handleSaveContact = (e: React.FormEvent) => {
+  const handleSaveContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || !formPhone.trim() || !formEmail.trim()) {
-      alert('Please fill out required fields: Name, Phone, and Email.');
+    if (!formName.trim() || !formPhone.trim()) {
+      alert('Please fill out required fields: Name and Phone.');
       return;
     }
 
@@ -218,7 +223,8 @@ export default function ContactDirectoryView({
             ...l,
             name: formName,
             phone: formPhone,
-            email: formEmail,
+            email: formEmail.trim(),
+            gender: formGender.trim() || undefined,
             source: formSource,
             notes: formNotes,
             groupIds: formGroupIds,
@@ -242,13 +248,16 @@ export default function ContactDirectoryView({
         }).catch((err) => console.error('Error saving contact:', err));
       }
     } else {
-      // Create mode — no group selected means "no group" (solo contact),
-      // addable to one later from the edit modal.
-      const newLead: Lead = {
-        id: newClientId('L'),
-        name: formName,
-        phone: formPhone,
-        email: formEmail,
+      // Create the contact on the backend BEFORE adding it to local state.
+      // Campaign assignment uses leadIds as durable database ids; a
+      // client-generated L-* id could race the background sync and produce a
+      // dialer task pointing at a contact that does not exist server-side.
+      const draftLead: Lead = {
+        id: '',
+        name: formName.trim(),
+        phone: formPhone.trim(),
+        email: formEmail.trim(),
+        gender: formGender.trim() || undefined,
         amountRequested: 0,
         score: 0,
         source: formSource,
@@ -258,7 +267,33 @@ export default function ContactDirectoryView({
         notes: formNotes,
         groupIds: formGroupIds,
       };
-      setLeads([newLead, ...leads]);
+
+      try {
+        const url = primaryObjectKey
+          ? `/api/objects/${primaryObjectKey}/records`
+          : '/api/leads';
+        const body = primaryObjectKey
+          ? leadToRecordCreate(draftLead, primaryObjectFields)
+          : draftLead;
+        const res = await apiFetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Create failed (${res.status})`);
+        }
+        const created = await res.json();
+        const newLead: Lead = primaryObjectKey
+          ? { ...draftLead, id: created.id }
+          : created;
+        setLeads([newLead, ...leads]);
+      } catch (err: any) {
+        console.error('Error creating contact:', err);
+        alert(`Failed to create contact: ${err.message || 'Network error'}`);
+        return;
+      }
     }
     setIsAddModalOpen(false);
   };
@@ -306,10 +341,8 @@ export default function ContactDirectoryView({
       // Basic validation of required headers
       const hasName = headers.includes('name');
       const hasPhone = headers.includes('phone');
-      const hasEmail = headers.includes('email');
-
-      if (!hasName || !hasPhone || !hasEmail) {
-        setParsingError('CSV columns must include: "name", "phone", and "email". Other optional keys: amount, employer, income, credit, dti');
+      if (!hasName || !hasPhone) {
+        setParsingError('CSV columns must include: "name" and "phone". Optional keys: email, gender, amount, employer, income, credit, dti');
         setParsedPreview([]);
         return;
       }
@@ -332,7 +365,8 @@ export default function ContactDirectoryView({
           id: `TEMP-${i}`,
           name: rowObj.name || `Lead #${i}`,
           phone: rowObj.phone || 'N/A',
-          email: rowObj.email || 'N/A',
+          email: rowObj.email || '',
+          gender: rowObj.gender || '',
           amountRequested: parseFloat(rowObj.amount) || 20000,
           source: 'Bulk Import',
           status: 'New',
@@ -370,7 +404,7 @@ export default function ContactDirectoryView({
   };
 
   // Confirm Bulk Upload
-  const handleConfirmBulkUpload = () => {
+  const handleConfirmBulkUpload = async () => {
     if (parsedPreview.length === 0) {
       alert('No valid contacts to import.');
       return;
@@ -381,7 +415,8 @@ export default function ContactDirectoryView({
         id: newClientId('L'),
         name: item.name || 'Anonymous Contact',
         phone: item.phone || '+1 (555) 000-0000',
-        email: item.email || 'imported@email.com',
+        email: item.email || '',
+        gender: item.gender || undefined,
         amountRequested: item.amountRequested || 25000,
         score: 0,
         source: 'CSV Bulk Upload',
@@ -399,12 +434,35 @@ export default function ContactDirectoryView({
       };
     });
 
-    setLeads([...finalLeadsToImport, ...leads]);
-    setIsBulkModalOpen(false);
-    setPastedData('');
-    setParsedPreview([]);
-    setBulkGroupId('');
-    alert(`Successfully parsed and bulk uploaded ${finalLeadsToImport.length} contacts! These are now fully available in your task assignment pool.`);
+    try {
+      // Persist first and only expose contacts with durable backend ids to
+      // campaign assignment. This removes the same L-* sync race as single
+      // contact creation.
+      const createdLeads = await Promise.all(finalLeadsToImport.map(async (lead) => {
+        const url = primaryObjectKey ? `/api/objects/${primaryObjectKey}/records` : '/api/leads';
+        const body = primaryObjectKey ? leadToRecordCreate(lead, primaryObjectFields) : lead;
+        const res = await apiFetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Create failed (${res.status})`);
+        }
+        const created = await res.json();
+        return primaryObjectKey ? { ...lead, id: created.id } : created;
+      }));
+      setLeads([...createdLeads, ...leads]);
+      setIsBulkModalOpen(false);
+      setPastedData('');
+      setParsedPreview([]);
+      setBulkGroupId('');
+      alert(`Successfully created ${createdLeads.length} contacts. They are now available for campaign assignment.`);
+    } catch (err: any) {
+      console.error('Bulk contact creation failed:', err);
+      alert(`Bulk upload failed: ${err.message || 'Network error'}`);
+    }
   };
 
   return (
@@ -639,7 +697,7 @@ export default function ContactDirectoryView({
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Email Address *</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Email Address <span className="font-normal text-slate-400">(Optional)</span></label>
                 <input
                   type="email"
                   required
@@ -648,6 +706,20 @@ export default function ContactDirectoryView({
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
                   placeholder="gavin@hooli.com"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Gender <span className="font-normal text-slate-400">(Optional)</span></label>
+                <select
+                  value={formGender}
+                  onChange={(e) => setFormGender(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">Prefer not to say</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               <div className="border-t border-slate-100 pt-3">
@@ -714,7 +786,7 @@ export default function ContactDirectoryView({
                 >
                   <FileSpreadsheet className="h-10 w-10 text-blue-500 mx-auto mb-3" />
                   <p className="text-xs font-semibold text-slate-700">Select .csv file to upload</p>
-                  <p className="text-[10px] text-slate-400 mt-1">Columns: name, phone, email, amount, employer, income, credit, dti</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Columns: name, phone, email (optional), gender (optional), amount, employer, income, credit, dti</p>
                   <input
                     type="file"
                     ref={fileInputRef}

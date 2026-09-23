@@ -825,6 +825,7 @@ export default function App() {
             industry={orgSettings.industry}
             callLogs={callLogs}
             primaryObjectKey={primaryObject?.key}
+            primaryObjectFields={primaryObject?.fields || []}
           />
         );
       case 'call-logs':

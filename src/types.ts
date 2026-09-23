@@ -10,6 +10,7 @@ export interface Lead {
   name: string;
   phone: string;
   email: string;
+  gender?: string;
   amountRequested: number;
   score: number; // AI score 0-100
   source: string; // e.g., Website, Facebook, Direct, Partner
