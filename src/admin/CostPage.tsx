@@ -190,15 +190,25 @@ export default function CostPage() {
           {priceSaved && <span className="text-xs text-emerald-600 font-medium">Saved</span>}
         </form>
 
-        <ProviderList
-          kind="call"
-          providers={callProviders}
-          emptyLabel="call"
-          savingKey={savingKey}
-          savedKey={savedKey}
-          onChange={updateLocal}
-          onSave={saveProvider}
-        />
+        <div className="divide-y divide-slate-100 dark:divide-[var(--border)]">
+          {callProviders.map((p) => (
+            <ProviderRow
+              key={p.key}
+              kind="call"
+              provider={p}
+              savingKey={savingKey}
+              savedKey={savedKey}
+              onChange={updateLocal}
+              onSave={saveProvider}
+            />
+          ))}
+
+          {callProviders.length === 0 && (
+            <div className="py-8 text-center text-slate-400 dark:text-[var(--text-muted)] text-xs">
+              No call providers are integrated in code yet.
+            </div>
+          )}
+        </div>
       </Widget>
 
       <ProviderSection
@@ -286,88 +296,15 @@ function ProviderSection({
     <Widget colSpan={12} title={title} subtitle={description} icon={Icon} accent="#f59e0b" padding="md">
       <div className="divide-y divide-slate-100 dark:divide-[var(--border)]">
         {providers.map((p) => (
-          <div key={p.key} className="py-4 flex items-end gap-3 flex-wrap">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-800 dark:text-[var(--text-primary)]">{p.label}</p>
-              <p className="text-[10px] text-slate-400 dark:text-[var(--text-muted)] font-mono">{p.key}</p>
-            </div>
-
-            {kind === 'call' ? (
-              <>
-                <Field label="Rate (INR)">
-                  <input
-                    type="number" min="0" step="0.01"
-                    value={p.rateAmount ?? 0}
-                    onChange={(e) => onChange(p.key, { rateAmount: Number(e.target.value) })}
-                    className="w-28 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  />
-                </Field>
-                <Field label="Per">
-                  <select
-                    value={p.rateUnit ?? 'minute'}
-                    onChange={(e) => onChange(p.key, { rateUnit: e.target.value as 'minute' | 'hour' })}
-                    className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  >
-                    <option value="minute">Minute</option>
-                    <option value="hour">Hour</option>
-                  </select>
-                </Field>
-              </>
-            ) : (
-              <>
-                <Field label="Rate (INR)">
-                  <input
-                    type="number" min="0" step="0.0001"
-                    value={p.ratePer1kTokens ?? 0}
-                    onChange={(e) => onChange(p.key, { ratePer1kTokens: Number(e.target.value) })}
-                    className="w-28 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  />
-                </Field>
-                <Field label="Per">
-                  <select
-                    value={p.tokenUnit ?? 1000}
-                    onChange={(e) => onChange(p.key, { tokenUnit: Number(e.target.value) })}
-                    className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  >
-                    {TOKEN_UNIT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </Field>
-              </>
-            )}
-
-            <Field label="Tax %">
-              <input
-                type="number" min="0" max="100" step="0.01"
-                value={p.taxPercent ?? 0}
-                onChange={(e) => onChange(p.key, { taxPercent: Number(e.target.value) })}
-                className="w-20 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
-            </Field>
-
-            <Field label="Active">
-              <select
-                value={p.active ? '1' : '0'}
-                onChange={(e) => onChange(p.key, { active: e.target.value === '1' })}
-                className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-              >
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
-              </select>
-            </Field>
-
-            <div className="flex items-center gap-2 ml-auto">
-              {savedKey === p.key && <span className="text-xs text-emerald-600 font-medium">Saved</span>}
-              <button
-                type="button"
-                onClick={() => onSave(p)}
-                disabled={savingKey === p.key}
-                className="flex items-center gap-1.5 bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 disabled:opacity-50"
-              >
-                {savingKey === p.key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                Save
-              </button>
-            </div>
-          </div>
+          <ProviderRow
+            key={p.key}
+            kind={kind}
+            provider={p}
+            savingKey={savingKey}
+            savedKey={savedKey}
+            onChange={onChange}
+            onSave={onSave}
+          />
         ))}
 
         {providers.length === 0 && (
@@ -377,6 +314,102 @@ function ProviderSection({
         )}
       </div>
     </Widget>
+  );
+}
+
+function ProviderRow({
+  kind, provider: p, savingKey, savedKey, onChange, onSave,
+}: {
+  kind: 'call' | 'ai';
+  provider: CostProvider;
+  savingKey: string | null;
+  savedKey: string | null;
+  onChange: (key: string, patch: Partial<CostProvider>) => void;
+  onSave: (provider: CostProvider) => void;
+}) {
+  return (
+    <div className="py-4 flex items-end gap-3 flex-wrap">
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-slate-800 dark:text-[var(--text-primary)]">{p.label}</p>
+        <p className="text-[10px] text-slate-400 dark:text-[var(--text-muted)] font-mono">{p.key}</p>
+      </div>
+
+      {kind === 'call' ? (
+        <>
+          <Field label="Rate (INR)">
+            <input
+              type="number" min="0" step="0.01"
+              value={p.rateAmount ?? 0}
+              onChange={(e) => onChange(p.key, { rateAmount: Number(e.target.value) })}
+              className="w-28 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+          </Field>
+          <Field label="Per">
+            <select
+              value={p.rateUnit ?? 'minute'}
+              onChange={(e) => onChange(p.key, { rateUnit: e.target.value as 'minute' | 'hour' })}
+              className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value="minute">Minute</option>
+              <option value="hour">Hour</option>
+            </select>
+          </Field>
+        </>
+      ) : (
+        <>
+          <Field label="Rate (INR)">
+            <input
+              type="number" min="0" step="0.0001"
+              value={p.ratePer1kTokens ?? 0}
+              onChange={(e) => onChange(p.key, { ratePer1kTokens: Number(e.target.value) })}
+              className="w-28 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+          </Field>
+          <Field label="Per">
+            <select
+              value={p.tokenUnit ?? 1000}
+              onChange={(e) => onChange(p.key, { tokenUnit: Number(e.target.value) })}
+              className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              {TOKEN_UNIT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </Field>
+        </>
+      )}
+
+      <Field label="Tax %">
+        <input
+          type="number" min="0" max="100" step="0.01"
+          value={p.taxPercent ?? 0}
+          onChange={(e) => onChange(p.key, { taxPercent: Number(e.target.value) })}
+          className="w-20 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+        />
+      </Field>
+
+      <Field label="Active">
+        <select
+          value={p.active ? '1' : '0'}
+          onChange={(e) => onChange(p.key, { active: e.target.value === '1' })}
+          className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+        >
+          <option value="1">Active</option>
+          <option value="0">Inactive</option>
+        </select>
+      </Field>
+
+      <div className="flex items-center gap-2 ml-auto">
+        {savedKey === p.key && <span className="text-xs text-emerald-600 font-medium">Saved</span>}
+        <button
+          type="button"
+          onClick={() => onSave(p)}
+          disabled={savingKey === p.key}
+          className="flex items-center gap-1.5 bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 disabled:opacity-50"
+        >
+          {savingKey === p.key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+          Save
+        </button>
+      </div>
+    </div>
   );
 }
 
