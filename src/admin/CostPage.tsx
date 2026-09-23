@@ -160,12 +160,12 @@ export default function CostPage() {
       <Widget
         colSpan={12}
         title="Voice call pricing"
-        subtitle="Base platform-wide rate applied to every org's billing calculation immediately — no redeploy needed. For per-provider call/AI rates and tax, see the sections below."
+        subtitle="Base platform-wide rate applied to every org's billing calculation immediately, plus the per-provider telephony rate and tax billed on top — no redeploy needed."
         icon={Zap}
         accent="#f59e0b"
         padding="md"
       >
-        <form onSubmit={savePricing} className="flex items-end gap-3">
+        <form onSubmit={savePricing} className="flex items-end gap-3 pb-4 border-b border-slate-100 dark:border-[var(--border)]">
           <div>
             <label className="block text-[10px] font-bold text-slate-400 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1">
               Cost per minute (INR)
@@ -189,19 +189,17 @@ export default function CostPage() {
           </button>
           {priceSaved && <span className="text-xs text-emerald-600 font-medium">Saved</span>}
         </form>
-      </Widget>
 
-      <ProviderSection
-        title="Call providers"
-        description="Telephony providers this codebase integrates with, billed per minute or per hour, plus tax. Support for a new provider is added in code — it then appears here automatically. This rate flows into every org's Billing & Usage as soon as it's set — no redeploy needed."
-        icon={Phone}
-        kind="call"
-        providers={callProviders}
-        savingKey={savingKey}
-        savedKey={savedKey}
-        onChange={updateLocal}
-        onSave={saveProvider}
-      />
+        <ProviderList
+          kind="call"
+          providers={callProviders}
+          emptyLabel="call"
+          savingKey={savingKey}
+          savedKey={savedKey}
+          onChange={updateLocal}
+          onSave={saveProvider}
+        />
+      </Widget>
 
       <ProviderSection
         title="AI providers"
