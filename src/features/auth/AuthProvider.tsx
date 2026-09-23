@@ -181,6 +181,18 @@ function CognitoAuthProvider({ children }: { children: React.ReactNode }) {
         configureCognito();
         const current = await getCognitoUser();
         if (!current) {
+          // A deliberate logout must not immediately trigger the automatic
+          // Cognito login redirect again. Leave the app in a logged-out state
+          // and let the /login page start a new sign-in explicitly.
+          const logoutRequested = sessionStorage.getItem('cognito_logout_requested') === '1';
+          if (logoutRequested) {
+            sessionStorage.removeItem('cognito_logout_requested');
+            sessionStorage.removeItem('cognito_signin_attempted');
+            setUser(null);
+            setInitState('ready');
+            return;
+          }
+
           const alreadyAttempted = sessionStorage.getItem('cognito_signin_attempted') === '1';
           if (alreadyAttempted) {
             sessionStorage.removeItem('cognito_signin_attempted');

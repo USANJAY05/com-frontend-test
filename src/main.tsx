@@ -5,11 +5,41 @@ import App from './App.tsx';
 import AdminApp from './AdminApp.tsx';
 import ProtectedRoute from './features/auth/ProtectedRoute.tsx';
 import { AuthProvider, useAuth } from './features/auth/AuthProvider.tsx';
+import { signInWithCognito } from './features/auth/cognito';
 import { FeatureFlagProvider } from './features/feature-flags/FeatureFlagContext.tsx';
 import { ThemeProvider } from './shared/theme/ThemeContext.tsx';
 import { ToastProvider } from './shared/toast/ToastContext.tsx';
-import { Globe2, LogOut } from 'lucide-react';
+import { Globe2, LogOut, LogIn } from 'lucide-react';
 import './index.css';
+
+
+function LoginPage() {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/" replace />;
+
+  const provider = String(import.meta.env.VITE_AUTH_PROVIDER || 'cognito').toLowerCase();
+  const startLogin = () => {
+    if (provider === 'cognito') void signInWithCognito();
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center shadow-xl">
+        <div className="mx-auto mb-5 h-14 w-14 rounded-2xl bg-indigo-600 flex items-center justify-center">
+          <LogIn className="h-7 w-7 text-white" />
+        </div>
+        <h1 className="text-xl font-bold text-white">Sign in to ChiefVoice</h1>
+        <p className="mt-2 text-sm text-slate-400">Your session has been signed out.</p>
+        <button
+          onClick={startLogin}
+          className="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+        >
+          Sign in
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // Blocks platform admins from the org app — they should only use /admin.
 // Org users who land on /admin are already blocked there via the whoami check.
@@ -68,7 +98,7 @@ createRoot(document.getElementById('root')!).render(
                     />
                     <Route
                       path="/login"
-                      element={<Navigate to="/" replace />}
+                      element={<LoginPage />}
                     />
                     <Route
                       path="/unauthorized"

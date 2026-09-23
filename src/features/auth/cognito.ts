@@ -50,9 +50,23 @@ export async function getCognitoUser() {
 }
 export async function signOutCognito() {
   configureCognito();
-  try { await signOut({ global: true }); } catch { /* ignore, still proceed to clear the Hosted UI session */ }
+
+  // Mark the browser as intentionally signed out before leaving the app.
+  // Cognito's hosted logout redirects back to the application; without this
+  // flag CognitoAuthProvider immediately starts a new sign-in redirect when it
+  // sees that there is no local session yet, making logout appear ineffective.
+  sessionStorage.setItem('cognito_logout_requested', '1');
+
+  try {
+    // This clears the Amplify browser session even if the Hosted UI logout
+    // endpoint is unavailable or misconfigured.
+    await signOut({ global: true });
+  } catch (err) {
+    console.warn('Cognito global sign-out failed; continuing with local logout:', err);
+  }
+
   const logoutUri = config.redirectSignOut;
-  window.location.assign(
+  window.location.replace(
     `${config.domain}/logout?client_id=${encodeURIComponent(config.userPoolClientId)}&logout_uri=${encodeURIComponent(logoutUri)}`,
   );
 }
