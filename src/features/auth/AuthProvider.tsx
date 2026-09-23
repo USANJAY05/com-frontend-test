@@ -75,7 +75,12 @@ type InitState = 'loading' | 'ready' | 'error';
 const provider = String(import.meta.env.VITE_AUTH_PROVIDER || 'cognito').toLowerCase();
 
 function extractCognitoUser(user: any, claims: Record<string, any>): AuthUser {
-  const rawRole = claims['custom:role'] ?? claims.role ?? (claims.platformAdmin ? 'platform-admin' : 'user');
+  // Cognito deployments may expose the platform-admin privilege as a
+  // custom role, a boolean claim, or an `admin` claim. Normalize all of
+  // those forms so a platform admin can never fall through to the org app.
+  const rawRole = claims['custom:role']
+    ?? claims.role
+    ?? (claims.platformAdmin === true || claims.admin === true ? 'platform-admin' : 'user');
   return { id: user.userId ?? claims.sub ?? '', email: claims.email ?? '', name: claims.name ?? claims['cognito:username'] ?? null, role: mapRole(rawRole), tokenParsed: claims };
 }
 

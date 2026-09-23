@@ -43,9 +43,21 @@ function LoginPage() {
 
 // Blocks platform admins from the org app — they should only use /admin.
 // Org users who land on /admin are already blocked there via the whoami check.
+function isPlatformAdminUser(user: ReturnType<typeof useAuth>['user']): boolean {
+  if (!user) return false;
+  if (user.role === 'Super Admin') return true;
+  const claims = user.tokenParsed as Record<string, any> | undefined;
+  if (claims?.platformAdmin === true || claims?.admin === true) return true;
+  const roles = [
+    ...(Array.isArray(claims?.realm_access?.roles) ? claims.realm_access.roles : []),
+    ...(Array.isArray(claims?.roles) ? claims.roles : []),
+  ];
+  return roles.includes('platform-admin') || roles.includes('super-admin');
+}
+
 function OrgRoute({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
-  if (user?.role === 'Super Admin') {
+  if (isPlatformAdminUser(user)) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 font-sans text-center gap-4">
         <div className="h-14 w-14 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">

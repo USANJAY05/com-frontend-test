@@ -51,22 +51,29 @@ export async function getCognitoUser() {
 export async function signOutCognito() {
   configureCognito();
 
-  // Mark the browser as intentionally signed out before leaving the app.
-  // Cognito's hosted logout redirects back to the application; without this
-  // flag CognitoAuthProvider immediately starts a new sign-in redirect when it
-  // sees that there is no local session yet, making logout appear ineffective.
+  // Set this before clearing the local session. The auth provider checks it
+  // after Cognito redirects back so it never starts a fresh login immediately.
   sessionStorage.setItem('cognito_logout_requested', '1');
+  sessionStorage.removeItem('cognito_signin_attempted');
 
   try {
-    // This clears the Amplify browser session even if the Hosted UI logout
-    // endpoint is unavailable or misconfigured.
+    // Revoke the user's Cognito tokens globally. This is separate from the
+    // Hosted UI cookie logout below: global sign-out invalidates the existing
+    // tokens while the Hosted UI endpoint clears the browser SSO cookie.
     await signOut({ global: true });
   } catch (err) {
-    console.warn('Cognito global sign-out failed; continuing with local logout:', err);
+    // Continue to Hosted UI logout even if token revocation fails.
+    console.warn('Cognito global sign-out failed; continuing with Hosted UI logout:', err);
   }
 
+  const domain = config.domain.replace(/\/+$/, '');
   const logoutUri = config.redirectSignOut;
-  window.location.replace(
-    `${config.domain}/logout?client_id=${encodeURIComponent(config.userPoolClientId)}&logout_uri=${encodeURIComponent(logoutUri)}`,
-  );
+  const hostedLogoutUrl =
+    `${domain}/logout?client_id=${encodeURIComponent(config.userPoolClientId)}`
+    + `&logout_uri=${encodeURIComponent(logoutUri)}`;
+
+  // Cognito's /logout endpoint is required to clear the Hosted UI session
+  // cookie. Redirect instead of opening it in a new tab so the browser's SSO
+  // session is actually terminated before the app returns to /login.
+  window.location.replace(hostedLogoutUrl);
 }
