@@ -21,8 +21,11 @@ type CostProvider = {
   // ai kind — ratePer1kTokens is "the rate, quoted per tokenUnit tokens"
   // (name kept for backward compat; tokenUnit itself is configurable now,
   // not fixed at 1,000).
+  pricingMode?: 'token' | 'time';
   ratePer1kTokens?: number;
   tokenUnit?: number;
+  timeRateAmount?: number;
+  timeUnit?: 'minute' | 'second';
   updatedAt?: string;
 };
 
@@ -158,7 +161,7 @@ export default function CostPage() {
 
       <ProviderSection
         title="AI providers"
-        description="AI-model providers this codebase integrates with, billed per token/100/1,000/1,000,000, plus tax. Live-voice and post-call-agent usage are priced separately since they're different models — applied against each org's actual Gemini token usage for the current billing period."
+        description="AI-model providers this codebase integrates with, billed either by token count or by elapsed time (minute/second), plus tax. Live-voice and post-call-agent usage are priced separately since they're different models — applied against each org's actual Gemini token usage for the current billing period."
         icon={Cpu}
         kind="ai"
         providers={aiProviders}
@@ -302,25 +305,60 @@ function ProviderRow({
         </>
       ) : (
         <>
-          <Field label="Rate (INR)">
-            <input
-              type="number" min="0" step="0.0001"
-              value={p.ratePer1kTokens ?? 0}
-              onChange={(e) => onChange(p.key, { ratePer1kTokens: Number(e.target.value) })}
-              className="w-28 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-            />
-          </Field>
-          <Field label="Per">
+          <Field label="Billing">
             <select
-              value={p.tokenUnit ?? 1000}
-              onChange={(e) => onChange(p.key, { tokenUnit: Number(e.target.value) })}
+              value={p.pricingMode ?? 'token'}
+              onChange={(e) => onChange(p.key, { pricingMode: e.target.value as 'token' | 'time' })}
               className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
             >
-              {TOKEN_UNIT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              <option value="token">Token based</option>
+              <option value="time">Time based</option>
             </select>
           </Field>
+          {p.pricingMode === 'time' ? (
+            <>
+              <Field label="Cost (INR)">
+                <input
+                  type="number" min="0" step="0.0001"
+                  value={p.timeRateAmount ?? 0}
+                  onChange={(e) => onChange(p.key, { timeRateAmount: Number(e.target.value) })}
+                  className="w-28 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+              </Field>
+              <Field label="Per">
+                <select
+                  value={p.timeUnit ?? 'minute'}
+                  onChange={(e) => onChange(p.key, { timeUnit: e.target.value as 'minute' | 'second' })}
+                  className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                >
+                  <option value="minute">Minute</option>
+                  <option value="second">Second</option>
+                </select>
+              </Field>
+            </>
+          ) : (
+            <>
+              <Field label="Cost (INR)">
+                <input
+                  type="number" min="0" step="0.0001"
+                  value={p.ratePer1kTokens ?? 0}
+                  onChange={(e) => onChange(p.key, { ratePer1kTokens: Number(e.target.value) })}
+                  className="w-28 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+              </Field>
+              <Field label="Per">
+                <select
+                  value={p.tokenUnit ?? 1000}
+                  onChange={(e) => onChange(p.key, { tokenUnit: Number(e.target.value) })}
+                  className="bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                >
+                  {TOKEN_UNIT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </Field>
+            </>
+          )}
         </>
-      )}
+      )
 
       <Field label="Tax %">
         <input
