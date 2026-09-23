@@ -678,22 +678,17 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
     setSelectedTaskId(newTask.id);
     setShowCreateModal(false);
 
-    // Every new task now dials in the background by default — the
-    // frontend's periodic full-table /sync can take up to 800ms, so this
-    // pushes the task to the backend directly first (a single-row create,
-    // not the delete+reinsert /sync) and only then starts auto-dial,
-    // instead of racing a start call against a task the backend doesn't
-    // know about yet. If either call fails (offline, backend hiccup), the
-    // task still exists locally and the "Run in Background (Server)"
-    // button lets the user retry manually — this isn't the only way in.
+    // Push the new task to the backend directly (a single-row create, not
+    // the delete+reinsert /sync, which can take up to 800ms) so it exists
+    // server-side right away. Auto-dial is NOT started here — creating a
+    // task must never place a call on its own; dialing only ever begins
+    // when the user explicitly clicks "Start Campaign" (see
+    // handleStartServerAutoDial), which calls the same
+    // /auto-dial/start endpoint this used to call automatically.
     try {
       await apiFetch('/api/dialer-tasks', { method: 'POST', body: JSON.stringify(newTask) });
-      await apiFetch(`/api/dialer-tasks/${newTask.id}/auto-dial/start`, {
-        method: 'POST',
-        body: JSON.stringify({ outboundNumber: selectedOutboundNumber || undefined }),
-      });
     } catch (err) {
-      console.error('Failed to start background auto-dial for new task:', err);
+      console.error('Failed to push new task to the backend:', err);
     }
   };
 
