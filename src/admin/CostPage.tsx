@@ -33,6 +33,16 @@ const TOKEN_UNIT_OPTIONS: { value: number; label: string }[] = [
   { value: 1000000, label: '1,000,000 tokens' },
 ];
 
+// Mirrors the backend's costProviders.getPrimaryCallProviderRate — a call
+// provider's rate normalized to per-minute (halved from an hourly rate)
+// with tax applied, so the admin's KPI matches what org-facing billing
+// screens actually show.
+function perMinuteRate(p: CostProvider): number {
+  const base = p.rateUnit === 'hour' ? (p.rateAmount ?? 0) / 60 : (p.rateAmount ?? 0);
+  const withTax = base * (1 + (p.taxPercent ?? 0) / 100);
+  return Math.round(withTax * 100) / 100;
+}
+
 // A permanent cost snapshot taken right before an org was deleted — see
 // backend platform/admin.js's deleteOrganization + db.archiveOrgCost.
 // The org itself, its call logs, and its accrued counters are gone; this
@@ -63,14 +73,6 @@ export default function CostPage() {
   const [archive, setArchive] = useState<CostArchiveEntry[]>([]);
   const [loadingArchive, setLoadingArchive] = useState(true);
 
-  // Base platform-wide voice-call pricing — was its own "Pricing &
-  // Features" page, split from every other cost figure (per-provider call/
-  // AI rates below). Folded in here so "cost" and "pricing" live in one
-  // section instead of two.
-  const [costPerMinuteInr, setCostPerMinuteInr] = useState('0');
-  const [savingPrice, setSavingPrice] = useState(false);
-  const [priceSaved, setPriceSaved] = useState(false);
-
   const load = () => {
     setLoading(true);
     apiFetch('/api/platform/cost-providers')
@@ -83,33 +85,9 @@ export default function CostPage() {
       .then((r) => r.json())
       .then((data) => setArchive(Array.isArray(data) ? data : []))
       .finally(() => setLoadingArchive(false));
-
-    apiFetch('/api/platform/pricing')
-      .then((r) => r.json())
-      .then((data) => setCostPerMinuteInr(String(data.costPerMinuteInr ?? '')))
-      .catch(() => {});
   };
 
   useEffect(load, []);
-
-  const savePricing = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingPrice(true);
-    setPriceSaved(false);
-    try {
-      const res = await apiFetch('/api/platform/pricing', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ costPerMinuteInr: Number(costPerMinuteInr) })
-      });
-      if (res.ok) {
-        setPriceSaved(true);
-        setTimeout(() => setPriceSaved(false), 2000);
-      }
-    } finally {
-      setSavingPrice(false);
-    }
-  };
 
   const callProviders = providers.filter((p) => p.kind === 'call');
   const aiProviders = providers.filter((p) => p.kind === 'ai');
@@ -146,6 +124,15 @@ export default function CostPage() {
   const activeCallProviderCount = callProviders.filter((p) => p.active).length;
   const activeAiProviderCount = aiProviders.filter((p) => p.active).length;
 
+  // The org-facing "AI voice cost per minute" (Billing & Usage, Reports,
+  // Dashboard, etc.) is no longer a separate manually-set number — it's
+  // this same active call provider's own rate (tax included, converted to
+  // per-minute if quoted per-hour). Only Vobiz exists today; once a
+  // second call provider is added, whichever is marked active here
+  // becomes this figure automatically.
+  const primaryCallProvider = callProviders.find((p) => p.active && (p.rateAmount ?? 0) > 0);
+  const costPerMinuteInr = primaryCallProvider ? perMinuteRate(primaryCallProvider) : 0;
+
   return (
     <div className="grid grid-cols-12 gap-4">
       {error && (
@@ -157,59 +144,17 @@ export default function CostPage() {
       <KpiCard colSpan={3} label="Active AI providers" value={activeAiProviderCount} icon={Cpu} iconBg="#4a3aa71a" iconColor="#4a3aa7" />
       <KpiCard colSpan={3} label="Deleted orgs archived" value={archive.length} icon={Archive} iconBg="#b453091a" iconColor="#b45309" />
 
-      <Widget
-        colSpan={12}
-        title="Voice call pricing"
-        subtitle="Base platform-wide rate applied to every org's billing calculation immediately, plus the per-provider telephony rate and tax billed on top — no redeploy needed."
-        icon={Zap}
-        accent="#f59e0b"
-        padding="md"
-      >
-        <form onSubmit={savePricing} className="flex items-end gap-3 pb-4 border-b border-slate-100 dark:border-[var(--border)]">
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1">
-              Cost per minute (INR)
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={costPerMinuteInr}
-              onChange={(e) => setCostPerMinuteInr(e.target.value)}
-              className="w-40 bg-slate-50 dark:bg-[var(--bg-subtle)] border border-slate-200 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={savingPrice}
-            className="flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-slate-800 disabled:opacity-50"
-          >
-            {savingPrice ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save
-          </button>
-          {priceSaved && <span className="text-xs text-emerald-600 font-medium">Saved</span>}
-        </form>
-
-        <div className="divide-y divide-slate-100 dark:divide-[var(--border)]">
-          {callProviders.map((p) => (
-            <ProviderRow
-              key={p.key}
-              kind="call"
-              provider={p}
-              savingKey={savingKey}
-              savedKey={savedKey}
-              onChange={updateLocal}
-              onSave={saveProvider}
-            />
-          ))}
-
-          {callProviders.length === 0 && (
-            <div className="py-8 text-center text-slate-400 dark:text-[var(--text-muted)] text-xs">
-              No call providers are integrated in code yet.
-            </div>
-          )}
-        </div>
-      </Widget>
+      <ProviderSection
+        title="Call providers"
+        description="Telephony providers this codebase integrates with, billed per minute/hour plus tax. The AI voice cost per minute shown across Billing & Usage, Reports, and Dashboard is derived live from whichever provider here is active — Vobiz is the only one wired up today; a future provider becomes that source the moment it's marked active with a rate set."
+        icon={Phone}
+        kind="call"
+        providers={callProviders}
+        savingKey={savingKey}
+        savedKey={savedKey}
+        onChange={updateLocal}
+        onSave={saveProvider}
+      />
 
       <ProviderSection
         title="AI providers"
