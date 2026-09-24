@@ -925,7 +925,7 @@ export default function AgentStudioView() {
           {/* Inbound Number — exclusive (one number → one agent). Hidden
               when Call Type is Outbound: the generated prompt assumes one
               direction per agent, so it shouldn't also answer inbound calls. */}
-          <div>
+          <div className="rounded-2xl border border-indigo-200/80 dark:border-indigo-500/25 bg-white dark:bg-[var(--bg-surface)] p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-1">
               <Phone className="h-4 w-4 text-emerald-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Inbound Number</p>
@@ -1000,7 +1000,7 @@ export default function AgentStudioView() {
 
           {/* Outbound Number — shared (many agents can use the same number).
               Hidden when Call Type is Inbound, for the same reason as above. */}
-          <div>
+          <div className="rounded-2xl border border-indigo-200/80 dark:border-indigo-500/25 bg-white dark:bg-[var(--bg-surface)] p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-1">
               <Zap className="h-4 w-4 text-violet-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Outbound Number</p>
@@ -1069,7 +1069,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Knowledge Base — connect to the whole org KB, specific documents, or none */}
-          <div>
+          <div className="rounded-2xl border border-indigo-200/80 dark:border-indigo-500/25 bg-white dark:bg-[var(--bg-surface)] p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-1">
               <BookOpen className="h-4 w-4 text-emerald-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Knowledge Base</p>
