@@ -36,6 +36,7 @@ import {
 import { Lead, CallLog, VirtualNumber, TeamMember, ContactGroup, OrganizationSettings } from '../types';
 import { QuestionFlow } from '../features/workflows/types';
 import PageShell from './ui/PageShell';
+import AwsCreateLayout from './ui/AwsCreateLayout';
 import BreadcrumbTitle from './ui/BreadcrumbTitle';
 import Widget from './ui/Widget';
 import Modal from './ui/Modal';
@@ -2229,17 +2230,28 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           return matchesSearch && matchesGroup;
         };
 
-        const WizardFrame: any = taskPage ? PageShell : Modal;
-        const frameProps = taskPage
+        const WizardFrame: any = taskPage ? AwsCreateLayout : Modal;
+        const frameProps: any = taskPage
           ? {
-              title: 'Assign Dialing Task',
-              subtitle: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
-              layout: 'grid',
+              breadcrumb: 'Voice Simulator / Assign Dialing Task',
+              title: 'Assign dialing task',
+              description: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
+              steps: [{ label: 'Configure' }, { label: 'Review' }],
+              activeStep: wizardStep,
+              summaryTitle: 'Dialing task summary',
+              summaryDescription: 'Review the configuration before creating the dialing task.',
+              summary: [
+                { label: 'Workflow', value: selectedWorkflow?.name || 'Not selected' },
+                { label: 'Outbound agent', value: selectedAgent?.name || 'Not selected' },
+                { label: 'Contacts', value: `${totalContacts} selected` },
+                { label: 'Contact source', value: wizardContactTab === 'existing' ? 'Database' : 'New contacts' },
+                { label: 'Step', value: wizardStep === 1 ? 'Configure' : 'Review & Create' },
+              ],
               action: (
                 <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => setShowAssignTask(false)}>
                   Back to Voice Simulator
                 </Button>
-              )
+              ),
             }
           : {
               open: true,
@@ -2251,28 +2263,9 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
         return (
           <WizardFrame {...frameProps}>
-            <div className={taskPage ? 'col-span-12 w-full px-3 sm:px-5 lg:px-6 xl:px-8 pb-12 pt-4 space-y-6' : ''}>
-            {/* AWS-style two-step flow: Configure first, then review and create. */}
-            <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
-              <div className={`flex items-center gap-2 ${wizardStep === 1 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
-                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 1 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>1</span>
-                <span className="text-xs font-semibold">Fill in details</span>
-              </div>
-              <div className="h-px flex-1 bg-[var(--border)]" />
-              <div className={`flex items-center gap-2 ${wizardStep === 2 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
-                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 2 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>2</span>
-                <span className="text-xs font-semibold">Review & Create</span>
-              </div>
-            </div>
-
+            <div className={taskPage ? 'w-full' : ''}>
             {wizardStep === 1 && (
               <div className="space-y-6">
-            {taskPage && (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Dialing task setup</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">Enter the workflow, outbound agent, and contacts for this dialing task.</p>
-              </div>
-            )}
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
                           <div className="space-y-4">
