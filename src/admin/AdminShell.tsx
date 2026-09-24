@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe2, LayoutDashboard, Building2, Users, ScrollText, LogOut, Settings, IndianRupee, MessageSquareText, Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Globe2, LayoutDashboard, Building2, Users, ScrollText, LogOut, Settings, Database, IndianRupee, MessageSquareText, Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Routes, Route, NavLink, Navigate, Link } from 'react-router-dom';
 import OverviewPage from './OverviewPage';
 import OrganizationsPage from './OrganizationsPage';
@@ -7,6 +7,7 @@ import CreateWorkspacePage from './CreateWorkspacePage';
 import UsersPage from './UsersPage';
 import ActivityPage from './ActivityPage';
 import SettingsPage from './SettingsPage';
+import DataRetentionPage from './DataRetentionPage';
 import CostPage from './CostPage';
 import PromptsPage from './PromptsPage';
 import ThemeToggle from '../shared/theme/ThemeToggle';
@@ -19,6 +20,7 @@ const NAV: { path: string; label: string; icon: React.ElementType }[] = [
   { path: 'activity',       label: 'Activity',           icon: ScrollText },
   { path: 'cost',           label: 'Cost & Pricing',     icon: IndianRupee },
   { path: 'settings',       label: 'Features',           icon: Settings },
+  { path: 'data-retention', label: 'Data Retention',      icon: Database },
   { path: 'prompts',        label: 'Prompts',             icon: MessageSquareText },
 ];
 
@@ -94,6 +96,7 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
           <Route path="activity"      element={<PageWrap title="Activity" section="Activity"><ActivityPage /></PageWrap>} />
           <Route path="cost"          element={<PageWrap title="Cost & Pricing" section="Cost & Pricing"><CostPage /></PageWrap>} />
           <Route path="settings"      element={<PageWrap title="Features" section="Features"><SettingsPage /></PageWrap>} />
+          <Route path="data-retention" element={<PageWrap title="Data Retention" section="Data Retention"><DataRetentionPage /></PageWrap>} />
           <Route path="prompts"       element={<PageWrap title="Prompts" section="Prompts"><PromptsPage /></PageWrap>} />
           <Route path="*"             element={<Navigate to="overview" replace />} />
         </Routes>
