@@ -2320,7 +2320,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-              </div>}
+              </div>
 
             <div className="h-px bg-[var(--border)]" />
 
@@ -2386,7 +2386,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-              </div>}
+              </div>
 
             <div className="h-px bg-[var(--border)]" />
 
@@ -2526,7 +2526,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-              </div>}
+              </div>
 
             <div className="h-px bg-[var(--border)]" />
 
