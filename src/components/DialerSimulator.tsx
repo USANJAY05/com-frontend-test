@@ -1598,17 +1598,23 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
   return (
     <PageShell
-      title={<BreadcrumbTitle group="Campaign" page={dialerMode === 'outbound' ? 'Outbound Campaigns' : 'Inbound Virtual Center'} />}
-      subtitle="Configure automated workflows, initiate sequential campaigns, or trigger dynamic incoming calls to your virtual phone lines."
+      title={taskPage
+        ? 'Assign Dialing Task'
+        : <BreadcrumbTitle group="Campaign" page={dialerMode === 'outbound' ? 'Outbound Campaigns' : 'Inbound Virtual Center'} />}
+      subtitle={taskPage
+        ? 'Configure the workflow, outbound agent, and contacts for this dialing task.'
+        : 'Configure automated workflows, initiate sequential campaigns, or trigger dynamic incoming calls to your virtual phone lines.'}
       layout="fill"
       action={
-        dialerMode === 'outbound' ? (
-          <IconButton
-              icon={Plus}
-              label="Assign Dialing Task"
-              onClick={() => setShowAssignTask(true)}
-            />
-        ) : undefined
+        taskPage
+          ? undefined
+          : dialerMode === 'outbound' ? (
+              <IconButton
+                icon={Plus}
+                label="Assign Dialing Task"
+                onClick={() => setShowAssignTask(true)}
+              />
+            ) : undefined
       }
       toolbar={
         // Calling Telemetry — moved here from a static widget in the
