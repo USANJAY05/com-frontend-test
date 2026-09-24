@@ -26,6 +26,7 @@ const NAV: { path: string; label: string; icon: React.ElementType }[] = [
 
 export default function AdminShell({ email, onLogout }: { email: string; onLogout: () => void }) {
   const { resolved } = useTheme();
+  const [profileOpen, setProfileOpen] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(() => localStorage.getItem('admin-sidebar-collapsed') === 'true');
 
   React.useEffect(() => {
@@ -66,10 +67,7 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4 mr-3" />}
             {!collapsed && 'Collapse sidebar'}
           </button>
-          {!collapsed && <div className="px-3 py-2 text-xs text-[var(--text-muted)] truncate">{email}</div>}
-          <button onClick={onLogout} className="w-full flex items-center px-3 py-2.5 rounded-xl text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]">
-            <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} /> {!collapsed && 'Sign out'}
-          </button>
+
         </div>
       </aside>
 
@@ -79,12 +77,29 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             Platform control center
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden md:inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-[var(--text-muted)]">
-              {resolved === 'dark' ? <Moon className="h-3 w-3" /> : <Sun className="h-3 w-3" />}
-              {resolved} mode
-            </span>
-            <ThemeToggle />
+          <div className="relative">
+            <button type="button" onClick={() => setProfileOpen(v => !v)} className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] p-1.5 pr-3 hover:bg-[var(--bg-subtle)]" aria-label="Open user menu">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">{(email || 'U').slice(0, 1).toUpperCase()}</span>
+              <span className="hidden md:block max-w-[180px] truncate text-xs font-medium text-[var(--text-primary)]">{email}</span>
+            </button>
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-2 shadow-xl z-50">
+                <div className="px-3 py-2 border-b border-[var(--border)]">
+                  <div className="text-xs font-semibold text-[var(--text-primary)]">Account</div>
+                  <div className="mt-0.5 truncate text-[10px] text-[var(--text-muted)]">{email}</div>
+                </div>
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                    {resolved === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                    {resolved === 'dark' ? 'Dark mode' : 'Light mode'}
+                  </div>
+                  <ThemeToggle />
+                </div>
+                <button type="button" onClick={onLogout} className="w-full flex items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20">
+                  <LogOut className="h-4 w-4" /> Sign out
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <Routes>
@@ -125,13 +140,6 @@ function PageWrap({
               <div className="flex items-center gap-2 text-[10px] font-medium text-[var(--text-muted)]">
                 <span>Admin</span>
                 <span className="text-[var(--border)]">/</span>
-                <span className="text-[var(--text-secondary)]">{section}</span>
-                {backTo && (
-                  <>
-                    <span className="text-[var(--border)]">/</span>
-                    <span className="truncate">{title}</span>
-                  </>
-                )}
               </div>
               <div className="mt-1 flex items-center gap-3">
                 {backTo && (
