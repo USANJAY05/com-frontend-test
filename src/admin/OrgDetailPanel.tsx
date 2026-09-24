@@ -35,6 +35,8 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
   const [retentionBusy, setRetentionBusy] = useState(false);
   const [backupState, setBackupState] = useState<any>(null);
   const [backupBusy, setBackupBusy] = useState(false);
+  const [rechargeAmount, setRechargeAmount] = useState('');
+  const [rechargeBusy, setRechargeBusy] = useState(false);
 
   const loadNumbers = () => {
     setNumbersLoading(true);
@@ -396,22 +398,57 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                 <div className="flex items-center justify-between text-sm mb-2"><span className="text-slate-500">Charge scope</span><span className="font-semibold text-slate-800">{detail.chargeScope === 'ai_and_call_provider' ? 'AI + Call Provider' : 'AI only'}</span></div>
                 {detail.billingMethod === 'recharge_based' && (
                   <>
-                    <div className="flex items-center justify-between text-sm mb-2"><span className="text-slate-500">Available balance</span><span className="font-semibold text-slate-800">₹{Number(detail.rechargeAvailableInr || 0).toFixed(2)}</span></div>
+                    <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">Available balance</div>
+                          <div className="mt-1 text-2xl font-bold text-slate-900">₹{Number(detail.rechargeAvailableInr ?? detail.rechargeBalanceInr ?? 0).toFixed(2)}</div>
+                        </div>
+                        <div className="rounded-lg bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700">Recharge</div>
+                      </div>
+                      <div className="mt-2 text-[10px] text-slate-500">
+                        {Number(detail.rechargeAvailableInr ?? detail.rechargeBalanceInr ?? 0) > 0
+                          ? 'Calls can use this prepaid balance.'
+                          : 'No available balance. Calls should remain blocked until the organization is recharged.'}
+                      </div>
+                    </div>
                     <div className="flex items-center gap-2 mt-3">
-                      <input id="recharge-amount" type="number" min="1" step="0.01" placeholder="Recharge amount" className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5" />
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        placeholder="Recharge amount"
+                        value={rechargeAmount}
+                        onChange={(e) => setRechargeAmount(e.target.value)}
+                        disabled={rechargeBusy}
+                        className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5"
+                      />
                       <button
+                        disabled={rechargeBusy || Number(rechargeAmount) <= 0}
                         onClick={async () => {
-                          const input = document.getElementById('recharge-amount') as HTMLInputElement | null;
-                          const amount = Number(input?.value || 0);
-                          if (!amount) return;
-                          const res = await apiFetch(`/api/platform/organizations/${orgId}/recharge`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount }) });
-                          if (!res.ok) { setActionError((await res.json()).error || 'Recharge failed'); return; }
-                          if (input) input.value = '';
-                          load();
-                          onChanged();
+                          const amount = Number(rechargeAmount);
+                          if (!amount || rechargeBusy) return;
+                          setRechargeBusy(true);
+                          setActionError(null);
+                          try {
+                            const res = await apiFetch(`/api/platform/organizations/${orgId}/recharge`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ amount }),
+                            });
+                            const data = await res.json().catch(() => ({}));
+                            if (!res.ok) throw new Error(data?.error || 'Recharge failed');
+                            setRechargeAmount('');
+                            load();
+                            onChanged();
+                          } catch (err: any) {
+                            setActionError(err?.message || 'Recharge failed');
+                          } finally {
+                            setRechargeBusy(false);
+                          }
                         }}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
-                      >Recharge</button>
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                      >{rechargeBusy ? 'Recharging…' : 'Recharge'}</button>
                     </div>
                   </>
                 )}
