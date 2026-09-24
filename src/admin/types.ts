@@ -35,6 +35,11 @@ export interface OrgRow {
   memberCount: number;
   leadCount: number;
   createdAt: string;
+  billingMethod?: 'pay_as_you_go' | 'recharge_based';
+  chargeScope?: 'ai_only' | 'ai_and_call_provider';
+  rechargeBalanceInr?: number;
+  rechargeReservedInr?: number;
+  rechargeAvailableInr?: number;
 }
 
 export interface OrgDetail {
