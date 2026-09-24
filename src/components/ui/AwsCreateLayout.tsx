@@ -35,7 +35,7 @@ export default function AwsCreateLayout({
   action,
 }: AwsCreateLayoutProps) {
   return (
-    <div className="w-full min-w-0 px-3 sm:px-5 lg:px-6 xl:px-8 pb-10 pt-2">
+    <div className="col-span-12 w-full min-w-0 px-3 sm:px-5 lg:px-6 xl:px-8 pb-10 pt-2">
       <div className="w-full min-w-0">
         <div className="mb-5">
           <div className="flex items-center justify-between gap-4 mb-2">
