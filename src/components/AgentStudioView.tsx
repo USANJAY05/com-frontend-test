@@ -695,13 +695,15 @@ export default function AgentStudioView() {
       <Modal
         open={isModalOpen}
         onClose={closeForm}
-        title={creating ? 'Create New Agent' : `Edit Agent`}
+        title={creating ? `Create Agent — Step ${agentWizardStep} of 2` : `Edit Agent`}
         subtitle={creating
-          ? 'Configure your agent\'s voice, persona, and phone number.'
+          ? (agentWizardStep === 1
+              ? 'Fill in the agent configuration, then continue to review.'
+              : 'Review the complete configuration before creating the agent.')
           : `Editing ${editingAgent?.name ?? ''} — changes save when you click Save.`}
-        maxWidth="max-w-2xl"
-      >
-        <div className="space-y-6">
+        maxWidth={creating ? 'max-w-6xl' : 'max-w-2xl'}
+        className={creating ? '!h-[calc(100vh-2rem)] !max-h-none' : ''}
+      >        <div className="space-y-6">
           {creating && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50/70 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
               <div className={`flex items-center gap-2 ${agentWizardStep === 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
