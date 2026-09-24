@@ -83,6 +83,8 @@ interface DialerSimulatorProps {
   // different device, instead of resetting every time like it used to.
   orgSettings?: OrganizationSettings;
   setOrgSettings?: React.Dispatch<React.SetStateAction<OrganizationSettings>>;
+  /** True only while the Voice Simulator/Dialer tab is the visible app tab. */
+  isActive?: boolean;
 }
 
 // Broad language list for per-task selection — a generic "speak fluently
@@ -301,7 +303,8 @@ export default function DialerSimulator({
   mode,
   setMode,
   orgSettings,
-  setOrgSettings
+  setOrgSettings,
+  isActive = true
 }: DialerSimulatorProps) {
   const isInsurance = industry === 'insurance';
   const storagePrefix = `chiefx:${encodeURIComponent(orgSettings?.id || companyName || 'default')}`;
@@ -318,8 +321,8 @@ export default function DialerSimulator({
   const [showAssignTask, setShowAssignTask] = useState(false);
   const taskPage = showAssignTask;
   useEffect(() => {
-    if (dialerMode !== 'outbound') setShowAssignTask(false);
-  }, [dialerMode]);
+    if (!isActive || dialerMode !== 'outbound') setShowAssignTask(false);
+  }, [isActive, dialerMode]);
 
   const activeVirtualNumbers = virtualNumbers;
 
@@ -1604,7 +1607,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
       subtitle={taskPage
         ? 'Configure the workflow, outbound agent, and contacts for this dialing task.'
         : 'Configure automated workflows, initiate sequential campaigns, or trigger dynamic incoming calls to your virtual phone lines.'}
-      layout="fill"
+      layout={taskPage ? 'grid' : 'fill'}
       action={
         taskPage
           ? undefined
@@ -1638,6 +1641,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
         ) : undefined
       }
     >
+      {!taskPage && (
       <div className="overflow-y-auto flex-1 px-8 pb-8 pt-6 space-y-6">
 
       {dialerMode === 'outbound' ? (
@@ -2220,7 +2224,8 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
         </>
       )}
       </div>
-      {/* MODAL: Assign New Dialing Task — 4-step wizard */}
+      )}
+      {/* CREATE PAGE: Assign New Dialing Task — dedicated page, not an overlay */}
       {taskPage && (() => {
         const workflowsWithQuestions = flows.filter(f => (f.variables ?? []).length > 0 && f.active);
         const agentsWithOutbound = wizardAgents.filter(a => a.outboundNumber && (a.active ?? true));
