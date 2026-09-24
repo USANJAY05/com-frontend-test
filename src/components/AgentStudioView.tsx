@@ -125,6 +125,37 @@ function emptyForm(defaultIndustry = ''): Omit<Agent, 'id'> {
   };
 }
 
+interface AgentFormFrameProps {
+  children: React.ReactNode;
+  creating: boolean;
+  agentWizardStep: number;
+  form: Omit<Agent, 'id'>;
+}
+
+function AgentFormFrame({ children, creating, agentWizardStep, form }: AgentFormFrameProps) {
+  return (
+    <AwsCreateLayout
+      breadcrumb={creating ? 'Agent Studio / Create Agent' : 'Agent Studio / Edit Agent'}
+      title={creating ? 'Create agent' : 'Edit agent'}
+      description={creating ? 'Configure the voice agent and review its launch configuration before creating it.' : 'Update the voice agent configuration and review the changes before saving.'}
+      steps={[{ label: 'Configure' }, { label: creating ? 'Review & Create' : 'Review & Save' }]}
+      activeStep={agentWizardStep}
+      summaryTitle="Agent summary"
+      summaryDescription={creating ? 'Review the configuration before creating the agent.' : 'Review the configuration before saving your changes.'}
+      summary={[
+        ['Name', form.name || 'Not configured'],
+        ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
+        ['Voice', form.activeVoice],
+        ['Language', form.language + (form.dialect ? ' · ' + form.dialect : '')],
+        ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
+        ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? ((form.knowledgeBaseDocumentIds?.length ?? 0) + ' documents') : 'None'],
+      ].map(([label, value]) => ({ label, value }))}
+    >
+      {children}
+    </AwsCreateLayout>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AgentStudioView() {
@@ -375,28 +406,7 @@ export default function AgentStudioView() {
 
   const assignableNumbers = freeNumbers(editingAgent?.id ?? null);
 
-  // Create and edit both use the same dedicated AWS-style resource page.
-  const AgentFormFrame = ({ children }: { children: React.ReactNode }) => (
-    <AwsCreateLayout
-      breadcrumb={creating ? 'Agent Studio / Create Agent' : 'Agent Studio / Edit Agent'}
-      title={creating ? 'Create agent' : 'Edit agent'}
-      description={creating ? 'Configure the voice agent and review its launch configuration before creating it.' : 'Update the voice agent configuration and review the changes before saving.'}
-      steps={[{ label: 'Configure' }, { label: creating ? 'Review & Create' : 'Review & Save' }]}
-      activeStep={agentWizardStep}
-      summaryTitle="Agent summary"
-      summaryDescription={creating ? 'Review the configuration before creating the agent.' : 'Review the configuration before saving your changes.'}
-      summary={[
-        ['Name', form.name || 'Not configured'],
-        ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
-        ['Voice', form.activeVoice],
-        ['Language', form.language + (form.dialect ? ' · ' + form.dialect : '')],
-        ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
-        ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? ((form.knowledgeBaseDocumentIds?.length ?? 0) + ' documents') : 'None'],
-      ].map(([label, value]) => ({ label, value }))}
-    >
-      {children}
-    </AwsCreateLayout>
-  );
+
 
   return (
     <PageShell
@@ -731,7 +741,7 @@ export default function AgentStudioView() {
 
       {/* ── Agent create page / edit modal ── */}
       {(creating || !!editingAgent) && (
-      <AgentFormFrame>
+      <AgentFormFrame creating={creating} agentWizardStep={agentWizardStep} form={form}>
         <div className="space-y-6">
           {(creating || editingAgent) && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50/70 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
