@@ -651,16 +651,43 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
     const questionLabels = questionPairs.map(p => p.label);
     const questionDataTypes = questionPairs.map(p => p.dataType);
 
-    // New contacts → add to leadsDatabase first
+    // New contacts must exist in the backend before they can be dialed.
+    // Previously these were added only to React state, so auto-dial correctly
+    // found the task but db.getLeadById() could not find the new contact.
     const newLeads: Lead[] = wizardNewContacts.map(c => ({
       id: `lead-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       name: c.name.trim(),
       phone: c.phone.trim(),
+      email: '',
       source: 'Manual Entry',
       status: 'New' as const,
+      tags: [],
+      notes: '',
+      amountRequested: 0,
+      score: 0,
       createdAt: new Date().toISOString(),
     }));
-    if (newLeads.length > 0) setLeadsDatabase(prev => [...prev, ...newLeads]);
+
+    if (newLeads.length > 0) {
+      try {
+        const persistedNewLeads = await Promise.all(newLeads.map(async (lead) => {
+          const res = await apiFetch('/api/leads', {
+            method: 'POST',
+            body: JSON.stringify(lead),
+          });
+          const body = await res.json().catch(() => null);
+          if (!res.ok) {
+            throw new Error(body?.error || `Failed to create contact ${lead.name}`);
+          }
+          return body as Lead;
+        }));
+        setLeadsDatabase(prev => [...prev, ...persistedNewLeads]);
+        newLeads.splice(0, newLeads.length, ...persistedNewLeads);
+      } catch (err: any) {
+        alert(err?.message || 'Failed to save the new contact.');
+        return;
+      }
+    }
 
     const allLeadIds = [...wizardSelectedLeadIds, ...newLeads.map(l => l.id)];
     if (allLeadIds.length === 0) {
@@ -698,9 +725,22 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
     // handleStartServerAutoDial), which calls the same
     // /auto-dial/start endpoint this used to call automatically.
     try {
-      await apiFetch('/api/dialer-tasks', { method: 'POST', body: JSON.stringify(newTask) });
-    } catch (err) {
-      console.error('Failed to push new task to the backend:', err);
+      const res = await apiFetch('/api/dialer-tasks', {
+        method: 'POST',
+        body: JSON.stringify(newTask),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(body?.error || 'Failed to create the dialing task on the server.');
+      }
+      // Keep the server representation (including any normalized fields)
+      // as the selected task so Start Campaign always targets a real DB row.
+      setTasks(prev => prev.map(t => t.id === newTask.id ? { ...t, ...body } : t));
+    } catch (err: any) {
+      setTasks(prev => prev.filter(t => t.id !== newTask.id));
+      setSelectedTaskId('');
+      setShowAssignTask(true);
+      alert(err?.message || 'Failed to create the dialing task.');
     }
   };
 
