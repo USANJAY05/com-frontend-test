@@ -53,7 +53,7 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
     adminName: '',
     gcpProjectId: '',
     gcpCredentialsJson: '',
-    gcpLocation: 'asia-south1',
+    gcpLocation: 'us-central1',
     callProvider: 'vobiz',
     callAuthId: '',
     callAuthToken: '',
@@ -87,8 +87,8 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
         setError('Service account credentials JSON is required.');
         return;
       }
-      if (!form.callAuthId.trim() || !form.callAuthToken.trim() || !form.callPhoneNumber.trim()) {
-        setError('Call provider credentials and phone number are required.');
+      if (form.chargeScope === 'ai_and_call_provider' && (!form.callAuthId.trim() || !form.callAuthToken.trim() || !form.callPhoneNumber.trim())) {
+        setError('Call provider credentials and phone number are required when Charge Scope is AI + Call Provider.');
         return;
       }
 
@@ -125,12 +125,14 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
             credentials,
             location: form.gcpLocation,
           },
-          callProvider: {
-            provider: form.callProvider,
-            authId: form.callAuthId.trim(),
-            authToken: form.callAuthToken.trim(),
-            phoneNumber: form.callPhoneNumber.trim(),
-          },
+          ...(form.chargeScope === 'ai_and_call_provider' ? {
+            callProvider: {
+              provider: form.callProvider,
+              authId: form.callAuthId.trim(),
+              authToken: form.callAuthToken.trim(),
+              phoneNumber: form.callPhoneNumber.trim(),
+            },
+          } : {}),
           billingMethod: form.billingMethod,
           chargeScope: form.chargeScope,
           initialRechargeAmountInr: form.billingMethod === 'recharge_based' ? Number(form.initialRechargeAmountInr || 0) : 0,
@@ -252,19 +254,7 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
             </div>
           </div>
 
-          <div className="border-t border-slate-100 pt-4">
-            <div className="mb-3">
-              <p className="text-xs font-bold text-slate-700">Call Provider Setup</p>
-              <p className="text-[11px] text-slate-500 mt-1">Configure the telephony account for this organization. Credentials are stored with the organization and are not read from server .env values.</p>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Call Provider *</label>
-                <select value={form.callProvider} onChange={set('callProvider')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="vobiz">Vobiz.ai</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Auth ID *</label>
                   <input value={form.callAuthId} onChange={set('callAuthId')} placeholder="Vobiz Auth ID" required autoComplete="off" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
@@ -312,6 +302,14 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
             <div className="grid grid-cols-2 gap-3">
               <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'pay_as_you_go' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
                 <input type="radio" className="sr-only" checked={form.billingMethod === 'pay_as_you_go'} onChange={() => setForm(f => ({ ...f, billingMethod: 'pay_as_you_go' }))} />
+                <p className="text-xs font-semibold text-slate-          <div className="border-t border-slate-100 pt-4">
+            <div className="mb-3">
+              <p className="text-xs font-bold text-slate-700">Billing</p>
+              <p className="text-[11px] text-slate-500 mt-1">Choose how this organization pays for voice usage. Pay-as-you-go keeps the current behavior; recharge-based blocks new calls when the wallet is insufficient.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'pay_as_you_go' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
+                <input type="radio" className="sr-only" checked={form.billingMethod === 'pay_as_you_go'} onChange={() => setForm(f => ({ ...f, billingMethod: 'pay_as_you_go' }))} />
                 <p className="text-xs font-semibold text-slate-700">Pay as you go</p>
                 <p className="text-[10px] text-slate-500 mt-1">Current behavior. Calls are not wallet-gated.</p>
               </label>
@@ -322,7 +320,7 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
               </label>
             </div>
             <div className="mt-3">
-              <label className="block text-xs font-medium text-slate-500 mb-1">Charge Scope</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Charge Scope *</label>
               <select value={form.chargeScope} onChange={set('chargeScope')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
                 <option value="ai_only">AI only</option>
                 <option value="ai_and_call_provider">AI + Call Provider</option>
@@ -363,23 +361,38 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
             </div>
           </div>
 
+{form.chargeScope === 'ai_and_call_provider' && (
           <div className="border-t border-slate-100 pt-4">
-            <p className="text-xs font-medium text-slate-500 mb-2">Feature Access — select what this org can use</p>
-            <FlagGroupPicker
-              availableKeys={FEATURE_REGISTRY.map(f => f.key)}
-              onApply={(keys) => setSelectedFlags(keys)}
-              className="mb-3"
-            />
-            <div className="flex flex-wrap gap-2">
-              {FEATURE_REGISTRY.map(f => (
-                <button
-                  key={f.key}
-                  type="button"
-                  onClick={() => toggleFlag(f.key)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                    selectedFlags.includes(f.key)
-                      ? 'bg-amber-500 text-white border-amber-500'
-                      : 'bg-white text-slate-500 border-slate-200 hover:border-amber-300'
+            <div className="mb-3">
+              <p className="text-xs font-bold text-slate-700">Call Provider Setup</p>
+              <p className="text-[11px] text-slate-500 mt-1">Only required when this organization is charged for AI + Call Provider usage.</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Call Provider *</label>
+                <select value={form.callProvider} onChange={set('callProvider')} className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  <option value="vobiz">Vobiz.ai</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth ID *</label>
+                  <input value={form.callAuthId} onChange={set('callAuthId')} placeholder="Vobiz Auth ID" required autoComplete="off" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth Token *</label>
+                  <input type="password" value={form.callAuthToken} onChange={set('callAuthToken')} placeholder="Vobiz Auth Token" required autoComplete="new-password" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Provider Phone Number *</label>
+                <input value={form.callPhoneNumber} onChange={set('callPhoneNumber')} placeholder="+14155550123" required autoComplete="off" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
+              </div>
+            </div>
+          </div>
+
+          )}
+          hover:border-amber-300'
                   }`}
                 >
                   {f.label}
