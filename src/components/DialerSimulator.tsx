@@ -2264,27 +2264,8 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
         return (
           <WizardFrame {...frameProps}>
             <div className={taskPage ? 'w-full' : ''}>
-            {/* AWS-style two-step flow: Configure first, then review and create. */}
-            <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
-              <div className={`flex items-center gap-2 ${wizardStep === 1 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
-                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 1 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>1</span>
-                <span className="text-xs font-semibold">Fill in details</span>
-              </div>
-              <div className="h-px flex-1 bg-[var(--border)]" />
-              <div className={`flex items-center gap-2 ${wizardStep === 2 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
-                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 2 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>2</span>
-                <span className="text-xs font-semibold">Review & Create</span>
-              </div>
-            </div>
-
             {wizardStep === 1 && (
               <div className="space-y-6">
-            {taskPage && (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Dialing task setup</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">Enter the workflow, outbound agent, and contacts for this dialing task.</p>
-              </div>
-            )}
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
                           <div className="space-y-4">
