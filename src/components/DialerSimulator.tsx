@@ -2261,8 +2261,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             )}
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
-            {(
-              <div className="space-y-4">
+                          <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">1</span> Select a Workflow</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active workflows with question tasks are shown — activate a workflow in Workflow Builder to make it available here.</p>
@@ -2321,14 +2320,12 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-              </div>
-            )}
+              </div>}
 
             <div className="h-px bg-[var(--border)]" />
 
             {/* ── Step 2: Select Agent ──────────────────────────────────────── */
-            {(
-              <div className="space-y-4">
+                          <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">2</span> Select an Agent</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active agents with an outbound number assigned are shown — configure and enable agents in Agent Studio.</p>
@@ -2389,14 +2386,12 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-              </div>
-            )}
+              </div>}
 
             <div className="h-px bg-[var(--border)]" />
 
             {/* ── Step 3: Add Contacts ──────────────────────────────────────── */
-            {(
-              <div className="space-y-4">
+                          <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">3</span> Add Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Select from your contact database or add new contacts manually. You can mix both.</p>
@@ -2531,8 +2526,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-              </div>
-            )}
+              </div>}
 
             <div className="h-px bg-[var(--border)]" />
 
