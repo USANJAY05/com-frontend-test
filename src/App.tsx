@@ -865,6 +865,7 @@ export default function App() {
             setMode={(m) => setActiveSubTab(m, 'dialer')}
             orgSettings={orgSettings}
             setOrgSettings={setOrgSettings}
+            isActive={activeTab === 'dialer'}
           />
         );
       case 'loans':
