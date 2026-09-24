@@ -2324,7 +2324,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
             <div className="h-px bg-[var(--border)]" />
 
-            {/* ── Step 2: Select Agent ──────────────────────────────────────── */
+            {/* ── Step 2: Select Agent ──────────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">2</span> Select an Agent</h3>
@@ -2390,7 +2390,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
             <div className="h-px bg-[var(--border)]" />
 
-            {/* ── Step 3: Add Contacts ──────────────────────────────────────── */
+            {/* ── Step 3: Add Contacts ──────────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">3</span> Add Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
@@ -2530,7 +2530,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
             <div className="h-px bg-[var(--border)]" />
 
-            {/* ── Step 4: Review + Create ───────────────────────────────────── */
+            {/* ── Step 4: Review + Create ───────────────────────────────────── */}
             {selectedWorkflow && (
               <div className="space-y-4">
                 <div>
