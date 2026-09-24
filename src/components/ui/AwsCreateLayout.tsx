@@ -42,7 +42,7 @@ export default function AwsCreateLayout({
             <div className="text-[11px] text-slate-500 dark:text-[var(--text-muted)]">
               {breadcrumb}
             </div>
-            {action}
+            {action && <div className="shrink-0">{action}</div>}
           </div>
 
           <div className="flex items-start justify-between gap-4">
