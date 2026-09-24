@@ -2251,7 +2251,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
         return (
           <WizardFrame {...frameProps}>
-            <div className={taskPage ? 'w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4 space-y-6' : ''}>
+            <div className={taskPage ? 'flex-1 min-h-0 overflow-y-auto w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4 space-y-6' : ''}>
             {/* All task configuration is shown on one page, top to bottom. */}
             {taskPage && (
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
