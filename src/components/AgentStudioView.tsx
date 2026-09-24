@@ -375,12 +375,45 @@ export default function AgentStudioView() {
   const isModalOpen = creating || !!editingAgent;
   const assignableNumbers = freeNumbers(editingAgent?.id ?? null);
 
+  // Creation is a page-level AWS-style wizard; editing remains a modal.
+  const AgentFormFrame = creating
+    ? ({ children }: { children: React.ReactNode }) => (
+        <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-200 dark:border-[var(--border)]">
+              <h2 className="text-base font-bold text-slate-800 dark:text-[var(--text-primary)]">
+                Create Agent — Step {agentWizardStep} of 2
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-[var(--text-muted)] mt-1">
+                {agentWizardStep === 1
+                  ? 'Fill in the agent configuration, then continue to review.'
+                  : 'Review the complete configuration before creating the agent.'}
+              </p>
+            </div>
+            <div className="p-6 sm:p-8">{children}</div>
+          </div>
+        </div>
+      )
+    : Modal;
+
+  const agentFormFrameProps = creating
+    ? {}
+    : {
+        open: true,
+        onClose: closeForm,
+        title: 'Edit Agent',
+        subtitle: `Editing ${editingAgent?.name ?? ''} — changes save when you click Save.`,
+        maxWidth: 'max-w-2xl',
+      };
+
   return (
     <PageShell
-      title="Agent Studio"
-      subtitle={agentView === 'user'
-        ? 'Create AI calling agents — each with its own voice, persona, and phone number.'
-        : 'Built-in AI agents that run automatically after every call — no phone number, no voice, just a system prompt.'}
+      title={creating ? 'Create Agent' : 'Agent Studio'}
+      subtitle={creating
+        ? 'Configure your agent, review the settings, and create it.'
+        : agentView === 'user'
+          ? 'Create AI calling agents — each with its own voice, persona, and phone number.'
+          : 'Built-in AI agents that run automatically after every call — no phone number, no voice, just a system prompt.'}
       onRefresh={() => loadData()}
       action={
         <div className="flex items-center gap-2">
@@ -406,11 +439,22 @@ export default function AgentStudioView() {
               </button>
             </div>
           )}
-          {agentView === 'user' && <IconButton icon={Plus} label="New Agent" onClick={openCreate} />}
+          {creating ? (
+            <button
+              type="button"
+              onClick={closeForm}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <X className="h-4 w-4" />
+              Back to Agent Studio
+            </button>
+          ) : (
+            agentView === 'user' && <IconButton icon={Plus} label="New Agent" onClick={openCreate} />
+          )}
         </div>
       }
     >
-      {agentView === 'user' && (
+      {agentView === 'user' && !creating && (
       <div className="col-span-12">
           {loading ? (
             <div className="flex items-center justify-center py-20 text-slate-400">
@@ -692,18 +736,8 @@ export default function AgentStudioView() {
       )}
 
       {/* ── Agent create / edit modal ── */}
-      <Modal
-        open={isModalOpen}
-        onClose={closeForm}
-        title={creating ? `Create Agent — Step ${agentWizardStep} of 2` : `Edit Agent`}
-        subtitle={creating
-          ? (agentWizardStep === 1
-              ? 'Fill in the agent configuration, then continue to review.'
-              : 'Review the complete configuration before creating the agent.')
-          : `Editing ${editingAgent?.name ?? ''} — changes save when you click Save.`}
-        maxWidth={creating ? 'max-w-6xl' : 'max-w-2xl'}
-        className={creating ? '!h-[calc(100vh-2rem)] !max-h-none' : ''}
-      >        <div className="space-y-6">
+      <AgentFormFrame {...agentFormFrameProps}>
+        <div className="space-y-6">        <div className="space-y-6">
           {creating && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50/70 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
               <div className={`flex items-center gap-2 ${agentWizardStep === 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
@@ -1270,7 +1304,7 @@ export default function AgentStudioView() {
             </div>
           )}
         </div>
-      </Modal>
+      </AgentFormFrame>
     </PageShell>
   );
 }
