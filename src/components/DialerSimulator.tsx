@@ -442,7 +442,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
 
   // Task Creation Wizard States
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4>(1);
+  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
   const [wizardWorkflowId, setWizardWorkflowId] = useState('');
   const [wizardAgentId, setWizardAgentId] = useState('');
   const [wizardAgents, setWizardAgents] = useState<WizardAgent[]>([]);
@@ -2252,7 +2252,21 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
         return (
           <WizardFrame {...frameProps}>
             <div className={taskPage ? 'flex-1 min-h-0 overflow-y-auto w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4 space-y-6' : ''}>
-            {/* All task configuration is shown on one page, top to bottom. */}
+            {/* AWS-style two-step flow: Configure first, then review and create. */}
+            <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
+              <div className={`flex items-center gap-2 ${wizardStep === 1 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
+                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 1 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>1</span>
+                <span className="text-xs font-semibold">Configure</span>
+              </div>
+              <div className="h-px flex-1 bg-[var(--border)]" />
+              <div className={`flex items-center gap-2 ${wizardStep === 2 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
+                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 2 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>2</span>
+                <span className="text-xs font-semibold">Review & Create</span>
+              </div>
+            </div>
+
+            {wizardStep === 1 && (
+              <div className="space-y-6">
             {taskPage && (
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Dialing task setup</p>
@@ -2528,10 +2542,25 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
               </div>
 
-            <div className="h-px bg-[var(--border)]" />
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
+              <p className="text-[11px] text-[var(--text-muted)]">
+                {wizardWorkflowId && wizardAgentId && totalContacts > 0
+                  ? `${totalContacts} contact${totalContacts !== 1 ? 's' : ''} ready to review`
+                  : 'Select a workflow, agent, and at least one contact to continue.'}
+              </p>
+              <Button
+                variant="primary"
+                size="md"
+                disabled={!wizardWorkflowId || !wizardAgentId || totalContacts === 0}
+                onClick={() => setWizardStep(2)}
+              >
+                Next: Review & Create
+              </Button>
+            </div>
+              </div>
+            )}
 
-            {/* ── Step 4: Review + Create ───────────────────────────────────── */}
-            {selectedWorkflow && (
+            {wizardStep === 2 && selectedWorkflow && (
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">4</span> Review & Create</h3>
@@ -2604,7 +2633,15 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    icon={ArrowLeft}
+                    onClick={() => setWizardStep(1)}
+                  >
+                    Back
+                  </Button>
                   <Button
                     variant="primary"
                     size="md"
