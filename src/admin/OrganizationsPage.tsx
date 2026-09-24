@@ -154,218 +154,108 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
 
   return (
     <Modal open onClose={onClose} title="Create Workspace" maxWidth="max-w-2xl">
-        {loading && (
-          <div className="mb-4 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-600 flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" /> Validating Google Cloud project and configuring Vertex AI…
+      {loading && (
+        <div className="mb-4 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-600 flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" /> Validating Google Cloud project and configuring Vertex AI…
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 bg-rose-50 border border-rose-200 rounded-lg px-4 py-2 text-sm text-rose-600">
+          Google Cloud project configuration failed: {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Organization Name *</label>
+          <input value={form.name} onChange={set('name')} placeholder="Acme Corp" required className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Workspace Slug *</label>
+          <input value={form.workspaceName} onChange={set('workspaceName')} placeholder="acme-corp" required className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+        </div>
+
+        <div className="border-t border-slate-100 pt-4">
+          <div className="mb-3">
+            <p className="text-xs font-bold text-slate-700">Google Cloud Project Setup</p>
+            <p className="text-[11px] text-slate-500 mt-1">Use an existing Google Cloud project for this workspace.</p>
           </div>
-        )}
-        {error && (
-          <div className="mb-4 bg-rose-50 border border-rose-200 rounded-lg px-4 py-2 text-sm text-rose-600">
-            Google Cloud project configuration failed: {error}
+          <div className="rounded-xl border border-amber-400 bg-white px-3 py-3 ring-1 ring-amber-100 mb-4">
+            <p className="text-xs font-semibold text-slate-700">Use an existing Google Cloud project <span className="text-rose-500">(required)</span></p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Enter the project ID, service-account JSON, and Vertex AI region.</p>
           </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Organization Name *</label>
-            <input
-              value={form.name}
-              onChange={set('name')}
-              placeholder="Acme Corp"
-              required
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Workspace Slug *</label>
-            <input
-              value={form.workspaceName}
-              onChange={set('workspaceName')}
-              placeholder="acme-corp"
-              required
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-            />
-          </div>
-
-          <div className="border-t border-slate-100 pt-4">
-            <div className="mb-3">
-              <p className="text-xs font-bold text-slate-700">Google Cloud Project Setup</p>
-              <p className="text-[11px] text-slate-500 mt-1">Choose how this workspace connects to Google Cloud. Automatic project creation is not available yet, so enter an existing project below.</p>
-            </div>
-
-            <div className="space-y-2 mb-4">
-              <div className="rounded-xl border border-amber-200 bg-amber-50/60 px-3 py-3">
-                <div className="flex items-start gap-3">
-                  <input type="radio" checked={false} disabled className="mt-1" readOnly />
-                  <div>
-                    <p className="text-xs font-semibold text-slate-600">Automatically create a new Google Cloud project</p>
-                    <p className="text-[10px] text-amber-700 mt-0.5">Coming soon — requires Google Cloud Organization setup</p>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-xl border border-amber-400 bg-white px-3 py-3 ring-1 ring-amber-100">
-                <div className="flex items-start gap-3">
-                  <input type="radio" checked readOnly className="mt-1 accent-amber-500" />
-                  <div>
-                    <p className="text-xs font-semibold text-slate-700">Use an existing Google Cloud project <span className="text-rose-500">(required)</span></p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Enter the project ID, service-account JSON, and Vertex AI region for this workspace.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Google Cloud Project ID *</label>
-                <input
-                  value={form.gcpProjectId}
-                  onChange={set('gcpProjectId')}
-                  placeholder="my-existing-gcp-project"
-                  required
-                  autoComplete="off"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Google Cloud Service Account JSON *</label>
-                <textarea
-                  value={form.gcpCredentialsJson}
-                  onChange={set('gcpCredentialsJson')}
-                  placeholder='Paste the service account JSON here'
-                  required
-                  rows={7}
-                  autoComplete="off"
-                  spellCheck={false}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-amber-500 resize-y"
-                />
-                <p className="text-[10px] text-slate-400 mt-1">Paste the service-account JSON for the selected project. It is sent only during workspace creation.</p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Region / Location *</label>
-                <select
-                  value={form.gcpLocation}
-                  onChange={set('gcpLocation')}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                >
-                  {['asia-south1', 'us-central1', 'us-east4', 'europe-west1', 'europe-west4', 'asia-southeast1'].map(region => <option key={region} value={region}>{region}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth ID *</label>
-                  <input value={form.callAuthId} onChange={set('callAuthId')} placeholder="Vobiz Auth ID" required autoComplete="off" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth Token *</label>
-                  <input type="password" value={form.callAuthToken} onChange={set('callAuthToken')} placeholder="Vobiz Auth Token" required autoComplete="new-password" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Provider Phone Number *</label>
-                <input value={form.callPhoneNumber} onChange={set('callPhoneNumber')} placeholder="+14155550123" required autoComplete="off" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Industry</label>
-              <select
-                value={form.industry}
-                onChange={set('industry')}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-              >
-                {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
-              </select>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Google Cloud Project ID *</label>
+              <input value={form.gcpProjectId} onChange={set('gcpProjectId')} placeholder="my-existing-gcp-project" required autoComplete="off" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Plan</label>
-              <select
-                value={form.subscriptionPlan}
-                onChange={set('subscriptionPlan')}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-              >
-                {PLANS.map(p => <option key={p} value={p}>{p}</option>)}
+              <label className="block text-xs font-medium text-slate-500 mb-1">Google Cloud Service Account JSON *</label>
+              <textarea value={form.gcpCredentialsJson} onChange={set('gcpCredentialsJson')} placeholder="Paste the service account JSON here" required rows={7} autoComplete="off" spellCheck={false} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-amber-500 resize-y" />
+              <p className="text-[10px] text-slate-400 mt-1">Paste the service-account JSON for the selected project.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Region / Location *</label>
+              <select value={form.gcpLocation} onChange={set('gcpLocation')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                {['asia-south1', 'us-central1', 'us-east4', 'europe-west1', 'europe-west4', 'asia-southeast1'].map(region => <option key={region} value={region}>{region}</option>)}
               </select>
             </div>
           </div>
+        </div>
 
-          <div className="border-t border-slate-100 pt-4">
-            <div className="mb-3">
-              <p className="text-xs font-bold text-slate-700">Billing</p>
-              <p className="text-[11px] text-slate-500 mt-1">Choose how this organization pays for voice usage. Pay-as-you-go keeps the current behavior; recharge-based blocks new calls when the wallet is insufficient.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'pay_as_you_go' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
-                <input type="radio" className="sr-only" checked={form.billingMethod === 'pay_as_you_go'} onChange={() => setForm(f => ({ ...f, billingMethod: 'pay_as_you_go' }))} />
-                <p className="text-xs font-semibold text-slate-          <div className="border-t border-slate-100 pt-4">
-            <div className="mb-3">
-              <p className="text-xs font-bold text-slate-700">Billing</p>
-              <p className="text-[11px] text-slate-500 mt-1">Choose how this organization pays for voice usage. Pay-as-you-go keeps the current behavior; recharge-based blocks new calls when the wallet is insufficient.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'pay_as_you_go' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
-                <input type="radio" className="sr-only" checked={form.billingMethod === 'pay_as_you_go'} onChange={() => setForm(f => ({ ...f, billingMethod: 'pay_as_you_go' }))} />
-                <p className="text-xs font-semibold text-slate-700">Pay as you go</p>
-                <p className="text-[10px] text-slate-500 mt-1">Current behavior. Calls are not wallet-gated.</p>
-              </label>
-              <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'recharge_based' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
-                <input type="radio" className="sr-only" checked={form.billingMethod === 'recharge_based'} onChange={() => setForm(f => ({ ...f, billingMethod: 'recharge_based' }))} />
-                <p className="text-xs font-semibold text-slate-700">Recharge based</p>
-                <p className="text-[10px] text-slate-500 mt-1">Calls stop when available credits are insufficient.</p>
-              </label>
-            </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Industry</label>
+            <select value={form.industry} onChange={set('industry')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+              {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Plan</label>
+            <select value={form.subscriptionPlan} onChange={set('subscriptionPlan')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+              {PLANS.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-100 pt-4">
+          <div className="mb-3">
+            <p className="text-xs font-bold text-slate-700">Billing</p>
+            <p className="text-[11px] text-slate-500 mt-1">Choose how this organization pays for voice usage.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'pay_as_you_go' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
+              <input type="radio" className="sr-only" checked={form.billingMethod === 'pay_as_you_go'} onChange={() => setForm(f => ({ ...f, billingMethod: 'pay_as_you_go' }))} />
+              <p className="text-xs font-semibold text-slate-700">Pay as you go</p>
+              <p className="text-[10px] text-slate-500 mt-1">Calls are billed from actual usage.</p>
+            </label>
+            <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'recharge_based' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
+              <input type="radio" className="sr-only" checked={form.billingMethod === 'recharge_based'} onChange={() => setForm(f => ({ ...f, billingMethod: 'recharge_based' }))} />
+              <p className="text-xs font-semibold text-slate-700">Recharge based</p>
+              <p className="text-[10px] text-slate-500 mt-1">New calls are blocked when credits are insufficient.</p>
+            </label>
+          </div>
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-slate-500 mb-1">Charge Scope *</label>
+            <select value={form.chargeScope} onChange={set('chargeScope')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+              <option value="ai_only">AI only</option>
+              <option value="ai_and_call_provider">AI + Call Provider</option>
+            </select>
+          </div>
+          {form.billingMethod === 'recharge_based' && (
             <div className="mt-3">
-              <label className="block text-xs font-medium text-slate-500 mb-1">Charge Scope *</label>
-              <select value={form.chargeScope} onChange={set('chargeScope')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
-                <option value="ai_only">AI only</option>
-                <option value="ai_and_call_provider">AI + Call Provider</option>
-              </select>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Initial Recharge (INR)</label>
+              <input type="number" min="0" step="0.01" value={form.initialRechargeAmountInr} onChange={set('initialRechargeAmountInr')} placeholder="0" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
-            {form.billingMethod === 'recharge_based' && (
-              <div className="mt-3">
-                <label className="block text-xs font-medium text-slate-500 mb-1">Initial Recharge (INR)</label>
-                <input type="number" min="0" step="0.01" value={form.initialRechargeAmountInr} onChange={set('initialRechargeAmountInr')} placeholder="0" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
-              </div>
-            )}
-          </div>
+          )}
+        </div>
 
-<div className="border-t border-slate-100 pt-4">
-            <p className="text-xs text-slate-400 mb-3">
-              Admin member (optional) — they'll be linked automatically on first login
-            </p>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Admin Email</label>
-                <input
-                  type="email"
-                  value={form.adminEmail}
-                  onChange={set('adminEmail')}
-                  placeholder="admin@acme.com"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Admin Name</label>
-                <input
-                  value={form.adminName}
-                  onChange={set('adminName')}
-                  placeholder="Jane Smith"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                />
-              </div>
-            </div>
-          </div>
-
-{form.chargeScope === 'ai_and_call_provider' && (
+        {form.chargeScope === 'ai_and_call_provider' && (
           <div className="border-t border-slate-100 pt-4">
             <div className="mb-3">
               <p className="text-xs font-bold text-slate-700">Call Provider Setup</p>
-              <p className="text-[11px] text-slate-500 mt-1">Only required when this organization is charged for AI + Call Provider usage.</p>
+              <p className="text-[11px] text-slate-500 mt-1">Only required when Charge Scope is AI + Call Provider.</p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
               <div>
@@ -390,39 +280,44 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
               </div>
             </div>
           </div>
+        )}
 
-          )}
-          hover:border-amber-300'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
+        <div className="border-t border-slate-100 pt-4">
+          <p className="text-xs text-slate-400 mb-3">Admin member (optional) — they'll be linked automatically on first login</p>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Admin Email</label>
+              <input type="email" value={form.adminEmail} onChange={set('adminEmail')} placeholder="admin@acme.com" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
-            {selectedFlags.length === 0 && (
-              <p className="text-[10px] text-slate-400 mt-1">No flags selected — org will have no feature access by default.</p>
-            )}
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Admin Name</label>
+              <input value={form.adminName} onChange={set('adminName')} placeholder="Jane Smith" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+            </div>
           </div>
+        </div>
 
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-5 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-white text-sm font-medium rounded-xl flex items-center gap-2"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? 'Validating…' : 'Create Workspace'}
-            </button>
+        <div className="border-t border-slate-100 pt-4">
+          <p className="text-xs font-bold text-slate-700 mb-2">Feature Access</p>
+          <div className="grid grid-cols-2 gap-2">
+            {FEATURE_REGISTRY.map(f => (
+              <button key={f.key} type="button" onClick={() => toggleFlag(f.key)} className={`text-left border rounded-lg px-3 py-2 text-xs ${selectedFlags.includes(f.key) ? 'border-amber-400 bg-amber-50 text-slate-700' : 'border-slate-200 text-slate-500 hover:border-amber-300'}`}>
+                {f.label}
+              </button>
+            ))}
           </div>
-        </form>
+          {selectedFlags.length === 0 && (
+            <p className="text-[10px] text-slate-400 mt-1">No flags selected — org will have no feature access by default.</p>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-3 pt-2">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
+          <button type="submit" disabled={loading} className="px-5 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-white text-sm font-medium rounded-xl flex items-center gap-2">
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {loading ? 'Validating…' : 'Create Workspace'}
+          </button>
+        </div>
+      </form>
     </Modal>
   );
 }
