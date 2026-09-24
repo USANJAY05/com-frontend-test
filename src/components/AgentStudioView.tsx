@@ -1342,5 +1342,6 @@ export default function AgentStudioView() {
         </div>
       </AgentFormFrame>
       )}
+    </PageShell>
   );
 }
