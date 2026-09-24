@@ -3,6 +3,7 @@ import { Globe2, LayoutDashboard, Building2, Users, ScrollText, LogOut, Settings
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import OverviewPage from './OverviewPage';
 import OrganizationsPage from './OrganizationsPage';
+import CreateWorkspacePage from './CreateWorkspacePage';
 import UsersPage from './UsersPage';
 import ActivityPage from './ActivityPage';
 import SettingsPage from './SettingsPage';
@@ -79,6 +80,7 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview"      element={<PageWrap title="Overview"><OverviewPage /></PageWrap>} />
           <Route path="organizations" element={<PageWrap title="Organizations"><OrganizationsPage /></PageWrap>} />
+          <Route path="organizations/create" element={<PageWrap title="Create Workspace"><CreateWorkspacePage /></PageWrap>} />
           <Route path="users"         element={<PageWrap title="Users"><UsersPage /></PageWrap>} />
           <Route path="activity"      element={<PageWrap title="Activity"><ActivityPage /></PageWrap>} />
           <Route path="cost"          element={<PageWrap title="Cost & Pricing"><CostPage /></PageWrap>} />
