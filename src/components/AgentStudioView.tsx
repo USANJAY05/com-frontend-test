@@ -8,6 +8,7 @@ import { apiFetch } from '../lib/api';
 import { isDevEnv } from '../lib/env';
 import PageShell from './ui/PageShell';
 import Modal from './ui/Modal';
+import AwsCreateLayout from './ui/AwsCreateLayout';
 import IconButton from './ui/IconButton';
 import ActionMenu from './ui/ActionMenu';
 
@@ -374,60 +375,28 @@ export default function AgentStudioView() {
 
   const assignableNumbers = freeNumbers(editingAgent?.id ?? null);
 
-  // Creating an agent is a full-page AWS EC2-style configuration experience.
-  // Editing remains a compact modal so existing edit behavior is unchanged.
+  // Creating an agent uses the shared AWS-style create layout. Editing remains a modal.
   const AgentFormFrame = creating
     ? ({ children }: { children: React.ReactNode }) => (
-        <div className="col-span-12 w-full px-3 sm:px-5 lg:px-6 xl:px-8 pb-10 pt-2">
-          <div className="w-full">
-            <div className="mb-5">
-              <div className="text-[11px] text-slate-500 mb-2">Agent Studio / Create Agent</div>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-[var(--text-primary)]">
-                    Create agent
-                  </h2>
-                  <p className="text-sm text-slate-500 dark:text-[var(--text-muted)] mt-1">
-                    Configure the voice agent and review its launch configuration before creating it.
-                  </p>
-                </div>
-                <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
-                  <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold ${agentWizardStep === 1 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>1</span>
-                  <span>Configure</span>
-                  <span className="text-slate-300">→</span>
-                  <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold ${agentWizardStep === 2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>2</span>
-                  <span>Review</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-5 2xl:gap-6 items-start">
-              <div className="min-w-0 space-y-5">{children}</div>
-
-              <aside className="xl:sticky xl:top-6 rounded-xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-200 dark:border-[var(--border)]">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-[var(--text-primary)]">Agent summary</h3>
-                  <p className="text-[11px] text-slate-500 mt-1">Review the configuration before creating the agent.</p>
-                </div>
-                <div className="p-5 space-y-4">
-                  {[
-                    ['Name', form.name || 'Not configured'],
-                    ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
-                    ['Voice', form.activeVoice],
-                    ['Language', form.language + (form.dialect ? ` · ${form.dialect}` : '')],
-                    ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
-                    ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? `${form.knowledgeBaseDocumentIds?.length ?? 0} documents` : 'None'],
-                  ].map(([label, value]) => (
-                    <div key={label} className="border-b border-slate-100 dark:border-[var(--border)] pb-3 last:border-0 last:pb-0">
-                      <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">{label}</p>
-                      <p className="text-xs font-medium text-slate-700 dark:text-[var(--text-secondary)] mt-1 break-words">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </aside>
-            </div>
-          </div>
-        </div>
+        <AwsCreateLayout
+          breadcrumb="Agent Studio / Create Agent"
+          title="Create agent"
+          description="Configure the voice agent and review its launch configuration before creating it."
+          steps={[{ label: 'Configure' }, { label: 'Review' }]}
+          activeStep={agentWizardStep}
+          summaryTitle="Agent summary"
+          summaryDescription="Review the configuration before creating the agent."
+          summary={[
+            ['Name', form.name || 'Not configured'],
+            ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
+            ['Voice', form.activeVoice],
+            ['Language', form.language + (form.dialect ? ` · ${form.dialect}` : '')],
+            ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
+            ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? `${form.knowledgeBaseDocumentIds?.length ?? 0} documents` : 'None'],
+          ].map(([label, value]) => ({ label, value }))}
+        >
+          {children}
+        </AwsCreateLayout>
       )
     : Modal;
 
