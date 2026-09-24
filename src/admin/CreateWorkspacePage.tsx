@@ -252,7 +252,7 @@ export default function CreateWorkspacePage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-3">
             <p className="text-xs font-bold text-slate-700">Billing</p>
             <p className="text-[11px] text-slate-500 mt-1">Choose how this organization pays for voice usage.</p>
@@ -282,7 +282,6 @@ export default function CreateWorkspacePage() {
               <input type="number" min="0" step="0.01" value={form.initialRechargeAmountInr} onChange={set('initialRechargeAmountInr')} placeholder="0" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
           )}
-        </div>
         </section>
 
         {form.chargeScope === 'ai_and_call_provider' && (
@@ -329,7 +328,6 @@ export default function CreateWorkspacePage() {
               <input value={form.adminName} onChange={set('adminName')} placeholder="Jane Smith" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
           </div>
-        </div>
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
