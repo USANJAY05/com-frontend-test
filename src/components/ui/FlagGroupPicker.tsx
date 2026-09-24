@@ -8,9 +8,11 @@ interface FlagGroupPickerProps {
   value?: string[];
   onApply: (flagKeys: string[]) => void;
   className?: string;
+  label?: string;
+  description?: string;
 }
 
-export default function FlagGroupPicker({ availableKeys, value = [], onApply, className = '' }: FlagGroupPickerProps) {
+export default function FlagGroupPicker({ availableKeys, value = [], onApply, className = '', label = 'Feature Access', description = 'Search features, select individually, or apply a complete group.' }: FlagGroupPickerProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const available = useMemo(() => new Set(availableKeys), [availableKeys]);
@@ -44,11 +46,11 @@ export default function FlagGroupPicker({ availableKeys, value = [], onApply, cl
   const clearAll = () => onApply([]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative w-full min-w-0 ${className}`}>
       <div className="flex items-center justify-between mb-2">
         <div>
-          <p className="text-xs font-bold text-slate-700">Feature Access</p>
-          <p className="text-[10px] text-slate-400">Search features, select individually, or apply a complete group.</p>
+          <p className="text-xs font-bold text-slate-700">{label}</p>
+          <p className="text-[10px] text-slate-400">{description}</p>
         </div>
         {value.length > 0 && (
           <button type="button" onClick={clearAll} className="text-[10px] font-semibold text-slate-400 hover:text-rose-500">
@@ -71,8 +73,8 @@ export default function FlagGroupPicker({ availableKeys, value = [], onApply, cl
         </button>
 
         {open && (
-          <div className="absolute z-50 mt-2 w-full rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
-            <div className="max-h-80 overflow-y-auto p-2">
+          <div className="absolute z-50 mt-2 left-0 w-[min(560px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+            <div className="max-h-[min(30rem,60vh)] overflow-y-auto overscroll-contain p-2">
               {groups.map(group => {
                 const visible = group.applicable.filter(k => !search || FEATURE_REGISTRY.find(f => f.key === k)?.label.toLowerCase().includes(search.toLowerCase()));
                 if (search && visible.length === 0) return null;
@@ -138,13 +140,13 @@ export default function FlagGroupPicker({ availableKeys, value = [], onApply, cl
       </div>
 
       {value.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
+        <div className="flex flex-wrap gap-1.5 mt-2 max-w-full">
           {value.map(key => {
             const f = FEATURE_REGISTRY.find(item => item.key === key);
             if (!f) return null;
             return (
-              <button key={key} type="button" onClick={() => toggleFeature(key)} title={f.description} className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[10px] font-semibold text-amber-700 hover:bg-amber-100">
-                {f.label}
+              <button key={key} type="button" onClick={() => toggleFeature(key)} title={f.description} className="inline-flex max-w-full items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[10px] font-semibold text-amber-700 hover:bg-amber-100">
+                <span className="truncate">{f.label}</span>
                 <X className="h-3 w-3" />
               </button>
             );
