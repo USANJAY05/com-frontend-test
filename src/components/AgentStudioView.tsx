@@ -1246,7 +1246,7 @@ export default function AgentStudioView() {
           )}
 
           {/* Footer actions */}
-          {(creating || editingAgent) ? (
+          {(creating || editingAgent) && (
             <div className="flex items-center justify-between gap-3 pt-2">
               <button
                 type="button"
