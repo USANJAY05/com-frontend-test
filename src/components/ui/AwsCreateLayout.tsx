@@ -15,9 +15,9 @@ interface AwsCreateLayoutProps {
   description: string;
   steps: CreateLayoutStep[];
   activeStep: number;
-  summaryTitle: string;
+  summaryTitle?: string;
   summaryDescription?: string;
-  summary: CreateLayoutSummaryItem[];
+  summary?: CreateLayoutSummaryItem[];
   children: React.ReactNode;
   action?: React.ReactNode;
 }
@@ -39,7 +39,7 @@ export default function AwsCreateLayout({
       <div className="w-full min-w-0">
         <div className="mb-5">
           <div className="flex items-center justify-between gap-4 mb-2">
-            <div className="text-[11px] text-slate-500 dark:text-[var(--text-muted)]">
+            <div className="text-[11px] font-medium text-slate-500 dark:text-[var(--text-muted)]">
               {breadcrumb}
             </div>
             {action && <div className="shrink-0">{action}</div>}
@@ -47,10 +47,10 @@ export default function AwsCreateLayout({
 
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-[var(--text-primary)]">
+              <h2 className="text-xl font-semibold text-slate-950 dark:text-[var(--text-primary)]">
                 {title}
               </h2>
-              <p className="text-sm text-slate-500 dark:text-[var(--text-muted)] mt-1 max-w-3xl">
+              <p className="text-sm text-slate-600 dark:text-[var(--text-muted)] mt-1 max-w-3xl">
                 {description}
               </p>
             </div>
@@ -63,20 +63,20 @@ export default function AwsCreateLayout({
 
                 return (
                   <React.Fragment key={step.label}>
-                    {index > 0 && <span className="text-slate-300 dark:text-slate-600 px-1">→</span>}
+                    {index > 0 && <span className="text-slate-400 dark:text-slate-500 px-1">→</span>}
                     <div className="flex items-center gap-1.5">
                       <span
                         className={
                           active
                             ? 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-indigo-600 text-white'
                             : complete
-                              ? 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-indigo-100 text-indigo-700'
-                              : 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-slate-200 text-slate-600'
+                              ? 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                              : 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
                         }
                       >
                         {stepNumber}
                       </span>
-                      <span className={active ? 'font-semibold text-slate-700 dark:text-[var(--text-secondary)]' : ''}>
+                      <span className={active ? 'font-semibold text-slate-800 dark:text-[var(--text-secondary)]' : ''}>
                         {step.label}
                       </span>
                     </div>
@@ -87,41 +87,11 @@ export default function AwsCreateLayout({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-5 2xl:gap-6 items-start">
+        <div className="w-full min-w-0">
           <main className="min-w-0 space-y-5">
             {children}
           </main>
-
-          <aside className="xl:sticky xl:top-6 rounded-xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200 dark:border-[var(--border)]">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-[var(--text-primary)]">
-                {summaryTitle}
-              </h3>
-              {summaryDescription && (
-                <p className="text-[11px] text-slate-500 dark:text-[var(--text-muted)] mt-1">
-                  {summaryDescription}
-                </p>
-              )}
-            </div>
-
-            <div className="p-5 space-y-4">
-              {summary.map(({ label, value }) => (
-                <div
-                  key={label}
-                  className="border-b border-slate-100 dark:border-[var(--border)] pb-3 last:border-0 last:pb-0"
-                >
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
-                    {label}
-                  </p>
-                  <p className="text-xs font-medium text-slate-700 dark:text-[var(--text-secondary)] mt-1 break-words">
-                    {value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </aside>
-        </div>
-      </div>
+        </div>    </div>
     </div>
   );
 }
