@@ -442,7 +442,6 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
   }, [showWorkflowDetailView, selectedTask, leadsDatabase]);
 
   // Task Creation Wizard States
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [wizardStep, setWizardStep] = useState<1 | 2>(1);
   const [wizardWorkflowId, setWizardWorkflowId] = useState('');
   const [wizardAgentId, setWizardAgentId] = useState('');
@@ -686,7 +685,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
 
     setTasks(prev => [...prev, newTask]);
     setSelectedTaskId(newTask.id);
-    setShowCreateModal(false);
+    setShowAssignTask(false);
 
     // Push the new task to the backend directly (a single-row create, not
     // the delete+reinsert /sync, which can take up to 800ms) so it exists
@@ -704,10 +703,10 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
 
   useEffect(() => {
     if (!taskPage) return;
-    openCreateTaskModal();
+    initializeCreateTask();
   }, [taskPage]);
 
-  const openCreateTaskModal = () => {
+  const initializeCreateTask = () => {
     setWizardStep(1);
     setWizardWorkflowId('');
     setWizardAgentId('');
@@ -719,7 +718,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
     setWizardNewPhone('');
     setWizardContactTab('existing');
     setWizardGroupFilter('All');
-    setShowCreateModal(true);
+    setShowAssignTask(true);
 
     // Fetch agents with outbound support
     setWizardAgentsLoading(true);
@@ -1717,7 +1716,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               heading="No dialing tasks yet"
               message="Assign a daily dialing task to start calling real leads."
               action={
-                <Button variant="primary" size="sm" icon={Plus} onClick={openCreateTaskModal}>
+                <Button variant="primary" size="sm" icon={Plus} onClick={() => setShowAssignTask(true)}>
                   Assign Dialing Task
                 </Button>
               }
@@ -2216,7 +2215,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
       )}
       </div>
       {/* MODAL: Assign New Dialing Task — 4-step wizard */}
-      {showCreateModal && (() => {
+      {taskPage && (() => {
         const workflowsWithQuestions = flows.filter(f => (f.variables ?? []).length > 0 && f.active);
         const agentsWithOutbound = wizardAgents.filter(a => a.outboundNumber && (a.active ?? true));
         const selectedWorkflow = flows.find(f => f.id === wizardWorkflowId);
@@ -2230,40 +2229,31 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           return matchesSearch && matchesGroup;
         };
 
-        const WizardFrame: any = taskPage ? AwsCreateLayout : Modal;
-        const frameProps: any = taskPage
-          ? {
-              breadcrumb: 'Voice Simulator / Assign Dialing Task',
-              title: 'Assign dialing task',
-              description: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
-              steps: [{ label: 'Configure' }, { label: 'Review' }],
-              activeStep: wizardStep,
-              summaryTitle: 'Dialing task summary',
-              summaryDescription: 'Review the configuration before creating the dialing task.',
-              summary: [
-                { label: 'Workflow', value: selectedWorkflow?.name || 'Not selected' },
-                { label: 'Outbound agent', value: selectedAgent?.name || 'Not selected' },
-                { label: 'Contacts', value: `${totalContacts} selected` },
-                { label: 'Contact source', value: wizardContactTab === 'existing' ? 'Database' : 'New contacts' },
-                { label: 'Step', value: wizardStep === 1 ? 'Configure' : 'Review & Create' },
-              ],
-              action: (
-                <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => setShowAssignTask(false)}>
-                  Back to Voice Simulator
-                </Button>
-              ),
-            }
-          : {
-              open: true,
-              onClose: () => setShowCreateModal(false),
-              title: 'Assign Dialing Task',
-              subtitle: 'Pick a workflow, assign an outbound agent, and load your contact list.',
-              maxWidth: 'max-w-2xl'
-            };
+        const WizardFrame: any = AwsCreateLayout;
+        const frameProps: any = {
+          breadcrumb: 'Voice Simulator / Assign Dialing Task',
+          title: 'Assign dialing task',
+          description: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
+          steps: [{ label: 'Configure' }, { label: 'Review' }],
+          activeStep: wizardStep,
+          summaryTitle: 'Dialing task summary',
+          summaryDescription: 'Review the configuration before creating the dialing task.',
+          summary: [
+            { label: 'Workflow', value: selectedWorkflow?.name || 'Not selected' },
+            { label: 'Outbound agent', value: selectedAgent?.name || 'Not selected' },
+            { label: 'Contacts', value: `${totalContacts} selected` },
+            { label: 'Contact source', value: wizardContactTab === 'existing' ? 'Database' : 'New contacts' },
+            { label: 'Step', value: wizardStep === 1 ? 'Configure' : 'Review & Create' },
+          ],
+          action: (
+            <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => setShowAssignTask(false)}>
+              Back to Voice Simulator
+            </Button>
+          ),
+        };
 
         return (
           <WizardFrame {...frameProps}>
-            <div className={taskPage ? 'w-full' : ''}>
             {wizardStep === 1 && (
               <div className="space-y-6">
 
@@ -2648,7 +2638,6 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                 </div>
               </div>
             )}
-            </div>
           </WizardFrame>
         );
       })()}
