@@ -163,11 +163,7 @@ export default function CreateWorkspacePage() {
 
   return (
     <div className="max-w-4xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Create Workspace</h2>
-          <p className="mt-1 text-xs text-[var(--text-secondary)]">Set up the organization, Google Cloud project, billing, call provider, and feature access.</p>
-        </div>
+      <div className="mb-6 flex items-center justify-end">
         <button type="button" onClick={() => navigate('/admin/organizations')} className="px-4 py-2 rounded-xl border border-[var(--border)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]">Back</button>
       </div>
       {loading && (
