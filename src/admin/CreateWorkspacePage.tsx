@@ -235,7 +235,7 @@ export default function CreateWorkspacePage() {
               </select>
             </div>
           </div>
-        </div>
+        </section>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
@@ -312,7 +312,6 @@ export default function CreateWorkspacePage() {
                 <input value={form.callPhoneNumber} onChange={set('callPhoneNumber')} placeholder="+14155550123" required autoComplete="off" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
               </div>
             </div>
-          </div>
           </section>
         )}
 
