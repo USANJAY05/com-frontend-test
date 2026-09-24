@@ -38,6 +38,9 @@ interface CreateOrgForm {
   callAuthId: string;
   callAuthToken: string;
   callPhoneNumber: string;
+  billingMethod: 'pay_as_you_go' | 'recharge_based';
+  chargeScope: 'ai_only' | 'ai_and_call_provider';
+  initialRechargeAmountInr: string;
 }
 
 function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
@@ -55,6 +58,9 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
     callAuthId: '',
     callAuthToken: '',
     callPhoneNumber: '',
+    billingMethod: 'pay_as_you_go',
+    chargeScope: 'ai_only',
+    initialRechargeAmountInr: '',
   });
   const [selectedFlags, setSelectedFlags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -125,6 +131,9 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
             authToken: form.callAuthToken.trim(),
             phoneNumber: form.callPhoneNumber.trim(),
           },
+          billingMethod: form.billingMethod,
+          chargeScope: form.chargeScope,
+          initialRechargeAmountInr: form.billingMethod === 'recharge_based' ? Number(form.initialRechargeAmountInr || 0) : 0,
         }),
       });
       if (!res.ok) {
@@ -296,6 +305,38 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
           </div>
 
           <div className="border-t border-slate-100 pt-4">
+            <div className="mb-3">
+              <p className="text-xs font-bold text-slate-700">Billing</p>
+              <p className="text-[11px] text-slate-500 mt-1">Choose how this organization pays for voice usage. Pay-as-you-go keeps the current behavior; recharge-based blocks new calls when the wallet is insufficient.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'pay_as_you_go' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
+                <input type="radio" className="sr-only" checked={form.billingMethod === 'pay_as_you_go'} onChange={() => setForm(f => ({ ...f, billingMethod: 'pay_as_you_go' }))} />
+                <p className="text-xs font-semibold text-slate-700">Pay as you go</p>
+                <p className="text-[10px] text-slate-500 mt-1">Current behavior. Calls are not wallet-gated.</p>
+              </label>
+              <label className={`rounded-xl border p-3 cursor-pointer ${form.billingMethod === 'recharge_based' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
+                <input type="radio" className="sr-only" checked={form.billingMethod === 'recharge_based'} onChange={() => setForm(f => ({ ...f, billingMethod: 'recharge_based' }))} />
+                <p className="text-xs font-semibold text-slate-700">Recharge based</p>
+                <p className="text-[10px] text-slate-500 mt-1">Calls stop when available credits are insufficient.</p>
+              </label>
+            </div>
+            <div className="mt-3">
+              <label className="block text-xs font-medium text-slate-500 mb-1">Charge Scope</label>
+              <select value={form.chargeScope} onChange={set('chargeScope')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <option value="ai_only">AI only</option>
+                <option value="ai_and_call_provider">AI + Call Provider</option>
+              </select>
+            </div>
+            {form.billingMethod === 'recharge_based' && (
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-slate-500 mb-1">Initial Recharge (INR)</label>
+                <input type="number" min="0" step="0.01" value={form.initialRechargeAmountInr} onChange={set('initialRechargeAmountInr')} placeholder="0" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+              </div>
+            )}
+          </div>
+
+<div className="border-t border-slate-100 pt-4">
             <p className="text-xs text-slate-400 mb-3">
               Admin member (optional) — they'll be linked automatically on first login
             </p>
