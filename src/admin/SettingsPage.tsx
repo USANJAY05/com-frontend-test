@@ -28,16 +28,25 @@ export default function SettingsPage() {
   const [groups, setGroups] = useState<FeatureGroup[]>([]);
   const [savingGroup, setSavingGroup] = useState(false);
   const [groupDraft, setGroupDraft] = useState<FeatureGroup | null>(null);
+  const [retention, setRetention] = useState<Record<string, number | null>>({});
+  const [retentionSaving, setRetentionSaving] = useState(false);
+  const retentionTypes = [
+    ['call_recordings', 'Call recordings'], ['transcripts', 'Transcripts'], ['ai_summaries', 'AI summaries'],
+    ['call_logs', 'Call logs'], ['campaign_history', 'Campaign history'], ['audit_logs', 'Audit logs'],
+    ['documents', 'Uploaded documents'], ['contacts', 'Contacts'],
+  ];
 
   const load = () => {
     setLoading(true);
     Promise.all([
       apiFetch('/api/platform/features').then((r) => r.json()),
       apiFetch('/api/platform/feature-groups').then((r) => r.json()),
+      apiFetch('/api/platform/data-retention/defaults').then((r) => r.json()),
     ])
-      .then(([features, featureGroups]) => {
+.then(([features, featureGroups, defaults]) => {
         setFlags(Array.isArray(features) ? features : []);
         setGroups(Array.isArray(featureGroups) ? featureGroups : []);
+        setRetention(defaults && typeof defaults === 'object' ? defaults : {});
       })
       .finally(() => setLoading(false));
   };
@@ -108,6 +117,54 @@ export default function SettingsPage() {
             </div>
           ))}
           {flags.length === 0 && <div className="py-8 text-center text-slate-400 dark:text-[var(--text-muted)] text-xs">No feature flags configured.</div>}
+        </div>
+      </Widget>
+
+      <Widget
+        colSpan={12}
+        title="Data Retention Defaults"
+        subtitle="Super Admin defaults used by organizations that choose to inherit the platform policy."
+        padding="md"
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {retentionTypes.map(([key, label]) => (
+            <div key={key}>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-[var(--text-secondary)] mb-1">{label}</label>
+              <select
+                value={retention[key] == null ? '' : String(retention[key])}
+                onChange={(e) => setRetention(prev => ({ ...prev, [key]: e.target.value === '' ? null : Number(e.target.value) }))}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:bg-[var(--bg-subtle)] dark:border-[var(--border)]"
+              >
+                <option value="">Never</option>
+                <option value="30">30 days</option><option value="90">90 days</option><option value="180">180 days</option>
+                <option value="365">1 year</option><option value="730">2 years</option><option value="1095">3 years</option><option value="1825">5 years</option>
+              </select>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 dark:bg-[var(--bg-subtle)] p-3">
+          <div>
+            <div className="text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)]">Platform policy</div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Organizations can override these defaults individually.</div>
+          </div>
+          <button
+            type="button"
+            disabled={retentionSaving}
+            onClick={async () => {
+              setRetentionSaving(true);
+              try {
+                const res = await apiFetch('/api/platform/data-retention/defaults', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ policy: retention }),
+                });
+                if (!res.ok) throw new Error('Failed to save retention defaults');
+              } finally { setRetentionSaving(false); }
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+          >
+            <Save className="h-3.5 w-3.5" /> {retentionSaving ? 'Saving…' : 'Save defaults'}
+          </button>
         </div>
       </Widget>
 
