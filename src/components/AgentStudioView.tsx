@@ -7,7 +7,6 @@ import {
 import { apiFetch } from '../lib/api';
 import { isDevEnv } from '../lib/env';
 import PageShell from './ui/PageShell';
-import Modal from './ui/Modal';
 import AwsCreateLayout from './ui/AwsCreateLayout';
 import IconButton from './ui/IconButton';
 import ActionMenu from './ui/ActionMenu';
@@ -207,6 +206,7 @@ export default function AgentStudioView() {
       knowledgeBaseDocumentIds: agent.knowledgeBaseDocumentIds ?? [],
     });
     setEditingAgent(agent);
+    setAgentWizardStep(1);
     setCreating(false);
     setSaveStatus('idle');
   };
@@ -375,47 +375,37 @@ export default function AgentStudioView() {
 
   const assignableNumbers = freeNumbers(editingAgent?.id ?? null);
 
-  // Creating an agent uses the shared AWS-style create layout. Editing remains a modal.
-  const AgentFormFrame = creating
-    ? ({ children }: { children: React.ReactNode }) => (
-        <AwsCreateLayout
-          breadcrumb="Agent Studio / Create Agent"
-          title="Create agent"
-          description="Configure the voice agent and review its launch configuration before creating it."
-          steps={[{ label: 'Configure' }, { label: 'Review' }]}
-          activeStep={agentWizardStep}
-          summaryTitle="Agent summary"
-          summaryDescription="Review the configuration before creating the agent."
-          summary={[
-            ['Name', form.name || 'Not configured'],
-            ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
-            ['Voice', form.activeVoice],
-            ['Language', form.language + (form.dialect ? ` · ${form.dialect}` : '')],
-            ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
-            ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? `${form.knowledgeBaseDocumentIds?.length ?? 0} documents` : 'None'],
-          ].map(([label, value]) => ({ label, value }))}
-        >
-          {children}
-        </AwsCreateLayout>
-      )
-    : Modal;
-
-  const agentFormFrameProps = creating
-    ? {}
-    : {
-        open: !!editingAgent,
-        onClose: closeForm,
-        title: 'Edit Agent',
-        subtitle: `Editing ${editingAgent?.name ?? ''} — changes save when you click Save.`,
-        maxWidth: 'max-w-2xl',
-      };
+  // Create and edit both use the same dedicated AWS-style resource page.
+  const AgentFormFrame = ({ children }: { children: React.ReactNode }) => (
+    <AwsCreateLayout
+      breadcrumb={creating ? 'Agent Studio / Create Agent' : 'Agent Studio / Edit Agent'}
+      title={creating ? 'Create agent' : 'Edit agent'}
+      description={creating ? 'Configure the voice agent and review its launch configuration before creating it.' : 'Update the voice agent configuration and review the changes before saving.'}
+      steps={[{ label: 'Configure' }, { label: creating ? 'Review & Create' : 'Review & Save' }]}
+      activeStep={agentWizardStep}
+      summaryTitle="Agent summary"
+      summaryDescription={creating ? 'Review the configuration before creating the agent.' : 'Review the configuration before saving your changes.'}
+      summary={[
+        ['Name', form.name || 'Not configured'],
+        ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
+        ['Voice', form.activeVoice],
+        ['Language', form.language + (form.dialect ? ' · ' + form.dialect : '')],
+        ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
+        ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? ((form.knowledgeBaseDocumentIds?.length ?? 0) + ' documents') : 'None'],
+      ].map(([label, value]) => ({ label, value }))}
+    >
+      {children}
+    </AwsCreateLayout>
+  );
 
   return (
     <PageShell
-      title={creating ? 'Create Agent' : 'Agent Studio'}
+      title={creating ? 'Create Agent' : editingAgent ? 'Edit Agent' : 'Agent Studio'}
       subtitle={creating
         ? 'Configure your agent, review the settings, and create it.'
-        : agentView === 'user'
+        : editingAgent
+          ? 'Edit ' + editingAgent.name + ' — review the configuration and save your changes.'
+          : agentView === 'user'
           ? 'Create AI calling agents — each with its own voice, persona, and phone number.'
           : 'Built-in AI agents that run automatically after every call — no phone number, no voice, just a system prompt.'}
       onRefresh={() => loadData()}
@@ -443,7 +433,7 @@ export default function AgentStudioView() {
               </button>
             </div>
           )}
-          {creating ? (
+          {creating || editingAgent ? (
             <button
               type="button"
               onClick={closeForm}
@@ -741,23 +731,23 @@ export default function AgentStudioView() {
 
       {/* ── Agent create page / edit modal ── */}
       {(creating || !!editingAgent) && (
-      <AgentFormFrame {...agentFormFrameProps}>
+      <AgentFormFrame>
         <div className="space-y-6">
           {creating && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50/70 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
               <div className={`flex items-center gap-2 ${agentWizardStep === 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
                 <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${agentWizardStep === 1 ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200'}`}>1</span>
-                <span className="text-xs font-semibold">Fill in details</span>
+                <span className="text-xs font-semibold">Configure</span>
               </div>
               <div className="h-px flex-1 bg-slate-200 dark:bg-[var(--border)]" />
               <div className={`flex items-center gap-2 ${agentWizardStep === 2 ? 'text-indigo-600' : 'text-slate-400'}`}>
                 <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${agentWizardStep === 2 ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200'}`}>2</span>
-                <span className="text-xs font-semibold">Review & Create</span>
+                <span className="text-xs font-semibold">{creating ? 'Review & Create' : 'Review & Save'}</span>
               </div>
             </div>
           )}
 
-          {(!creating || agentWizardStep === 1) && (
+          {agentWizardStep === 1 && (
             <>
           {/* Agent Name */}
           <div>
@@ -1198,12 +1188,12 @@ export default function AgentStudioView() {
             </>
           )}
 
-          {creating && agentWizardStep === 2 && (
+          {(creating || editingAgent) && agentWizardStep === 2 && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-lg font-bold text-slate-800 dark:text-[var(--text-primary)]">Review & Create</h3>
+                <h3 className="text-lg font-bold text-slate-800 dark:text-[var(--text-primary)]">{creating ? 'Review & Create' : 'Review & Save'}</h3>
                 <p className="text-xs text-slate-500 dark:text-[var(--text-muted)] mt-1">
-                  Review the agent configuration before creating it.
+                  {creating ? 'Review the agent configuration before creating it.' : 'Review the agent configuration before saving your changes.'}
                 </p>
               </div>
 
@@ -1256,7 +1246,7 @@ export default function AgentStudioView() {
           )}
 
           {/* Footer actions */}
-          {creating ? (
+          {(creating || editingAgent) ? (
             <div className="flex items-center justify-between gap-3 pt-2">
               <button
                 type="button"
@@ -1272,7 +1262,7 @@ export default function AgentStudioView() {
                   disabled={!form.name.trim()}
                   className="px-6 py-2.5 text-sm font-semibold rounded-xl shadow-sm bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60 transition-all"
                 >
-                  Next: Review & Create
+                  {creating ? 'Next: Review & Create' : 'Next: Review & Save'}
                 </button>
               ) : (
                 <button
@@ -1283,29 +1273,9 @@ export default function AgentStudioView() {
                 >
                   {saveStatus === 'saving' && <Loader2 className="h-4 w-4 animate-spin" />}
                   {saveStatus === 'saved' && <Check className="h-4 w-4" />}
-                  {saveStatus === 'saved' ? 'Created!' : saveStatus === 'saving' ? 'Creating…' : 'Create Agent'}
+                  {creating ? (saveStatus === 'saved' ? 'Created!' : saveStatus === 'saving' ? 'Creating…' : 'Create Agent') : (saveStatus === 'saved' ? 'Saved!' : saveStatus === 'saving' ? 'Saving…' : 'Save Changes')}
                 </button>
               )}
-            </div>
-          ) : (
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={closeForm}
-                className="text-sm text-slate-500 dark:text-[var(--text-secondary)] hover:text-slate-700 dark:hover:text-[var(--text-primary)] font-medium px-4 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!form.name.trim() || saveStatus === 'saving'}
-                className={`flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-xl shadow-sm transition-all disabled:opacity-60 ${saveStatus === 'saved' ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-              >
-                {saveStatus === 'saving' && <Loader2 className="h-4 w-4 animate-spin" />}
-                {saveStatus === 'saved' && <Check className="h-4 w-4" />}
-                {saveStatus === 'saved' ? 'Saved!' : saveStatus === 'saving' ? 'Saving…' : 'Save Changes'}
-              </button>
             </div>
           )}
         </div>
