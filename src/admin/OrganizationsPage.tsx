@@ -24,6 +24,17 @@ const INDUSTRIES = [
 
 const PLANS = ['Starter', 'Growth', 'Enterprise'];
 
+function generateWorkspaceSlug(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
 interface CreateOrgForm {
   name: string;
   workspaceName: string;
@@ -65,6 +76,10 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
   const [selectedFlags, setSelectedFlags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setForm(current => ({ ...current, workspaceName: generateWorkspaceSlug(current.name) }));
+  }, [form.name]);
 
   const toggleFlag = (key: string) => {
     setSelectedFlags(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
@@ -173,7 +188,17 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
 
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Workspace Slug *</label>
-          <input value={form.workspaceName} onChange={set('workspaceName')} placeholder="acme-corp" required className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+          <div className="relative">
+            <input
+              value={form.workspaceName}
+              readOnly
+              placeholder="acme-corp"
+              required
+              className="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 pr-24 text-sm text-slate-600 cursor-not-allowed focus:outline-none"
+            />
+            <span className="absolute right-3 top-2.5 text-[10px] font-medium text-slate-400">Auto-generated</span>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-1">Generated automatically from the organization name.</p>
         </div>
 
         <div className="border-t border-slate-100 pt-4">
