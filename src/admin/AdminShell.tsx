@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe2, LayoutDashboard, Building2, Users, ScrollText, LogOut, Settings, IndianRupee, MessageSquareText, Sun, Moon } from 'lucide-react';
+import { Globe2, LayoutDashboard, Building2, Users, ScrollText, LogOut, Settings, IndianRupee, MessageSquareText, Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import OverviewPage from './OverviewPage';
 import OrganizationsPage from './OrganizationsPage';
@@ -24,17 +24,22 @@ const NAV: { path: string; label: string; icon: React.ElementType }[] = [
 
 export default function AdminShell({ email, onLogout }: { email: string; onLogout: () => void }) {
   const { resolved } = useTheme();
+  const [collapsed, setCollapsed] = React.useState(() => localStorage.getItem('admin-sidebar-collapsed') === 'true');
+
+  React.useEffect(() => {
+    localStorage.setItem('admin-sidebar-collapsed', String(collapsed));
+  }, [collapsed]);
   return (
     <div className="admin-shell flex h-screen w-screen overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)] font-sans">
-      <aside className="admin-sidebar w-60 flex flex-col shrink-0">
-        <div className="h-16 flex items-center gap-2 px-5 border-b border-[var(--border)]">
+      <aside className={`admin-sidebar flex flex-col shrink-0 transition-all duration-200 ${collapsed ? 'w-[72px]' : 'w-60'}`}>
+        <div className={`h-16 flex items-center border-b border-[var(--border)] ${collapsed ? 'justify-center px-2' : 'gap-2 px-5'}`}>
           <div className="h-8 w-8 rounded-lg bg-amber-500 flex items-center justify-center">
             <Globe2 className="h-4 w-4 text-white" />
           </div>
-          <div>
+          {!collapsed && <div>
             <div className="text-sm font-bold text-[var(--text-primary)] leading-none">ChiefVoice</div>
             <div className="text-[9px] text-amber-500 uppercase tracking-widest mt-0.5">Platform Admin</div>
-          </div>
+          </div>}
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -48,16 +53,20 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
                 }`
               }
             >
-              <Icon className="h-4 w-4 mr-3" />
-              {label}
+              <Icon className={`h-4 w-4 shrink-0 ${collapsed ? '' : 'mr-3'}`} />
+              {!collapsed && label}
             </NavLink>
           ))}
         </nav>
 
         <div className="p-3 border-t border-[var(--border)]">
-          <div className="px-3 py-2 text-xs text-[var(--text-muted)] truncate">{email}</div>
+          <button type="button" onClick={() => setCollapsed(value => !value)} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} className={`mb-1 w-full flex items-center rounded-xl text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] ${collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}`}>
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4 mr-3" />}
+            {!collapsed && 'Collapse sidebar'}
+          </button>
+          {!collapsed && <div className="px-3 py-2 text-xs text-[var(--text-muted)] truncate">{email}</div>}
           <button onClick={onLogout} className="w-full flex items-center px-3 py-2.5 rounded-xl text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]">
-            <LogOut className="h-4 w-4 mr-3" /> Sign out
+            <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} /> {!collapsed && 'Sign out'}
           </button>
         </div>
       </aside>

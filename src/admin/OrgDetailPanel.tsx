@@ -518,35 +518,17 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                   <ToggleRight className="h-3.5 w-3.5" /> Feature Access
                   {flagsBusy && <Loader2 className="h-3 w-3 animate-spin ml-1 text-slate-400" />}
                 </h4>
-                <p className="text-[10px] text-slate-400 mb-3">Toggle which app modules this org can access. Org admins can further distribute enabled features to their team.</p>
+                <p className="text-[10px] text-slate-400 mb-3">
+                  Choose a complete group or individual features independently. Changes are saved automatically.
+                </p>
                 <FlagGroupPicker
                   availableKeys={FEATURE_REGISTRY.map((f) => f.key)}
+                  value={enabledFlags}
                   onApply={applyFlagGroup}
-                  className="mb-3"
+                  className="w-full"
+                  label="Feature Access"
+                  description="Choose a complete group or individual features independently."
                 />
-                <div className="space-y-2">
-                  {FEATURE_REGISTRY.map((f) => {
-                    const on = enabledFlags.includes(f.key);
-                    return (
-                      <div key={f.key} className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className={`text-xs font-medium ${on ? 'text-slate-700' : 'text-slate-400'}`}>{f.label}</p>
-                          <p className="text-[10px] text-slate-400">{f.description}</p>
-                        </div>
-                        <button
-                          onClick={() => toggleFlag(f.key)}
-                          disabled={flagsBusy}
-                          className="shrink-0 disabled:opacity-50"
-                          title={on ? 'Disable' : 'Enable'}
-                        >
-                          {on
-                            ? <ToggleRight className="h-5 w-5 text-amber-500" />
-                            : <ToggleLeft className="h-5 w-5 text-slate-300" />}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
             </div>
           </>

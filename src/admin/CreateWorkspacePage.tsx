@@ -162,13 +162,12 @@ export default function CreateWorkspacePage() {
   };
 
   return (
-    <div className="max-w-4xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Create Workspace</h2>
-          <p className="mt-1 text-xs text-[var(--text-secondary)]">Set up the organization, Google Cloud project, billing, call provider, and feature access.</p>
-        </div>
-        <button type="button" onClick={() => navigate('/admin/organizations')} className="px-4 py-2 rounded-xl border border-[var(--border)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]">Back</button>
+    <div className="max-w-5xl">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <button type="button" onClick={() => navigate('/admin/organizations')} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-800">
+          ← Back to Organizations
+        </button>
+        <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-semibold text-amber-700">New Workspace</span>
       </div>
       {loading && (
         <div className="mb-4 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-600 flex items-center gap-2">
@@ -181,8 +180,14 @@ export default function CreateWorkspacePage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-slate-800">Workspace Identity</h2>
+            <p className="mt-1 text-[11px] text-slate-500">Set the organization name and let the workspace slug generate automatically.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+          <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Organization Name *</label>
           <input value={form.name} onChange={set('name')} placeholder="Acme Corp" required className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
         </div>
@@ -200,9 +205,11 @@ export default function CreateWorkspacePage() {
             <span className="absolute right-3 top-2.5 text-[10px] font-medium text-slate-400">Auto-generated</span>
           </div>
           <p className="text-[10px] text-slate-400 mt-1">Generated automatically from the organization name.</p>
-        </div>
+          </div>
+          </div>
+        </section>
 
-        <div className="border-t border-slate-100 pt-4">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-3">
             <p className="text-xs font-bold text-slate-700">Google Cloud Project Setup</p>
             <p className="text-[11px] text-slate-500 mt-1">Use an existing Google Cloud project for this workspace.</p>
@@ -230,7 +237,7 @@ export default function CreateWorkspacePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Industry</label>
             <select value={form.industry} onChange={set('industry')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
@@ -245,7 +252,7 @@ export default function CreateWorkspacePage() {
           </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-4">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-3">
             <p className="text-xs font-bold text-slate-700">Billing</p>
             <p className="text-[11px] text-slate-500 mt-1">Choose how this organization pays for voice usage.</p>
@@ -275,10 +282,10 @@ export default function CreateWorkspacePage() {
               <input type="number" min="0" step="0.01" value={form.initialRechargeAmountInr} onChange={set('initialRechargeAmountInr')} placeholder="0" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
           )}
-        </div>
+        </section>
 
         {form.chargeScope === 'ai_and_call_provider' && (
-          <div className="border-t border-slate-100 pt-4">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-3">
               <p className="text-xs font-bold text-slate-700">Call Provider Setup</p>
               <p className="text-[11px] text-slate-500 mt-1">Only required when Charge Scope is AI + Call Provider.</p>
@@ -306,9 +313,10 @@ export default function CreateWorkspacePage() {
               </div>
             </div>
           </div>
+          </section>
         )}
 
-        <div className="border-t border-slate-100 pt-4">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs text-slate-400 mb-3">Admin member (optional) — they'll be linked automatically on first login</p>
           <div className="space-y-3">
             <div>
@@ -320,16 +328,16 @@ export default function CreateWorkspacePage() {
               <input value={form.adminName} onChange={set('adminName')} placeholder="Jane Smith" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="border-t border-slate-100 pt-4">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <FlagGroupPicker
             availableKeys={FEATURE_REGISTRY.map(f => f.key)}
             value={selectedFlags}
             onApply={setSelectedFlags}
           />
-        </div>
-        <div className="flex justify-end gap-3 pt-2">
+        </section>
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <button type="button" onClick={() => navigate('/admin/organizations')} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
           <button type="submit" disabled={loading} className="px-5 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-white text-sm font-medium rounded-xl flex items-center gap-2">
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
