@@ -5,6 +5,49 @@ import { apiFetch } from '../lib/api';
 import { FEATURE_REGISTRY } from '../features/feature-flags/registry';
 import FlagGroupPicker from '../components/ui/FlagGroupPicker';
 
+const INDUSTRIES = [
+  { value: 'lending', label: 'Lending' },
+  { value: 'real_estate', label: 'Real Estate' },
+  { value: 'insurance', label: 'Insurance' },
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'retail', label: 'Retail' },
+  { value: 'education', label: 'Education' },
+  { value: 'logistics', label: 'Logistics' },
+  { value: 'other', label: 'Other' },
+];
+
+const PLANS = ['Starter', 'Growth', 'Enterprise'];
+
+function generateWorkspaceSlug(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+interface CreateOrgForm {
+  name: string;
+  workspaceName: string;
+  industry: string;
+  subscriptionPlan: string;
+  adminEmail: string;
+  adminName: string;
+  gcpProjectId: string;
+  gcpCredentialsJson: string;
+  gcpLocation: string;
+  callProvider: string;
+  callAuthId: string;
+  callAuthToken: string;
+  callPhoneNumber: string;
+  billingMethod: 'pay_as_you_go' | 'recharge_based';
+  chargeScope: 'ai_only' | 'ai_and_call_provider';
+  initialRechargeAmountInr: string;
+}
+
 export default function CreateWorkspacePage() {
   const [form, setForm] = useState<CreateOrgForm>({
     name: '',
