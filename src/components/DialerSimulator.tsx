@@ -75,7 +75,9 @@ interface DialerSimulatorProps {
   flows?: QuestionFlow[];
   /** Outbound/Inbound sub-page, driven by the sidebar's Voice Simulator group */
   mode?: 'outbound' | 'inbound';
-  setMode?: (mode: 'outbound' | 'inbound') => void;
+  setMode?: (mode: 'outbound' | 'inbound' | 'assign-task') => void;
+  /** Render the task assignment wizard as a dedicated page instead of a modal. */
+  taskPage?: boolean;
   // Backend-persisted org settings (POST /api/settings/org) — used here
   // only to read/write defaultOutboundNumber, so the "which number am I
   // dialing from" choice survives a reload and follows the account to a
@@ -300,7 +302,8 @@ export default function DialerSimulator({
   mode,
   setMode,
   orgSettings,
-  setOrgSettings
+  setOrgSettings,
+  taskPage = false
 }: DialerSimulatorProps) {
   const isInsurance = industry === 'insurance';
   const storagePrefix = `chiefx:${encodeURIComponent(orgSettings?.id || companyName || 'default')}`;
@@ -444,6 +447,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
   const [wizardContactSearch, setWizardContactSearch] = useState('');
   const [wizardNewName, setWizardNewName] = useState('');
   const [wizardNewPhone, setWizardNewPhone] = useState('');
+  const [showWizardContactModal, setShowWizardContactModal] = useState(false);
   const [wizardContactTab, setWizardContactTab] = useState<'existing' | 'new'>('existing');
   const [wizardContactGroups, setWizardContactGroups] = useState<ContactGroup[]>([]);
   const [wizardGroupFilter, setWizardGroupFilter] = useState('All');
@@ -691,6 +695,11 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
       console.error('Failed to push new task to the backend:', err);
     }
   };
+
+  useEffect(() => {
+    if (!taskPage) return;
+    openCreateTaskModal();
+  }, [taskPage]);
 
   const openCreateTaskModal = () => {
     setWizardStep(1);
@@ -1589,7 +1598,11 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
       layout="fill"
       action={
         dialerMode === 'outbound' ? (
-          <IconButton icon={Plus} label="Assign Dialing Task" onClick={openCreateTaskModal} />
+          <IconButton
+              icon={Plus}
+              label="Assign Dialing Task"
+              onClick={() => setMode?.('assign-task')}
+            />
         ) : undefined
       }
       toolbar={
@@ -2218,14 +2231,29 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           { num: 4, label: 'Review' },
         ];
 
+        const WizardFrame: any = taskPage ? PageShell : Modal;
+        const frameProps = taskPage
+          ? {
+              title: 'Assign Dialing Task',
+              subtitle: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
+              layout: 'fill',
+              action: (
+                <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => setMode?.('outbound')}>
+                  Back to Voice Simulator
+                </Button>
+              )
+            }
+          : {
+              open: true,
+              onClose: () => setShowCreateModal(false),
+              title: 'Assign Dialing Task',
+              subtitle: 'Pick a workflow, assign an outbound agent, and load your contact list.',
+              maxWidth: 'max-w-2xl'
+            };
+
         return (
-          <Modal
-            open
-            onClose={() => setShowCreateModal(false)}
-            title="Assign Dialing Task"
-            subtitle="Pick a workflow, assign an outbound agent, and load your contact list."
-            maxWidth="max-w-2xl"
-          >
+          <WizardFrame {...frameProps}>
+            <div className={taskPage ? 'flex-1 overflow-y-auto px-8 pb-10 pt-6' : ''}>
             {/* Step progress indicator */}
             <div className="flex items-center gap-1 mb-6">
               {STEPS.map((s, idx) => (
@@ -2502,36 +2530,24 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
                 {wizardContactTab === 'new' && (
                   <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Full name"
-                        value={wizardNewName}
-                        onChange={e => setWizardNewName(e.target.value)}
-                        className="flex-1 border border-[var(--border)] bg-[var(--bg-surface)] rounded-xl px-3.5 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-blue-500"
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Phone number"
-                        value={wizardNewPhone}
-                        onChange={e => setWizardNewPhone(e.target.value)}
-                        className="flex-1 border border-[var(--border)] bg-[var(--bg-surface)] rounded-xl px-3.5 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-blue-500"
-                      />
-                      <button
+                    <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--bg-subtle)]/50 p-6 text-center">
+                      <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                        <Plus className="h-5 w-5" />
+                      </div>
+                      <p className="text-sm font-semibold text-[var(--text-primary)]">Add a new contact</p>
+                      <p className="text-xs text-[var(--text-muted)] mt-1 mb-4">Use the standard contact overlay so the task flow stays focused and uncluttered.</p>
+                      <Button
                         type="button"
-                        onClick={() => {
-                          if (!wizardNewName.trim() || !wizardNewPhone.trim()) return;
-                          setWizardNewContacts(prev => [...prev, { name: wizardNewName.trim(), phone: wizardNewPhone.trim() }]);
-                          setWizardNewName('');
-                          setWizardNewPhone('');
-                        }}
-                        className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl cursor-pointer shrink-0 transition-all"
+                        variant="secondary"
+                        size="sm"
+                        icon={Plus}
+                        onClick={() => setShowWizardContactModal(true)}
                       >
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
+                        Add Contact
+                      </Button>
                     </div>
 
-                    {wizardNewContacts.length > 0 ? (
+                    {wizardNewContacts.length > 0 && (
                       <div className="space-y-1.5 max-h-40 overflow-y-auto bg-[var(--bg-subtle)] p-2.5 rounded-xl border border-[var(--border)]">
                         {wizardNewContacts.map((c, i) => (
                           <div key={i} className="flex items-center justify-between bg-[var(--bg-surface)] px-3 py-2 rounded-lg border border-[var(--border)]">
@@ -2549,8 +2565,6 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <p className="text-xs text-[var(--text-muted)] italic">No new contacts added yet. Fill in the fields above and click +.</p>
                     )}
                   </div>
                 )}
@@ -2662,9 +2676,64 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                 </div>
               </div>
             )}
-          </Modal>
+            </div>
+          </WizardFrame>
         );
       })()}
+
+      {showWizardContactModal && (
+        <Modal
+          open
+          onClose={() => setShowWizardContactModal(false)}
+          title="Add New Contact"
+          subtitle="Create a contact using the same focused overlay used throughout the CRM."
+          maxWidth="max-w-xl"
+        >
+          <form
+            className="p-6 space-y-5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!wizardNewName.trim() || !wizardNewPhone.trim()) return;
+              setWizardNewContacts(prev => [
+                ...prev,
+                { name: wizardNewName.trim(), phone: wizardNewPhone.trim() }
+              ]);
+              setWizardNewName('');
+              setWizardNewPhone('');
+              setShowWizardContactModal(false);
+            }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Contact Name *</label>
+                <input
+                  autoFocus
+                  required
+                  value={wizardNewName}
+                  onChange={e => setWizardNewName(e.target.value)}
+                  placeholder="Full name"
+                  className="w-full bg-[var(--bg-subtle)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Phone Number *</label>
+                <input
+                  required
+                  type="tel"
+                  value={wizardNewPhone}
+                  onChange={e => setWizardNewPhone(e.target.value)}
+                  placeholder="+1 555 012 3456"
+                  className="w-full bg-[var(--bg-subtle)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowWizardContactModal(false)}>Cancel</Button>
+              <Button type="submit" variant="primary" size="sm" icon={Check}>Add Contact</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
 
       <SlideOver
         open={tapeSlideOverOpen}

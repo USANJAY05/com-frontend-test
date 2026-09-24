@@ -846,6 +846,30 @@ export default function App() {
         if (activeSubTab === 'scheduled') {
           return <ScheduledCallbacksView />;
         }
+        if (activeSubTab === 'assign-task') {
+          return (
+            <DialerSimulator
+              leads={leads}
+              callLogs={callLogs}
+              setCallLogs={setCallLogs}
+              leadsDatabase={leads}
+              setLeadsDatabase={setLeads}
+              virtualNumbers={virtualNumbers}
+              setVirtualNumbers={setVirtualNumbers}
+              tasks={dialerTasks}
+              setTasks={setDialerTasks}
+              companyName={orgSettings.workspaceName}
+              teamMembers={teamMembers}
+              industry={orgSettings.industry}
+              flows={questionFlows}
+              mode="outbound"
+              setMode={(m) => setActiveSubTab(m, 'dialer')}
+              taskPage
+              orgSettings={orgSettings}
+              setOrgSettings={setOrgSettings}
+            />
+          );
+        }
         return (
           <DialerSimulator
             leads={leads}

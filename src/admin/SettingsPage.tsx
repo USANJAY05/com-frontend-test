@@ -31,10 +31,10 @@ export default function SettingsPage() {
   const [retention, setRetention] = useState<Record<string, number | null>>({});
   const [retentionSaving, setRetentionSaving] = useState(false);
   const retentionTypes = [
-    ['call_recordings', 'Call recordings'], ['transcripts', 'Transcripts'], ['ai_summaries', 'AI summaries'],
-    ['call_logs', 'Call logs'], ['campaign_history', 'Campaign history'], ['audit_logs', 'Audit logs'],
-    ['documents', 'Uploaded documents'], ['contacts', 'Contacts'],
-  ];
+    ['call_recordings', 'Call recordings', 365], ['transcripts', 'Transcripts', 365], ['ai_summaries', 'AI summaries', 730],
+    ['call_logs', 'Call logs', 730], ['campaign_history', 'Campaign history', 365], ['audit_logs', 'Audit logs', 730],
+    ['documents', 'Uploaded documents', 365], ['contacts', 'Contacts', 365],
+  ] as const;
 
   const load = () => {
     setLoading(true);
@@ -127,11 +127,11 @@ export default function SettingsPage() {
         padding="md"
       >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {retentionTypes.map(([key, label]) => (
+          {retentionTypes.map(([key, label, defaultDays]) => (
             <div key={key}>
               <label className="block text-xs font-semibold text-slate-600 dark:text-[var(--text-secondary)] mb-1">{label}</label>
               <select
-                value={retention[key] == null ? '' : String(retention[key])}
+                value={retention[key] == null ? String(defaultDays) : String(retention[key])}
                 onChange={(e) => setRetention(prev => ({ ...prev, [key]: e.target.value === '' ? null : Number(e.target.value) }))}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:bg-[var(--bg-subtle)] dark:border-[var(--border)]"
               >

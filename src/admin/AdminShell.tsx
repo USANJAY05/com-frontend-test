@@ -1,6 +1,6 @@
 import React from 'react';
 import { Globe2, LayoutDashboard, Building2, Users, ScrollText, LogOut, Settings, IndianRupee, MessageSquareText, Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import { Routes, Route, NavLink, Navigate, Link } from 'react-router-dom';
 import OverviewPage from './OverviewPage';
 import OrganizationsPage from './OrganizationsPage';
 import CreateWorkspacePage from './CreateWorkspacePage';
@@ -87,14 +87,14 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
         </div>
         <Routes>
           <Route index element={<Navigate to="overview" replace />} />
-          <Route path="overview"      element={<PageWrap title="Overview"><OverviewPage /></PageWrap>} />
-          <Route path="organizations" element={<PageWrap title="Organizations"><OrganizationsPage /></PageWrap>} />
-          <Route path="organizations/create" element={<PageWrap title="Create Workspace"><CreateWorkspacePage /></PageWrap>} />
-          <Route path="users"         element={<PageWrap title="Users"><UsersPage /></PageWrap>} />
-          <Route path="activity"      element={<PageWrap title="Activity"><ActivityPage /></PageWrap>} />
-          <Route path="cost"          element={<PageWrap title="Cost & Pricing"><CostPage /></PageWrap>} />
-          <Route path="settings"      element={<PageWrap title="Features"><SettingsPage /></PageWrap>} />
-          <Route path="prompts"       element={<PageWrap title="Prompts"><PromptsPage /></PageWrap>} />
+          <Route path="overview"      element={<PageWrap title="Overview" section="Overview"><OverviewPage /></PageWrap>} />
+          <Route path="organizations" element={<PageWrap title="Organizations" section="Organizations"><OrganizationsPage /></PageWrap>} />
+          <Route path="organizations/create" element={<PageWrap title="Create Workspace" section="Organizations" backTo="/admin/organizations"><CreateWorkspacePage /></PageWrap>} />
+          <Route path="users"         element={<PageWrap title="Users" section="Users"><UsersPage /></PageWrap>} />
+          <Route path="activity"      element={<PageWrap title="Activity" section="Activity"><ActivityPage /></PageWrap>} />
+          <Route path="cost"          element={<PageWrap title="Cost & Pricing" section="Cost & Pricing"><CostPage /></PageWrap>} />
+          <Route path="settings"      element={<PageWrap title="Features" section="Features"><SettingsPage /></PageWrap>} />
+          <Route path="prompts"       element={<PageWrap title="Prompts" section="Prompts"><PromptsPage /></PageWrap>} />
           <Route path="*"             element={<Navigate to="overview" replace />} />
         </Routes>
       </main>
@@ -102,11 +102,49 @@ export default function AdminShell({ email, onLogout }: { email: string; onLogou
   );
 }
 
-function PageWrap({ title, children }: { title: string; children: React.ReactNode }) {
+function PageWrap({
+  title,
+  section,
+  backTo,
+  children,
+}: {
+  title: string;
+  section: string;
+  backTo?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="admin-page">
-      <div className="px-8 pt-7 pb-2">
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h1>
+      <div className="sticky top-16 z-10 border-b border-[var(--border)] bg-[var(--header-bg)]/95 backdrop-blur">
+        <div className="px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-[10px] font-medium text-[var(--text-muted)]">
+                <span>Admin</span>
+                <span className="text-[var(--border)]">/</span>
+                <span className="text-[var(--text-secondary)]">{section}</span>
+                {backTo && (
+                  <>
+                    <span className="text-[var(--border)]">/</span>
+                    <span className="truncate">{title}</span>
+                  </>
+                )}
+              </div>
+              <div className="mt-1 flex items-center gap-3">
+                {backTo && (
+                  <Link
+                    to={backTo}
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
+                    aria-label={`Back to ${section}`}
+                  >
+                    ←
+                  </Link>
+                )}
+                <h1 className="truncate text-lg font-semibold text-[var(--text-primary)]">{title}</h1>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="p-8 pt-5">{children}</div>
     </div>
