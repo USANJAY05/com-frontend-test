@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, ToggleLeft, ToggleRight, ListChecks } from 'lucide-react';
+import { Loader2, ToggleLeft, ToggleRight, ListChecks, Users2, Plus, Trash2, Save } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import Widget from '../components/ui/Widget';
 import KpiCard from '../components/ui/KpiCard';
@@ -9,18 +9,36 @@ type FeatureFlag = {
   label: string;
   description: string;
   enabled: boolean;
+  scope?: 'app' | 'capability';
+  globallyEnabled?: boolean;
+};
+
+type FeatureGroup = {
+  key: string;
+  label: string;
+  description: string;
+  featureKeys: string[];
+  system?: boolean;
 };
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [togglingKey, setTogglingKey] = useState<string | null>(null);
+  const [groups, setGroups] = useState<FeatureGroup[]>([]);
+  const [savingGroup, setSavingGroup] = useState(false);
+  const [groupDraft, setGroupDraft] = useState<FeatureGroup | null>(null);
 
   const load = () => {
     setLoading(true);
-    apiFetch('/api/platform/features')
-      .then((r) => r.json())
-      .then((features) => setFlags(Array.isArray(features) ? features : []))
+    Promise.all([
+      apiFetch('/api/platform/features').then((r) => r.json()),
+      apiFetch('/api/platform/feature-groups').then((r) => r.json()),
+    ])
+      .then(([features, featureGroups]) => {
+        setFlags(Array.isArray(features) ? features : []);
+        setGroups(Array.isArray(featureGroups) ? featureGroups : []);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -52,6 +70,7 @@ export default function SettingsPage() {
   }
 
   const enabledCount = flags.filter((f) => f.enabled).length;
+  const appFeatures = flags.filter((f) => f.scope === 'app');
 
   return (
     <div className="grid grid-cols-12 gap-4">
@@ -90,6 +109,124 @@ export default function SettingsPage() {
           ))}
           {flags.length === 0 && <div className="py-8 text-center text-slate-400 dark:text-[var(--text-muted)] text-xs">No feature flags configured.</div>}
         </div>
+      </Widget>
+
+      <Widget
+        colSpan={12}
+        title="Feature Groups"
+        subtitle="Create reusable permission bundles. Global-disabled features are automatically excluded from organization and team access."
+        padding="md"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)]">
+            <Users2 className="h-4 w-4" /> Groups
+          </div>
+          <button
+            type="button"
+            onClick={() => setGroupDraft({ key: '', label: '', description: '', featureKeys: [] })}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+          >
+            <Plus className="h-3.5 w-3.5" /> New group
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {groups.map((group) => (
+            <div key={group.key} className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-[var(--border)] px-3 py-3">
+              <div>
+                <div className="text-sm font-medium text-slate-700 dark:text-[var(--text-primary)]">{group.label}</div>
+                <div className="text-xs text-slate-400">{group.description || 'No description'} · {group.featureKeys.length} features</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setGroupDraft({ ...group })} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs">Edit</button>
+                {!group.system && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await apiFetch('/api/platform/feature-groups/' + encodeURIComponent(group.key), { method: 'DELETE' });
+                      load();
+                    }}
+                    className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs text-rose-600"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {groupDraft && (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 dark:bg-[var(--bg-subtle)] p-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              <input
+                value={groupDraft.key}
+                disabled={!!groupDraft.system}
+                onChange={(e) => setGroupDraft({ ...groupDraft, key: e.target.value })}
+                placeholder="Group key"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
+              />
+              <input
+                value={groupDraft.label}
+                onChange={(e) => setGroupDraft({ ...groupDraft, label: e.target.value })}
+                placeholder="Group name"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
+              />
+            </div>
+            <input
+              value={groupDraft.description}
+              onChange={(e) => setGroupDraft({ ...groupDraft, description: e.target.value })}
+              placeholder="Description"
+              className="mt-3 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
+            />
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {appFeatures.map((feature) => {
+                const selected = groupDraft.featureKeys.includes(feature.key);
+                return (
+                  <button
+                    type="button"
+                    key={feature.key}
+                    onClick={() => setGroupDraft({
+                      ...groupDraft,
+                      featureKeys: selected
+                        ? groupDraft.featureKeys.filter((k) => k !== feature.key)
+                        : [...groupDraft.featureKeys, feature.key],
+                    })}
+                    disabled={!feature.enabled}
+                    className={`rounded-lg border px-3 py-2 text-left text-xs ${selected ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-slate-200 bg-white text-slate-600'} ${!feature.enabled ? 'opacity-40' : ''}`}
+                  >
+                    <div className="font-semibold">{feature.label}</div>
+                    <div className="mt-0.5 text-[10px] text-slate-400">{feature.enabled ? 'Available' : 'Globally disabled'}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => setGroupDraft(null)} className="rounded-lg px-3 py-2 text-xs text-slate-500">Cancel</button>
+              <button
+                type="button"
+                disabled={savingGroup || !groupDraft.key || !groupDraft.label}
+                onClick={async () => {
+                  setSavingGroup(true);
+                  try {
+                    await apiFetch('/api/platform/feature-groups', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(groupDraft),
+                    });
+                    setGroupDraft(null);
+                    load();
+                  } finally {
+                    setSavingGroup(false);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+              >
+                <Save className="h-3.5 w-3.5" /> Save group
+              </button>
+            </div>
+          </div>
+        )}
       </Widget>
     </div>
   );
