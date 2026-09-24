@@ -442,7 +442,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
 
   // Task Creation Wizard States
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4>(1);
+  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
   const [wizardWorkflowId, setWizardWorkflowId] = useState('');
   const [wizardAgentId, setWizardAgentId] = useState('');
   const [wizardAgents, setWizardAgents] = useState<WizardAgent[]>([]);
@@ -2251,19 +2251,33 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
         return (
           <WizardFrame {...frameProps}>
-            <div className={taskPage ? 'w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4 space-y-6' : ''}>
-            {/* All task configuration is shown on one page, top to bottom. */}
+            <div className={taskPage ? 'flex-1 min-h-0 overflow-y-auto w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4 space-y-6' : ''}>
+            {/* AWS-style two-step flow: Configure first, then review and create. */}
+            <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
+              <div className={`flex items-center gap-2 ${wizardStep === 1 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
+                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 1 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>1</span>
+                <span className="text-xs font-semibold">Fill in details</span>
+              </div>
+              <div className="h-px flex-1 bg-[var(--border)]" />
+              <div className={`flex items-center gap-2 ${wizardStep === 2 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
+                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 2 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>2</span>
+                <span className="text-xs font-semibold">Review & Create</span>
+              </div>
+            </div>
+
+            {wizardStep === 1 && (
+              <div className="space-y-6">
             {taskPage && (
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Dialing task setup</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">Complete each section from top to bottom, then create the dialing task at the end.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Enter the workflow, outbound agent, and contacts for this dialing task.</p>
               </div>
             )}
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">1</span> Select a Workflow</h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Workflow</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active workflows with question tasks are shown — activate a workflow in Workflow Builder to make it available here.</p>
                 </div>
 
@@ -2327,7 +2341,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {/* ── Step 2: Select Agent ──────────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">2</span> Select an Agent</h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Outbound Agent</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active agents with an outbound number assigned are shown — configure and enable agents in Agent Studio.</p>
                 </div>
 
@@ -2393,7 +2407,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {/* ── Step 3: Add Contacts ──────────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">3</span> Add Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Select from your contact database or add new contacts manually. You can mix both.</p>
                 </div>
 
@@ -2528,13 +2542,28 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
               </div>
 
-            <div className="h-px bg-[var(--border)]" />
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
+              <p className="text-[11px] text-[var(--text-muted)]">
+                {wizardWorkflowId && wizardAgentId && totalContacts > 0
+                  ? `${totalContacts} contact${totalContacts !== 1 ? 's' : ''} ready to review`
+                  : 'Select a workflow, agent, and at least one contact to continue.'}
+              </p>
+              <Button
+                variant="primary"
+                size="md"
+                disabled={!wizardWorkflowId || !wizardAgentId || totalContacts === 0}
+                onClick={() => setWizardStep(2)}
+              >
+                Next: Review & Create
+              </Button>
+            </div>
+              </div>
+            )}
 
-            {/* ── Step 4: Review + Create ───────────────────────────────────── */}
-            {selectedWorkflow && (
+            {wizardStep === 2 && selectedWorkflow && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">4</span> Review & Create</h3>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">Review & Create</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Confirm the details below, then create the dialing task.</p>
                 </div>
 
@@ -2604,7 +2633,15 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    icon={ArrowLeft}
+                    onClick={() => setWizardStep(1)}
+                  >
+                    Back
+                  </Button>
                   <Button
                     variant="primary"
                     size="md"
