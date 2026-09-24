@@ -733,7 +733,7 @@ export default function AgentStudioView() {
       {(creating || !!editingAgent) && (
       <AgentFormFrame>
         <div className="space-y-6">
-          {creating && (
+          {(creating || editingAgent) && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50/70 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
               <div className={`flex items-center gap-2 ${agentWizardStep === 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
                 <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${agentWizardStep === 1 ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200'}`}>1</span>
