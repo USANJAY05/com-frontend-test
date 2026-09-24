@@ -12,7 +12,7 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
   const [detail, setDetail] = useState<OrgDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', workspaceName: '', industry: '', subscriptionPlan: '', aiMinutesLimit: '' });
+  const [editForm, setEditForm] = useState({ name: '', workspaceName: '', industry: '', subscriptionPlan: '', aiMinutesLimit: '', billingMethod: 'pay_as_you_go', chargeScope: 'ai_only' });
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState(false);
@@ -137,7 +137,9 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
           workspaceName: d.workspaceName || '',
           industry: d.industry || '',
           subscriptionPlan: d.subscriptionPlan || '',
-          aiMinutesLimit: d.aiMinutesLimit != null ? String(d.aiMinutesLimit) : ''
+          aiMinutesLimit: d.aiMinutesLimit != null ? String(d.aiMinutesLimit) : '',
+          billingMethod: d.billingMethod || 'pay_as_you_go',
+          chargeScope: d.chargeScope || 'ai_only'
         });
       })
       .finally(() => setLoading(false));
@@ -161,6 +163,12 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
         })
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
+      const billingRes = await apiFetch(`/api/platform/organizations/${orgId}/billing`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billingMethod: editForm.billingMethod, chargeScope: editForm.chargeScope }),
+      });
+      if (!billingRes.ok) throw new Error((await billingRes.json()).error || 'Billing update failed');
       setEditing(false);
       load();
       onChanged();
@@ -285,6 +293,22 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                       <input value={editForm.aiMinutesLimit} onChange={(e) => setEditForm((f) => ({ ...f, aiMinutesLimit: e.target.value }))} placeholder="Unlimited" className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5" />
                     </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">Billing Method</label>
+                      <select value={editForm.billingMethod} onChange={(e) => setEditForm((f) => ({ ...f, billingMethod: e.target.value }))} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5">
+                        <option value="pay_as_you_go">Pay as you go</option>
+                        <option value="recharge_based">Recharge based</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">Charge Scope</label>
+                      <select value={editForm.chargeScope} onChange={(e) => setEditForm((f) => ({ ...f, chargeScope: e.target.value }))} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5">
+                        <option value="ai_only">AI only</option>
+                        <option value="ai_and_call_provider">AI + Call Provider</option>
+                      </select>
+                    </div>
+                  </div>
                   <button onClick={handleSaveEdit} disabled={busy} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50">
                     {busy ? 'Saving…' : 'Save Changes'}
                   </button>
@@ -310,6 +334,33 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                   <div className="text-lg font-semibold text-slate-800">{detail.counts.campaigns}</div>
                   <div className="text-[10px] text-slate-400 uppercase">Campaigns</div>
                 </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-5">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Billing</h4>
+                <div className="flex items-center justify-between text-sm mb-2"><span className="text-slate-500">Method</span><span className="font-semibold text-slate-800">{detail.billingMethod === 'recharge_based' ? 'Recharge based' : 'Pay as you go'}</span></div>
+                <div className="flex items-center justify-between text-sm mb-2"><span className="text-slate-500">Charge scope</span><span className="font-semibold text-slate-800">{detail.chargeScope === 'ai_and_call_provider' ? 'AI + Call Provider' : 'AI only'}</span></div>
+                {detail.billingMethod === 'recharge_based' && (
+                  <>
+                    <div className="flex items-center justify-between text-sm mb-2"><span className="text-slate-500">Available balance</span><span className="font-semibold text-slate-800">₹{Number(detail.rechargeAvailableInr || 0).toFixed(2)}</span></div>
+                    <div className="flex items-center gap-2 mt-3">
+                      <input id="recharge-amount" type="number" min="1" step="0.01" placeholder="Recharge amount" className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5" />
+                      <button
+                        onClick={async () => {
+                          const input = document.getElementById('recharge-amount') as HTMLInputElement | null;
+                          const amount = Number(input?.value || 0);
+                          if (!amount) return;
+                          const res = await apiFetch(`/api/platform/organizations/${orgId}/recharge`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount }) });
+                          if (!res.ok) { setActionError((await res.json()).error || 'Recharge failed'); return; }
+                          if (input) input.value = '';
+                          load();
+                          onChanged();
+                        }}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+                      >Recharge</button>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="bg-white border border-slate-200 rounded-2xl p-5">
