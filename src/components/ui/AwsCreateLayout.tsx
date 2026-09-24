@@ -15,9 +15,9 @@ interface AwsCreateLayoutProps {
   description: string;
   steps: CreateLayoutStep[];
   activeStep: number;
-  summaryTitle: string;
+  summaryTitle?: string;
   summaryDescription?: string;
-  summary: CreateLayoutSummaryItem[];
+  summary?: CreateLayoutSummaryItem[];
   children: React.ReactNode;
   action?: React.ReactNode;
 }
@@ -87,41 +87,11 @@ export default function AwsCreateLayout({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-5 2xl:gap-6 items-start">
+        <div className="w-full min-w-0">
           <main className="min-w-0 space-y-5">
             {children}
           </main>
-
-          <aside className="xl:sticky xl:top-6 rounded-xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200 dark:border-[var(--border)]">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-[var(--text-primary)]">
-                {summaryTitle}
-              </h3>
-              {summaryDescription && (
-                <p className="text-[11px] text-slate-500 dark:text-[var(--text-muted)] mt-1">
-                  {summaryDescription}
-                </p>
-              )}
-            </div>
-
-            <div className="p-5 space-y-4">
-              {summary.map(({ label, value }) => (
-                <div
-                  key={label}
-                  className="border-b border-slate-100 dark:border-[var(--border)] pb-3 last:border-0 last:pb-0"
-                >
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
-                    {label}
-                  </p>
-                  <p className="text-xs font-medium text-slate-700 dark:text-[var(--text-secondary)] mt-1 break-words">
-                    {value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </aside>
-        </div>
-      </div>
+        </div>    </div>
     </div>
   );
 }
