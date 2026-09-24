@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Search, Sparkles, Users2, X } from 'lucide-react';
 import { getAllFlagGroups } from '../../features/feature-flags/flagGroups';
 import { FEATURE_REGISTRY } from '../../features/feature-flags/registry';
@@ -15,6 +15,8 @@ interface FlagGroupPickerProps {
 export default function FlagGroupPicker({ availableKeys, value = [], onApply, className = '', label = 'Feature Access', description = 'Search features, select individually, or apply a complete group.' }: FlagGroupPickerProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [placement, setPlacement] = useState<'down' | 'up' | 'left' | 'right'>('down');
+  const triggerRef = useRef<HTMLDivElement>(null);
   const available = useMemo(() => new Set(availableKeys), [availableKeys]);
   const selected = useMemo(() => new Set(value), [value]);
 
@@ -45,6 +47,34 @@ export default function FlagGroupPicker({ availableKeys, value = [], onApply, cl
 
   const clearAll = () => onApply([]);
 
+  useEffect(() => {
+    if (!open) return;
+    const updatePlacement = () => {
+      const el = triggerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const gap = 8;
+      const margin = 12;
+      const dropdownHeight = Math.min(480, Math.max(220, window.innerHeight * 0.6));
+      const below = window.innerHeight - rect.bottom - margin;
+      const above = rect.top - margin;
+      const right = window.innerWidth - rect.right - margin;
+      const left = rect.left - margin;
+      if (below >= Math.min(dropdownHeight, 320)) setPlacement('down');
+      else if (above >= Math.min(dropdownHeight, 320)) setPlacement('up');
+      else if (right >= Math.min(rect.width, 320)) setPlacement('right');
+      else if (left >= Math.min(rect.width, 320)) setPlacement('left');
+      else setPlacement(below >= above ? 'down' : 'up');
+    };
+    updatePlacement();
+    window.addEventListener('resize', updatePlacement);
+    window.addEventListener('scroll', updatePlacement, true);
+    return () => {
+      window.removeEventListener('resize', updatePlacement);
+      window.removeEventListener('scroll', updatePlacement, true);
+    };
+  }, [open]);
+
   return (
     <div className={`relative w-full min-w-0 ${className}`}>
       <div className="flex items-center justify-between mb-2">
@@ -59,7 +89,7 @@ export default function FlagGroupPicker({ availableKeys, value = [], onApply, cl
         )}
       </div>
 
-      <div className="relative">
+      <div ref={triggerRef} className="relative">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
         <input
           value={search}
@@ -73,7 +103,7 @@ export default function FlagGroupPicker({ availableKeys, value = [], onApply, cl
         </button>
 
         {open && (
-          <div className="absolute z-50 mt-2 left-0 w-[min(560px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+          <div className={`absolute z-50 w-full min-w-full max-w-full rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden ${placement === 'down' ? 'top-full mt-2 left-0' : placement === 'up' ? 'bottom-full mb-2 left-0' : placement === 'right' ? 'left-full ml-2 top-0' : 'right-full mr-2 top-0'}`}>
             <div className="max-h-[min(30rem,60vh)] overflow-y-auto overscroll-contain p-2">
               {groups.map(group => {
                 const visible = group.applicable.filter(k => !search || FEATURE_REGISTRY.find(f => f.key === k)?.label.toLowerCase().includes(search.toLowerCase()));
