@@ -309,6 +309,61 @@ export default function CreateWorkspacePage() {
           )}
         </section>
 
+
+
+        {form.chargeScope === 'ai_and_call_provider' && (
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-3">
+              <p className="text-xs font-bold text-slate-700">Call Provider Setup</p>
+              <p className="text-[11px] text-slate-500 mt-1">Only required when Charge Scope is AI + Call Provider.</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Call Provider *</label>
+                <select value={form.callProvider} onChange={set('callProvider')} className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  <option value="vobiz">Vobiz.ai</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth ID *</label>
+                  <input value={form.callAuthId} onChange={set('callAuthId')} placeholder="Vobiz Auth ID" required autoComplete="off" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth Token *</label>
+                  <input type="password" value={form.callAuthToken} onChange={set('callAuthToken')} placeholder="Vobiz Auth Token" required autoComplete="new-password" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Provider Phone Number *</label>
+                <input value={form.callPhoneNumber} onChange={set('callPhoneNumber')} placeholder="+14155550123" required autoComplete="off" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-xs text-slate-400 mb-3">Admin member (optional) — they'll be linked automatically on first login</p>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Admin Email</label>
+              <input type="email" value={form.adminEmail} onChange={set('adminEmail')} placeholder="admin@acme.com" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Admin Name</label>
+              <input value={form.adminName} onChange={set('adminName')} placeholder="Jane Smith" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <FlagGroupPicker
+            availableKeys={FEATURE_REGISTRY.map(f => f.key)}
+            value={selectedFlags}
+            onApply={setSelectedFlags}
+          />
+        </section>
+
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-3">
             <p className="text-xs font-bold text-slate-700">Advanced · Data Retention &amp; Backup</p>
@@ -371,59 +426,6 @@ export default function CreateWorkspacePage() {
               </div>
             )}
           </div>
-        </section>
-
-        {form.chargeScope === 'ai_and_call_provider' && (
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-3">
-              <p className="text-xs font-bold text-slate-700">Call Provider Setup</p>
-              <p className="text-[11px] text-slate-500 mt-1">Only required when Charge Scope is AI + Call Provider.</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Call Provider *</label>
-                <select value={form.callProvider} onChange={set('callProvider')} className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="vobiz">Vobiz.ai</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth ID *</label>
-                  <input value={form.callAuthId} onChange={set('callAuthId')} placeholder="Vobiz Auth ID" required autoComplete="off" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Auth Token *</label>
-                  <input type="password" value={form.callAuthToken} onChange={set('callAuthToken')} placeholder="Vobiz Auth Token" required autoComplete="new-password" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Provider Phone Number *</label>
-                <input value={form.callPhoneNumber} onChange={set('callPhoneNumber')} placeholder="+14155550123" required autoComplete="off" className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs text-slate-400 mb-3">Admin member (optional) — they'll be linked automatically on first login</p>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Admin Email</label>
-              <input type="email" value={form.adminEmail} onChange={set('adminEmail')} placeholder="admin@acme.com" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Admin Name</label>
-              <input value={form.adminName} onChange={set('adminName')} placeholder="Jane Smith" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <FlagGroupPicker
-            availableKeys={FEATURE_REGISTRY.map(f => f.key)}
-            value={selectedFlags}
-            onApply={setSelectedFlags}
-          />
         </section>
         <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <button type="button" onClick={() => navigate('/admin/organizations')} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
