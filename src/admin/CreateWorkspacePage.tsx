@@ -46,6 +46,12 @@ interface CreateOrgForm {
   billingMethod: 'pay_as_you_go' | 'recharge_based';
   chargeScope: 'ai_only' | 'ai_and_call_provider';
   initialRechargeAmountInr: string;
+  dataRetentionMode: 'default' | 'custom';
+  dataRetentionOverrides: Record<string, number | null>;
+  backupEnabled: boolean;
+  backupFrequency: 'daily' | 'weekly' | 'monthly';
+  backupEmail: string;
+  backupRetentionDays: string;
 }
 
 export default function CreateWorkspacePage() {
@@ -66,6 +72,12 @@ export default function CreateWorkspacePage() {
     billingMethod: 'pay_as_you_go',
     chargeScope: 'ai_only',
     initialRechargeAmountInr: '',
+    dataRetentionMode: 'default',
+    dataRetentionOverrides: {},
+    backupEnabled: false,
+    backupFrequency: 'monthly',
+    backupEmail: '',
+    backupRetentionDays: '365',
   });
   const [selectedFlags, setSelectedFlags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -118,6 +130,11 @@ export default function CreateWorkspacePage() {
         setError('The service account JSON must contain a valid project_id.');
         return;
       }
+      if (form.backupEnabled && !form.backupEmail.trim()) {
+        setError('Backup email is required when automated backups are enabled.');
+        return;
+      }
+
       const res = await apiFetch('/api/platform/organizations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -146,6 +163,14 @@ export default function CreateWorkspacePage() {
           billingMethod: form.billingMethod,
           chargeScope: form.chargeScope,
           initialRechargeAmountInr: form.billingMethod === 'recharge_based' ? Number(form.initialRechargeAmountInr || 0) : 0,
+          dataRetentionMode: form.dataRetentionMode,
+          dataRetentionOverrides: form.dataRetentionMode === 'custom' ? form.dataRetentionOverrides : {},
+          backup: {
+            enabled: form.backupEnabled,
+            frequency: form.backupFrequency,
+            email: form.backupEmail.trim(),
+            retentionDays: Number(form.backupRetentionDays || 365),
+          },
         }),
       });
       if (!res.ok) {
@@ -282,6 +307,70 @@ export default function CreateWorkspacePage() {
               <input type="number" min="0" step="0.01" value={form.initialRechargeAmountInr} onChange={set('initialRechargeAmountInr')} placeholder="0" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
             </div>
           )}
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3">
+            <p className="text-xs font-bold text-slate-700">Advanced · Data Retention &amp; Backup</p>
+            <p className="text-[11px] text-slate-500 mt-1">Use the platform defaults or define a company-specific retention policy.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <label className={`rounded-xl border p-3 cursor-pointer ${form.dataRetentionMode === 'default' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
+              <input type="radio" className="sr-only" checked={form.dataRetentionMode === 'default'} onChange={() => setForm(f => ({ ...f, dataRetentionMode: 'default' }))} />
+              <p className="text-xs font-semibold text-slate-700">Platform default</p>
+              <p className="text-[10px] text-slate-500 mt-1">Inherits Super Admin retention settings.</p>
+            </label>
+            <label className={`rounded-xl border p-3 cursor-pointer ${form.dataRetentionMode === 'custom' ? 'border-amber-400 ring-1 ring-amber-100' : 'border-slate-200'}`}>
+              <input type="radio" className="sr-only" checked={form.dataRetentionMode === 'custom'} onChange={() => setForm(f => ({ ...f, dataRetentionMode: 'custom' }))} />
+              <p className="text-xs font-semibold text-slate-700">Custom policy</p>
+              <p className="text-[10px] text-slate-500 mt-1">Set different retention for this company.</p>
+            </label>
+          </div>
+          {form.dataRetentionMode === 'custom' && (
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {[
+                ['call_recordings', 'Call recordings'],
+                ['transcripts', 'Transcripts'],
+                ['ai_summaries', 'AI summaries'],
+                ['call_logs', 'Call logs'],
+                ['campaign_history', 'Campaign history'],
+                ['audit_logs', 'Audit logs'],
+                ['documents', 'Documents'],
+                ['contacts', 'Contacts'],
+              ].map(([key, label]) => (
+                <div key={key}>
+                  <label className="block text-[10px] font-semibold text-slate-500 mb-1">{label}</label>
+                  <select
+                    value={form.dataRetentionOverrides[key] == null ? '' : String(form.dataRetentionOverrides[key])}
+                    onChange={e => setForm(f => ({ ...f, dataRetentionOverrides: { ...f.dataRetentionOverrides, [key]: e.target.value === '' ? null : Number(e.target.value) } }))}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs"
+                  >
+                    <option value="">Never</option>
+                    <option value="30">30 days</option><option value="90">90 days</option><option value="180">180 days</option>
+                    <option value="365">1 year</option><option value="730">2 years</option><option value="1095">3 years</option><option value="1825">5 years</option>
+                  </select>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-slate-700">Automated backups</p>
+                <p className="text-[10px] text-slate-500 mt-1">Creates a ZIP archive, stores it securely, and emails a temporary download link.</p>
+              </div>
+              <button type="button" onClick={() => setForm(f => ({ ...f, backupEnabled: !f.backupEnabled }))} className={`relative h-6 w-11 rounded-full transition ${form.backupEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${form.backupEnabled ? 'left-6' : 'left-1'}`} />
+              </button>
+            </div>
+            {form.backupEnabled && (
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div><label className="block text-[10px] font-semibold text-slate-500 mb-1">Backup email</label><input type="email" value={form.backupEmail} onChange={set('backupEmail')} placeholder="admin@company.com" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs" /></div>
+                <div><label className="block text-[10px] font-semibold text-slate-500 mb-1">Frequency</label><select value={form.backupFrequency} onChange={set('backupFrequency')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+                <div><label className="block text-[10px] font-semibold text-slate-500 mb-1">Backup retention</label><select value={form.backupRetentionDays} onChange={set('backupRetentionDays')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs"><option value="30">30 days</option><option value="90">90 days</option><option value="180">180 days</option><option value="365">1 year</option><option value="730">2 years</option></select></div>
+              </div>
+            )}
+          </div>
         </section>
 
         {form.chargeScope === 'ai_and_call_provider' && (

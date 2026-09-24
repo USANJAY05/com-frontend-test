@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader2, Users, PhoneCall, ScrollText, Pencil, Ban, PlayCircle, Trash2, AlertTriangle, ToggleLeft, ToggleRight, Hash, Plus, X, Cloud } from 'lucide-react';
+import { Loader2, Users, PhoneCall, ScrollText, Pencil, Ban, PlayCircle, Trash2, AlertTriangle, ToggleLeft, ToggleRight, Hash, Plus, X, Cloud, Database, Archive } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { OrgDetail } from './types';
 import { callCostInr, formatInr } from '../lib/pricing';
@@ -29,6 +29,12 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
   const [numBusy, setNumBusy] = useState(false);
   const [gcpProject, setGcpProject] = useState<any>(null);
   const [gcpBusy, setGcpBusy] = useState(false);
+  const [retentionState, setRetentionState] = useState<any>(null);
+  const [retentionMode, setRetentionMode] = useState<'default' | 'custom'>('default');
+  const [retentionOverrides, setRetentionOverrides] = useState<Record<string, number | null>>({});
+  const [retentionBusy, setRetentionBusy] = useState(false);
+  const [backupState, setBackupState] = useState<any>(null);
+  const [backupBusy, setBackupBusy] = useState(false);
 
   const loadNumbers = () => {
     setNumbersLoading(true);
@@ -59,6 +65,54 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
     if (!confirm('Remove this virtual number?')) return;
     await apiFetch(`/api/platform/organizations/${orgId}/numbers/${encodeURIComponent(numberId)}`, { method: 'DELETE' });
     setNumbers(prev => prev.filter(n => n.id !== numberId));
+  };
+
+  const loadRetention = () => {
+    apiFetch(`/api/platform/organizations/${orgId}/data-retention`)
+      .then(r => r.json())
+      .then(d => {
+        setRetentionState(d);
+        setRetentionMode(d?.mode === 'custom' ? 'custom' : 'default');
+        setRetentionOverrides(d?.overrides || {});
+      }).catch(() => {});
+    apiFetch(`/api/platform/organizations/${orgId}/backup`)
+      .then(r => r.json()).then(d => setBackupState(d)).catch(() => {});
+  };
+
+  const saveRetention = async () => {
+    setRetentionBusy(true);
+    try {
+      const res = await apiFetch(`/api/platform/organizations/${orgId}/data-retention`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: retentionMode, overrides: retentionOverrides }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to save retention policy');
+      setRetentionState(await res.json());
+    } catch (err: any) { setActionError(err?.message || 'Failed to save retention policy'); }
+    finally { setRetentionBusy(false); }
+  };
+
+  const saveBackup = async (patch: any) => {
+    setBackupBusy(true);
+    try {
+      const res = await apiFetch(`/api/platform/organizations/${orgId}/backup`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to save backup settings');
+      setBackupState(await res.json());
+    } catch (err: any) { setActionError(err?.message || 'Failed to save backup settings'); }
+    finally { setBackupBusy(false); }
+  };
+
+  const requestBackup = async () => {
+    setBackupBusy(true);
+    try {
+      const res = await apiFetch(`/api/platform/organizations/${orgId}/backup`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to queue backup');
+      setBackupState((prev: any) => ({ ...prev, lastStatus: 'queued' }));
+    } catch (err: any) { setActionError(err?.message || 'Failed to queue backup'); }
+    finally { setBackupBusy(false); }
   };
 
   const loadGcpProject = () => {
@@ -145,7 +199,7 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); loadFlags(); loadNumbers(); loadGcpProject(); }, [orgId]);
+  useEffect(() => { load(); loadFlags(); loadNumbers(); loadGcpProject(); loadRetention(); }, [orgId]);
 
   const handleSaveEdit = async () => {
     setBusy(true);
@@ -510,6 +564,55 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                       </button>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-5">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1 flex items-center gap-1.5"><Database className="h-3.5 w-3.5" /> Data Retention</h4>
+                <p className="text-[10px] text-slate-400 mb-3">Source: {retentionMode === 'custom' ? 'Organization override' : 'Platform default'}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    ['call_recordings', 'Call recordings'], ['transcripts', 'Transcripts'], ['ai_summaries', 'AI summaries'],
+                    ['call_logs', 'Call logs'], ['campaign_history', 'Campaign history'], ['audit_logs', 'Audit logs'],
+                    ['documents', 'Documents'], ['contacts', 'Contacts'],
+                  ].map(([key, label]) => (
+                    <div key={key}>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">{label}</label>
+                      <select
+                        value={retentionMode === 'custom' ? (retentionOverrides[key] == null ? '' : String(retentionOverrides[key])) : String(retentionState?.defaults?.[key] ?? '')}
+                        disabled={retentionMode !== 'custom'}
+                        onChange={e => setRetentionOverrides(prev => ({ ...prev, [key]: e.target.value === '' ? null : Number(e.target.value) }))}
+                        className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 disabled:bg-slate-50"
+                      >
+                        <option value="">Never</option><option value="30">30 days</option><option value="90">90 days</option>
+                        <option value="180">180 days</option><option value="365">1 year</option><option value="730">2 years</option>
+                        <option value="1095">3 years</option><option value="1825">5 years</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <button onClick={() => setRetentionMode('default')} className={`text-[10px] px-2.5 py-1.5 rounded-lg ${retentionMode === 'default' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}>Use default</button>
+                  <button onClick={() => setRetentionMode('custom')} className={`text-[10px] px-2.5 py-1.5 rounded-lg ${retentionMode === 'custom' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}>Custom policy</button>
+                  <button onClick={saveRetention} disabled={retentionBusy} className="ml-auto text-[10px] font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white disabled:opacity-50">{retentionBusy ? 'Saving…' : 'Save policy'}</button>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-5">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5"><Archive className="h-3.5 w-3.5" /> Backups</h4>
+                <div className="flex items-center justify-between text-sm mb-2"><span className="text-slate-500">Status</span><span className="font-semibold text-slate-800">{backupState?.lastStatus || 'never'}</span></div>
+                <div className="space-y-2">
+                  <input type="email" value={backupState?.email || ''} onChange={e => setBackupState((p:any) => ({ ...p, email: e.target.value }))} placeholder="Backup administrator email" className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <select value={backupState?.frequency || 'monthly'} onChange={e => setBackupState((p:any) => ({ ...p, frequency: e.target.value }))} className="text-xs border border-slate-200 rounded-lg px-2 py-1.5"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+                    <select value={String(backupState?.retentionDays || 365)} onChange={e => setBackupState((p:any) => ({ ...p, retentionDays: Number(e.target.value) }))} className="text-xs border border-slate-200 rounded-lg px-2 py-1.5"><option value="30">30 days</option><option value="90">90 days</option><option value="180">180 days</option><option value="365">1 year</option><option value="730">2 years</option></select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => saveBackup({ enabled: !backupState?.enabled, email: backupState?.email, frequency: backupState?.frequency, retentionDays: backupState?.retentionDays })} disabled={backupBusy} className={`text-[10px] font-semibold px-2.5 py-1.5 rounded-lg ${backupState?.enabled ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'}`}>{backupState?.enabled ? 'Backups enabled' : 'Enable backups'}</button>
+                    <button onClick={() => saveBackup({ enabled: !!backupState?.enabled, email: backupState?.email, frequency: backupState?.frequency, retentionDays: backupState?.retentionDays })} disabled={backupBusy} className="text-[10px] font-semibold px-2.5 py-1.5 rounded-lg bg-slate-900 text-white">Save</button>
+                    <button onClick={requestBackup} disabled={backupBusy || !backupState?.email} className="ml-auto text-[10px] font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white disabled:opacity-50">Create backup now</button>
+                  </div>
+                  {backupState?.lastError && <p className="text-[10px] text-rose-600">{backupState.lastError}</p>}
                 </div>
               </div>
 
