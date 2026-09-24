@@ -2316,17 +2316,6 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-                <div className="flex justify-end pt-2 border-t border-[var(--border)]">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    disabled={!wizardWorkflowId}
-                    onClick={() => setWizardStep(2)}
-                    iconRight={ChevronRight}
-                  >
-                    Next: Select Agent
-                  </Button>
-                </div>
               </div>
             )}
 
@@ -2336,7 +2325,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {(
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Select an Agent</h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">2</span> Select an Agent</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active agents with an outbound number assigned are shown — configure and enable agents in Agent Studio.</p>
                 </div>
 
@@ -2543,7 +2532,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             <div className="h-px bg-[var(--border)]" />
 
             {/* ── Step 4: Review + Create ───────────────────────────────────── */
-            {wizardStep === 4 && selectedWorkflow && (
+            {selectedWorkflow && (
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">4</span> Review & Create</h3>
@@ -2616,13 +2605,11 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-                  <Button variant="ghost" size="sm" onClick={() => setWizardStep(3)} icon={ChevronLeft}>
-                    Back
-                  </Button>
+                <div className="flex justify-end pt-2 border-t border-[var(--border)]">
                   <Button
                     variant="primary"
                     size="md"
+                    disabled={!wizardWorkflowId || !wizardAgentId || totalContacts === 0}
                     onClick={handleCreateTask}
                     icon={PhoneCall}
                     className="shadow-md"
