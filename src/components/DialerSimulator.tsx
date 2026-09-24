@@ -316,6 +316,9 @@ export default function DialerSimulator({
   // not a route/sub-route.
   const [showAssignTask, setShowAssignTask] = useState(false);
   const taskPage = showAssignTask;
+  useEffect(() => {
+    if (dialerMode !== 'outbound') setShowAssignTask(false);
+  }, [dialerMode]);
 
   const activeVirtualNumbers = virtualNumbers;
 
