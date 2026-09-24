@@ -2224,13 +2224,6 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           return matchesSearch && matchesGroup;
         };
 
-        const STEPS = [
-          { num: 1, label: 'Workflow' },
-          { num: 2, label: 'Agent' },
-          { num: 3, label: 'Contacts' },
-          { num: 4, label: 'Review' },
-        ];
-
         const WizardFrame: any = taskPage ? PageShell : Modal;
         const frameProps = taskPage
           ? {
@@ -2253,35 +2246,20 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
         return (
           <WizardFrame {...frameProps}>
-            <div className={taskPage ? 'flex-1 overflow-y-auto px-8 pb-10 pt-6' : ''}>
-            {/* Step progress indicator */}
-            <div className="flex items-center gap-1 mb-6">
-              {STEPS.map((s, idx) => (
-                <React.Fragment key={s.num}>
-                  <div className="flex items-center gap-1.5">
-                    <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-all ${
-                      wizardStep > s.num
-                        ? 'bg-blue-600 text-white'
-                        : wizardStep === s.num
-                        ? 'bg-blue-600 text-white ring-2 ring-blue-200'
-                        : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'
-                    }`}>
-                      {wizardStep > s.num ? <Check className="h-3 w-3" /> : s.num}
-                    </div>
-                    <span className={`text-xs font-semibold hidden sm:block ${wizardStep === s.num ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>{s.label}</span>
-                  </div>
-                  {idx < STEPS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-1 rounded-full transition-all ${wizardStep > s.num ? 'bg-blue-600' : 'bg-[var(--border)]'}`} />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
+            <div className={taskPage ? 'w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4 space-y-6' : ''}>
+            {/* All task configuration is shown on one page, top to bottom. */}
+            {taskPage && (
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Dialing task setup</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Complete each section from top to bottom, then create the dialing task at the end.</p>
+              </div>
+            )}
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
-            {wizardStep === 1 && (
+            {(
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Select a Workflow</h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">1</span> Select a Workflow</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active workflows with question tasks are shown — activate a workflow in Workflow Builder to make it available here.</p>
                 </div>
 
@@ -2352,8 +2330,10 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               </div>
             )}
 
-            {/* ── Step 2: Select Agent ──────────────────────────────────────── */}
-            {wizardStep === 2 && (
+            <div className="h-px bg-[var(--border)]" />
+
+            {/* ── Step 2: Select Agent ──────────────────────────────────────── */
+            {(
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Select an Agent</h3>
@@ -2415,28 +2395,16 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-                  <Button variant="ghost" size="sm" onClick={() => setWizardStep(1)} icon={ChevronLeft}>
-                    Back
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    disabled={!wizardAgentId}
-                    onClick={() => setWizardStep(3)}
-                    iconRight={ChevronRight}
-                  >
-                    Next: Add Contacts
-                  </Button>
-                </div>
               </div>
             )}
 
-            {/* ── Step 3: Add Contacts ──────────────────────────────────────── */}
-            {wizardStep === 3 && (
+            <div className="h-px bg-[var(--border)]" />
+
+            {/* ── Step 3: Add Contacts ──────────────────────────────────────── */
+            {(
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Add Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">3</span> Add Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Select from your contact database or add new contacts manually. You can mix both.</p>
                 </div>
 
@@ -2569,28 +2537,16 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-                  <Button variant="ghost" size="sm" onClick={() => setWizardStep(2)} icon={ChevronLeft}>
-                    Back
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    disabled={totalContacts === 0}
-                    onClick={() => setWizardStep(4)}
-                    iconRight={ChevronRight}
-                  >
-                    Review Task
-                  </Button>
-                </div>
               </div>
             )}
 
-            {/* ── Step 4: Review + Create ───────────────────────────────────── */}
+            <div className="h-px bg-[var(--border)]" />
+
+            {/* ── Step 4: Review + Create ───────────────────────────────────── */
             {wizardStep === 4 && selectedWorkflow && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Review & Create</h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">4</span> Review & Create</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Confirm the details below, then create the dialing task.</p>
                 </div>
 
