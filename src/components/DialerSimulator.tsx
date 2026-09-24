@@ -76,8 +76,6 @@ interface DialerSimulatorProps {
   /** Outbound/Inbound sub-page, driven by the sidebar's Voice Simulator group */
   mode?: 'outbound' | 'inbound';
   setMode?: (mode: 'outbound' | 'inbound' | 'assign-task') => void;
-  /** Render the task assignment wizard as a dedicated page instead of a modal. */
-  taskPage?: boolean;
   // Backend-persisted org settings (POST /api/settings/org) — used here
   // only to read/write defaultOutboundNumber, so the "which number am I
   // dialing from" choice survives a reload and follows the account to a
@@ -302,8 +300,7 @@ export default function DialerSimulator({
   mode,
   setMode,
   orgSettings,
-  setOrgSettings,
-  taskPage = false
+  setOrgSettings
 }: DialerSimulatorProps) {
   const isInsurance = industry === 'insurance';
   const storagePrefix = `chiefx:${encodeURIComponent(orgSettings?.id || companyName || 'default')}`;
@@ -314,6 +311,11 @@ export default function DialerSimulator({
   const [internalDialerMode, setInternalDialerMode] = useState<'outbound' | 'inbound'>('outbound');
   const dialerMode = mode ?? internalDialerMode;
   const setDialerMode = setMode ?? setInternalDialerMode;
+  // Keep task assignment inside the Voice Simulator screen so the sidebar,
+  // header and dialer state stay mounted. This is intentionally UI state,
+  // not a route/sub-route.
+  const [showAssignTask, setShowAssignTask] = useState(false);
+  const taskPage = showAssignTask;
 
   const activeVirtualNumbers = virtualNumbers;
 
@@ -1601,7 +1603,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           <IconButton
               icon={Plus}
               label="Assign Dialing Task"
-              onClick={() => setMode?.('assign-task')}
+              onClick={() => setShowAssignTask(true)}
             />
         ) : undefined
       }
@@ -2231,7 +2233,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               subtitle: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
               layout: 'fill',
               action: (
-                <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => setMode?.('outbound')}>
+                <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => setShowAssignTask(false)}>
                   Back to Voice Simulator
                 </Button>
               )
