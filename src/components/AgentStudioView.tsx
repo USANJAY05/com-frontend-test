@@ -372,25 +372,60 @@ export default function AgentStudioView() {
     }
   };
 
-  const isModalOpen = creating || !!editingAgent;
   const assignableNumbers = freeNumbers(editingAgent?.id ?? null);
 
-  // Creation is a page-level AWS-style wizard; editing remains a modal.
+  // Creating an agent is a full-page AWS EC2-style configuration experience.
+  // Editing remains a compact modal so existing edit behavior is unchanged.
   const AgentFormFrame = creating
     ? ({ children }: { children: React.ReactNode }) => (
-        <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4">
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-200 dark:border-[var(--border)]">
-              <h2 className="text-base font-bold text-slate-800 dark:text-[var(--text-primary)]">
-                Create Agent — Step {agentWizardStep} of 2
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-[var(--text-muted)] mt-1">
-                {agentWizardStep === 1
-                  ? 'Fill in the agent configuration, then continue to review.'
-                  : 'Review the complete configuration before creating the agent.'}
-              </p>
+        <div className="w-full px-4 sm:px-6 lg:px-8 pb-10 pt-2">
+          <div className="max-w-[1440px] mx-auto">
+            <div className="mb-5">
+              <div className="text-[11px] text-slate-500 mb-2">Agent Studio / Create Agent</div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-[var(--text-primary)]">
+                    Create agent
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-[var(--text-muted)] mt-1">
+                    Configure the voice agent and review its launch configuration before creating it.
+                  </p>
+                </div>
+                <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
+                  <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold ${agentWizardStep === 1 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>1</span>
+                  <span>Configure</span>
+                  <span className="text-slate-300">→</span>
+                  <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold ${agentWizardStep === 2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>2</span>
+                  <span>Review</span>
+                </div>
+              </div>
             </div>
-            <div className="p-6 sm:p-8">{children}</div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+              <div className="min-w-0 space-y-5">{children}</div>
+
+              <aside className="xl:sticky xl:top-4 rounded-xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200 dark:border-[var(--border)]">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-[var(--text-primary)]">Agent summary</h3>
+                  <p className="text-[11px] text-slate-500 mt-1">Review the configuration before creating the agent.</p>
+                </div>
+                <div className="p-5 space-y-4">
+                  {[
+                    ['Name', form.name || 'Not configured'],
+                    ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
+                    ['Voice', form.activeVoice],
+                    ['Language', form.language + (form.dialect ? ` · ${form.dialect}` : '')],
+                    ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
+                    ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? `${form.knowledgeBaseDocumentIds?.length ?? 0} documents` : 'None'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="border-b border-slate-100 dark:border-[var(--border)] pb-3 last:border-0 last:pb-0">
+                      <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">{label}</p>
+                      <p className="text-xs font-medium text-slate-700 dark:text-[var(--text-secondary)] mt-1 break-words">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+            </div>
           </div>
         </div>
       )
@@ -399,7 +434,7 @@ export default function AgentStudioView() {
   const agentFormFrameProps = creating
     ? {}
     : {
-        open: true,
+        open: !!editingAgent,
         onClose: closeForm,
         title: 'Edit Agent',
         subtitle: `Editing ${editingAgent?.name ?? ''} — changes save when you click Save.`,
@@ -735,7 +770,8 @@ export default function AgentStudioView() {
         </div>
       )}
 
-      {/* ── Agent create / edit modal ── */}
+      {/* ── Agent create page / edit modal ── */}
+      {(creating || !!editingAgent) && (
       <AgentFormFrame {...agentFormFrameProps}>
         <div className="space-y-6">
           {creating && (
@@ -1305,6 +1341,6 @@ export default function AgentStudioView() {
           )}
         </div>
       </AgentFormFrame>
-    </PageShell>
+      )}
   );
 }
