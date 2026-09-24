@@ -737,7 +737,7 @@ export default function AgentStudioView() {
 
       {/* ── Agent create / edit modal ── */}
       <AgentFormFrame {...agentFormFrameProps}>
-        <div className="space-y-6">        <div className="space-y-6">
+        <div className="space-y-6">
           {creating && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50/70 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
               <div className={`flex items-center gap-2 ${agentWizardStep === 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
