@@ -378,7 +378,7 @@ export default function AgentStudioView() {
   // Editing remains a compact modal so existing edit behavior is unchanged.
   const AgentFormFrame = creating
     ? ({ children }: { children: React.ReactNode }) => (
-        <div className="w-full px-3 sm:px-5 lg:px-6 xl:px-8 pb-10 pt-2">
+        <div className="col-span-12 w-full px-3 sm:px-5 lg:px-6 xl:px-8 pb-10 pt-2">
           <div className="w-full">
             <div className="mb-5">
               <div className="text-[11px] text-slate-500 mb-2">Agent Studio / Create Agent</div>
