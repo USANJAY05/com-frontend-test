@@ -2256,7 +2256,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
               <div className={`flex items-center gap-2 ${wizardStep === 1 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
                 <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${wizardStep === 1 ? 'bg-blue-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>1</span>
-                <span className="text-xs font-semibold">Configure</span>
+                <span className="text-xs font-semibold">Fill in details</span>
               </div>
               <div className="h-px flex-1 bg-[var(--border)]" />
               <div className={`flex items-center gap-2 ${wizardStep === 2 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
@@ -2270,14 +2270,14 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {taskPage && (
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Dialing task setup</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">Complete each section from top to bottom, then create the dialing task at the end.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Enter the workflow, outbound agent, and contacts for this dialing task.</p>
               </div>
             )}
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">1</span> Select a Workflow</h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Workflow</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active workflows with question tasks are shown — activate a workflow in Workflow Builder to make it available here.</p>
                 </div>
 
@@ -2341,7 +2341,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {/* ── Step 2: Select Agent ──────────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">2</span> Select an Agent</h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Outbound Agent</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active agents with an outbound number assigned are shown — configure and enable agents in Agent Studio.</p>
                 </div>
 
@@ -2407,7 +2407,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {/* ── Step 3: Add Contacts ──────────────────────────────────────── */}
                           <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">3</span> Add Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Select from your contact database or add new contacts manually. You can mix both.</p>
                 </div>
 
@@ -2563,7 +2563,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {wizardStep === 2 && selectedWorkflow && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><span className="h-6 w-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shrink-0">4</span> Review & Create</h3>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">Review & Create</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Confirm the details below, then create the dialing task.</p>
                 </div>
 
