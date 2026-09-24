@@ -2251,7 +2251,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
         return (
           <WizardFrame {...frameProps}>
-            <div className={taskPage ? 'w-full px-3 sm:px-5 lg:px-6 xl:px-8 pb-12 pt-4 space-y-6' : ''}>
+            <div className={taskPage ? 'col-span-12 w-full px-3 sm:px-5 lg:px-6 xl:px-8 pb-12 pt-4 space-y-6' : ''}>
             {/* AWS-style two-step flow: Configure first, then review and create. */}
             <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/50 px-4 py-3">
               <div className={`flex items-center gap-2 ${wizardStep === 1 ? 'text-blue-600' : 'text-[var(--text-muted)]'}`}>
