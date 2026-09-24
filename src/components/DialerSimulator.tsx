@@ -2247,15 +2247,6 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           description: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
           steps: [{ label: 'Configure' }, { label: 'Review' }],
           activeStep: wizardStep,
-          summaryTitle: 'Dialing task summary',
-          summaryDescription: 'Review the configuration before creating the dialing task.',
-          summary: [
-            { label: 'Workflow', value: selectedWorkflow?.name || 'Not selected' },
-            { label: 'Outbound agent', value: selectedAgent?.name || 'Not selected' },
-            { label: 'Contacts', value: `${totalContacts} selected` },
-            { label: 'Contact source', value: wizardContactTab === 'existing' ? 'Database' : 'New contacts' },
-            { label: 'Step', value: wizardStep === 1 ? 'Configure' : 'Review & Create' },
-          ],
           action: (
             <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => setShowAssignTask(false)}>
               Back to Voice Simulator
