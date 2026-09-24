@@ -448,7 +448,7 @@ export default function AgentStudioView() {
         </div>
       }
     >
-      {agentView === 'user' && !creating && (
+      {agentView === 'user' && !creating && !editingAgent && (
       <div className="col-span-12">
           {loading ? (
             <div className="flex items-center justify-center py-20 text-slate-400">
