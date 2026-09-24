@@ -2018,7 +2018,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                       className={`rounded-2xl px-4 py-2 text-xs font-sans leading-relaxed ${
                         isAI
                           ? 'bg-blue-600 text-white rounded-tl-none'
-                          : 'bg-slate-100 dark:bg-[var(--bg-subtle)] text-[var(--text-primary)] rounded-tr-none border border-slate-200 dark:border-[var(--border)]'
+                          : 'bg-slate-100 dark:bg-[var(--bg-subtle)] text-[var(--text-primary)] rounded-tr-none border border-slate-300 dark:border-[var(--border)]'
                       }`}
                     >
                       {line.text}
@@ -2028,7 +2028,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               })
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-[var(--text-muted)] space-y-2">
-                <Mic className="h-8 w-8 text-slate-300 dark:text-slate-600 animate-pulse" />
+                <Mic className="h-8 w-8 text-slate-300 dark:text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-secondary)] animate-pulse" />
                 <p className="text-xs text-[var(--text-muted)]">Awaiting telephone call connection to parse audio waves...</p>
               </div>
             )}
@@ -2058,7 +2058,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                       setCustomerUtterance(suggestion);
                       handleSendUtterance(suggestion);
                     }}
-                    className="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-[var(--bg-subtle)] hover:bg-blue-600 hover:text-white text-[var(--text-secondary)] border border-slate-200 dark:border-[var(--border)] rounded px-2.5 py-1 transition-all cursor-pointer"
+                    className="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-[var(--bg-subtle)] hover:bg-blue-600 hover:text-white text-[var(--text-secondary)] border border-slate-300 dark:border-[var(--border)] rounded px-2.5 py-1 transition-all cursor-pointer"
                   >
                     <Mic className="h-2.5 w-2.5" /> Say: "{suggestion}"
                   </button>
@@ -2077,7 +2077,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                   value={customerUtterance}
                   onChange={(e) => setCustomerUtterance(e.target.value)}
                   placeholder="Type customer reply here..."
-                  className="flex-1 rounded-xl px-3.5 py-2.5 text-xs placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-[var(--bg-surface)] border border-slate-200 dark:border-[var(--border)] text-[var(--text-primary)]"
+                  className="flex-1 rounded-xl px-3.5 py-2.5 text-xs placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-[var(--bg-surface)] border border-slate-300 dark:border-[var(--border)] text-[var(--text-primary)]"
                 />
                 <Button type="submit" variant="primary" size="md" className="!px-2.5">
                   <Send className="h-4 w-4" />
