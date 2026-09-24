@@ -1,6 +1,6 @@
 import React from 'react';
 import { Globe2, LayoutDashboard, Building2, Users, ScrollText, LogOut, Settings, IndianRupee, MessageSquareText, Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import { Routes, Route, NavLink, Navigate, Link } from 'react-router-dom';
 import OverviewPage from './OverviewPage';
 import OrganizationsPage from './OrganizationsPage';
 import CreateWorkspacePage from './CreateWorkspacePage';
@@ -132,13 +132,13 @@ function PageWrap({
               </div>
               <div className="mt-1 flex items-center gap-3">
                 {backTo && (
-                  <a
-                    href={backTo}
+                  <Link
+                    to={backTo}
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
                     aria-label={`Back to ${section}`}
                   >
                     ←
-                  </a>
+                  </Link>
                 )}
                 <h1 className="truncate text-lg font-semibold text-[var(--text-primary)]">{title}</h1>
               </div>
