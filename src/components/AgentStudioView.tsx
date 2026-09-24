@@ -378,8 +378,8 @@ export default function AgentStudioView() {
   // Editing remains a compact modal so existing edit behavior is unchanged.
   const AgentFormFrame = creating
     ? ({ children }: { children: React.ReactNode }) => (
-        <div className="w-full px-4 sm:px-6 lg:px-8 pb-10 pt-2">
-          <div className="max-w-[1440px] mx-auto">
+        <div className="w-full px-3 sm:px-5 lg:px-6 xl:px-8 pb-10 pt-2">
+          <div className="w-full">
             <div className="mb-5">
               <div className="text-[11px] text-slate-500 mb-2">Agent Studio / Create Agent</div>
               <div className="flex items-start justify-between gap-4">
@@ -401,10 +401,10 @@ export default function AgentStudioView() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-5 2xl:gap-6 items-start">
               <div className="min-w-0 space-y-5">{children}</div>
 
-              <aside className="xl:sticky xl:top-4 rounded-xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
+              <aside className="xl:sticky xl:top-6 rounded-xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-200 dark:border-[var(--border)]">
                   <h3 className="text-sm font-semibold text-slate-900 dark:text-[var(--text-primary)]">Agent summary</h3>
                   <p className="text-[11px] text-slate-500 mt-1">Review the configuration before creating the agent.</p>
