@@ -358,7 +358,7 @@ function ProviderRow({
             </>
           )}
         </>
-      )
+      )}
 
       <Field label="Tax %">
         <input
