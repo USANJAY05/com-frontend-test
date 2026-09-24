@@ -140,16 +140,6 @@ function AgentFormFrame({ children, creating, agentWizardStep, form }: AgentForm
       description={creating ? 'Configure the voice agent and review its launch configuration before creating it.' : 'Update the voice agent configuration and review the changes before saving.'}
       steps={[{ label: 'Configure' }, { label: creating ? 'Review & Create' : 'Review & Save' }]}
       activeStep={agentWizardStep}
-      summaryTitle="Agent summary"
-      summaryDescription={creating ? 'Review the configuration before creating the agent.' : 'Review the configuration before saving your changes.'}
-      summary={[
-        ['Name', form.name || 'Not configured'],
-        ['Call type', form.callType === 'OUTBOUND' ? 'Outbound' : 'Inbound'],
-        ['Voice', form.activeVoice],
-        ['Language', form.language + (form.dialect ? ' · ' + form.dialect : '')],
-        ['Phone', form.callType === 'OUTBOUND' ? (form.outboundNumber?.number || 'Org default') : (form.assignedNumber?.number || 'None')],
-        ['Knowledge', form.knowledgeBaseMode === 'all' ? 'Full knowledge base' : form.knowledgeBaseMode === 'specific' ? ((form.knowledgeBaseDocumentIds?.length ?? 0) + ' documents') : 'None'],
-      ].map(([label, value]) => ({ label, value }))}
     >
       {children}
     </AwsCreateLayout>
