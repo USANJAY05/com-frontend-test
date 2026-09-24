@@ -59,6 +59,11 @@ export interface OrgDetail {
   members: { id: string; name: string; email: string; role: string; status: string; hasAccount: boolean; createdAt: string }[];
   recentCalls: { id: string; callerNumber: string; agentName: string; durationSeconds: number; sentiment: string | null; recordingUrl: string | null; createdAt: string }[];
   recentActivity: { id: string; actorEmail: string | null; action: string; metadata: Record<string, unknown>; createdAt: string }[];
+  billingMethod?: 'pay_as_you_go' | 'recharge_based';
+  chargeScope?: 'ai_only' | 'ai_and_call_provider';
+  rechargeBalanceInr?: number;
+  rechargeReservedInr?: number;
+  rechargeAvailableInr?: number;
 }
 
 export interface UserRow {
