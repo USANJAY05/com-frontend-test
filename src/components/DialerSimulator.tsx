@@ -780,7 +780,30 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
       .catch(() => setWizardContactGroups([]));
   };
 
+  const ESTIMATED_CALL_RESERVATION_INR = 5;
+
+  // Recharge-based organizations must have enough available balance before
+  // any real outbound call is attempted. The backend enforces the same rule,
+  // but the UI checks it first so users see an actionable warning immediately.
+  const ensureCallBalance = () => {
+    if (orgSettings?.billingMethod !== 'recharge_based') return true;
+    const available = Math.max(
+      0,
+      Number(orgSettings.rechargeBalanceInr || 0) - Number(orgSettings.rechargeReservedInr || 0),
+    );
+    if (available >= ESTIMATED_CALL_RESERVATION_INR) return true;
+
+    alert(
+      'Insufficient recharge balance\\n\\n' +
+      'Available balance: ' + formatInr(available) + '\\n' +
+      'Estimated call reservation: ' + formatInr(ESTIMATED_CALL_RESERVATION_INR) + '\\n\\n' +
+      'Please recharge your organization balance before starting a call.',
+    );
+    return false;
+  };
+
   const handleInitiateVobizCall = async (lead: Lead) => {
+    if (!ensureCallBalance()) return;
     if (callState === 'dialing' || callState === 'connected') return;
 
     cancelDialRequestedRef.current = false;
@@ -1211,6 +1234,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
   // notifications through App.tsx's existing SSE handler).
   const handleStartServerAutoDial = async () => {
     if (!selectedTask) return;
+    if (!ensureCallBalance()) return;
     setServerAutoDialBusy(true);
     try {
       const res = await apiFetch(`/api/dialer-tasks/${selectedTask.id}/auto-dial/start`, {
@@ -1827,6 +1851,16 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                 </Button>
               )}
               </div>
+              {orgSettings?.billingMethod === 'recharge_based' &&
+                Math.max(0, Number(orgSettings.rechargeBalanceInr || 0) - Number(orgSettings.rechargeReservedInr || 0)) < ESTIMATED_CALL_RESERVATION_INR && (
+                <div className="mt-3 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-200">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="min-w-0 text-xs">
+                    <p className="font-semibold">Insufficient recharge balance</p>
+                    <p className="mt-0.5">Available {formatInr(Math.max(0, Number(orgSettings.rechargeBalanceInr || 0) - Number(orgSettings.rechargeReservedInr || 0)))}. A call requires an estimated {formatInr(ESTIMATED_CALL_RESERVATION_INR)} reservation. Recharge your balance before calling.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* List Queue Table — normal mode (Lead Contact/Value/Survey
