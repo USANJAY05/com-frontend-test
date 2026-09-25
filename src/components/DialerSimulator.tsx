@@ -50,6 +50,7 @@ import SlideOver from './ui/SlideOver';
 import Badge from './ui/Badge';
 import { apiFetch, getPlayableRecordingUrl } from '../lib/api';
 import { callCostInr, formatInr } from '../lib/pricing';
+import { useToast } from './ui/Toast';
 
 interface WizardAgent {
   id: string;
@@ -306,6 +307,7 @@ export default function DialerSimulator({
   setOrgSettings,
   isActive = true
 }: DialerSimulatorProps) {
+  const { showToast } = useToast();
   const isInsurance = industry === 'insurance';
   const storagePrefix = `chiefx:${encodeURIComponent(orgSettings?.id || companyName || 'default')}`;
   const storageKey = (key: string) => `${storagePrefix}:${key}`;
@@ -793,11 +795,13 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
     );
     if (available >= ESTIMATED_CALL_RESERVATION_INR) return true;
 
-    alert(
-      'Insufficient recharge balance\\n\\n' +
-      'Available balance: ' + formatInr(available) + '\\n' +
-      'Estimated call reservation: ' + formatInr(ESTIMATED_CALL_RESERVATION_INR) + '\\n\\n' +
-      'Please recharge your organization balance before starting a call.',
+    showToast(
+      'Insufficient recharge balance. Available: ' +
+        formatInr(available) +
+        '. Estimated call reservation: ' +
+        formatInr(ESTIMATED_CALL_RESERVATION_INR) +
+        '. Please recharge your organization balance before calling.',
+      'warning',
     );
     return false;
   };
@@ -1851,16 +1855,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                 </Button>
               )}
               </div>
-              {orgSettings?.billingMethod === 'recharge_based' &&
-                Math.max(0, Number(orgSettings.rechargeBalanceInr || 0) - Number(orgSettings.rechargeReservedInr || 0)) < ESTIMATED_CALL_RESERVATION_INR && (
-                <div className="mt-3 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-200">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <div className="min-w-0 text-xs">
-                    <p className="font-semibold">Insufficient recharge balance</p>
-                    <p className="mt-0.5">Available {formatInr(Math.max(0, Number(orgSettings.rechargeBalanceInr || 0) - Number(orgSettings.rechargeReservedInr || 0)))}. A call requires an estimated {formatInr(ESTIMATED_CALL_RESERVATION_INR)} reservation. Recharge your balance before calling.</p>
-                  </div>
-                </div>
-              )}
+
             </div>
 
             {/* List Queue Table — normal mode (Lead Contact/Value/Survey
