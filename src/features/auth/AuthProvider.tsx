@@ -81,7 +81,20 @@ function extractCognitoUser(user: any, claims: Record<string, any>): AuthUser {
   const rawRole = claims['custom:role']
     ?? claims.role
     ?? (claims.platformAdmin === true || claims.admin === true ? 'platform-admin' : 'user');
-  return { id: user.userId ?? claims.sub ?? '', email: claims.email ?? '', name: claims.name ?? [claims.given_name, claims.family_name].filter(Boolean).join(' ') || user.attributes?.name || [user.attributes?.given_name, user.attributes?.family_name].filter(Boolean).join(' ') || null, role: mapRole(rawRole), tokenParsed: claims };
+  const profileName =
+    claims.name ||
+    [claims.given_name, claims.family_name].filter(Boolean).join(' ') ||
+    user.attributes?.name ||
+    [user.attributes?.given_name, user.attributes?.family_name].filter(Boolean).join(' ') ||
+    null;
+
+  return {
+    id: user.userId ?? claims.sub ?? '',
+    email: claims.email ?? '',
+    name: profileName,
+    role: mapRole(rawRole),
+    tokenParsed: claims,
+  };
 }
 
 function LoadingSplash() {
