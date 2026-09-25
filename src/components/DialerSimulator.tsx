@@ -1642,15 +1642,25 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
   return (
     <PageShell
       title={taskPage
-        ? 'Assign Dialing Task'
+        ? 'Voice Simulator / Assign Dialing Task'
         : <BreadcrumbTitle group="Campaign" page={dialerMode === 'outbound' ? 'Outbound Campaigns' : 'Inbound Virtual Center'} />}
       subtitle={taskPage
-        ? 'Configure the workflow, outbound agent, and contacts for this dialing task.'
+        ? undefined
         : 'Configure automated workflows, initiate sequential campaigns, or trigger dynamic incoming calls to your virtual phone lines.'}
       layout={taskPage ? 'grid' : 'fill'}
+      onRefresh={taskPage ? undefined : undefined}
       action={
         taskPage
-          ? undefined
+          ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={ArrowLeft}
+                onClick={() => setShowAssignTask(false)}
+              >
+                Back to Voice Simulator
+              </Button>
+            )
           : dialerMode === 'outbound' ? (
               <IconButton
                 icon={Plus}

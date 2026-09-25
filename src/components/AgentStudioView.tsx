@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Sparkles, Loader2, Mic, Check, Plus, Trash2, Edit2,
   Phone, PhoneOff, Bot, Zap, ToggleRight, ToggleLeft, BookOpen, FileText, MoreVertical,
-  Cpu, Wrench, X,
+  Cpu, Wrench, X, ArrowLeft,
 } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { isDevEnv } from '../lib/env';
@@ -130,16 +130,27 @@ interface AgentFormFrameProps {
   creating: boolean;
   agentWizardStep: number;
   form: Omit<Agent, 'id'>;
+  onBack: () => void;
 }
 
-function AgentFormFrame({ children, creating, agentWizardStep, form }: AgentFormFrameProps) {
+function AgentFormFrame({ children, creating, agentWizardStep, form, onBack }: AgentFormFrameProps) {
   return (
     <AwsCreateLayout
       breadcrumb={creating ? 'Agent Studio / Create Agent' : 'Agent Studio / Edit Agent'}
-      title={creating ? 'Create agent' : 'Edit agent'}
-      description={creating ? 'Configure the voice agent and review its launch configuration before creating it.' : 'Update the voice agent configuration and review the changes before saving.'}
-      steps={[{ label: 'Configure' }, { label: creating ? 'Review & Create' : 'Review & Save' }]}
+      title=""
+      description=""
+      steps={[]}
       activeStep={agentWizardStep}
+      action={(
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-500 bg-slate-700 text-white hover:bg-slate-600 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Agent Studio
+        </button>
+      )}
     >
       {children}
     </AwsCreateLayout>
@@ -400,52 +411,50 @@ export default function AgentStudioView() {
 
   return (
     <PageShell
-      title={creating ? 'Create Agent' : editingAgent ? 'Edit Agent' : 'Agent Studio'}
-      subtitle={creating
-        ? 'Configure your agent, review the settings, and create it.'
+      title={creating
+        ? 'Agent Studio / Create Agent'
         : editingAgent
-          ? 'Edit ' + editingAgent.name + ' — review the configuration and save your changes.'
-          : agentView === 'user'
+          ? 'Agent Studio / Edit Agent'
+          : 'Agent Studio'}
+      subtitle={creating || editingAgent
+        ? undefined
+        : agentView === 'user'
           ? 'Create AI calling agents — each with its own voice, persona, and phone number.'
           : 'Built-in AI agents that run automatically after every call — no phone number, no voice, just a system prompt.'}
-      onRefresh={() => loadData()}
+      onRefresh={creating || editingAgent ? undefined : () => loadData()}
       action={
-        <div className="flex items-center gap-2">
-          {/* System Agents (built-in post-call prompt editor) is dev-only —
-              gated on VITE_APP_ENV=dev (see src/lib/env.ts) so it's not
-              reachable in a real production build at all, not just
-              visually hidden. */}
-          {isDevEnv && (
-            <div className="flex items-center bg-slate-100 dark:bg-[var(--bg-subtle)] border border-slate-300 dark:border-[var(--border)] rounded-xl p-1">
-              <button
-                type="button"
-                onClick={() => setAgentView('user')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'user' ? 'bg-white dark:bg-[var(--bg-surface)] text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-[var(--text-primary)]'}`}
-              >
-                User Agents
-              </button>
-              <button
-                type="button"
-                onClick={() => setAgentView('system')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'system' ? 'bg-white dark:bg-[var(--bg-surface)] text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-[var(--text-primary)]'}`}
-              >
-                System Agents
-              </button>
-            </div>
-          )}
-          {creating || editingAgent ? (
-            <button
-              type="button"
-              onClick={closeForm}
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] transition-colors"
-            >
-              <X className="h-4 w-4" />
-              Back to Agent Studio
-            </button>
-          ) : (
-            agentView === 'user' && <IconButton icon={Plus} label="New Agent" onClick={openCreate} />
-          )}
-        </div>
+        creating || editingAgent ? (
+          <button
+            type="button"
+            onClick={closeForm}
+            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-500 bg-slate-700 text-white hover:bg-slate-600 transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to Agent Studio
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            {isDevEnv && (
+              <div className="flex items-center bg-slate-100 dark:bg-[var(--bg-subtle)] border border-slate-300 dark:border-[var(--border)] rounded-xl p-1">
+                <button
+                  type="button"
+                  onClick={() => setAgentView('user')}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'user' ? 'bg-white dark:bg-[var(--bg-surface)] text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-[var(--text-primary)]'}`}
+                >
+                  User Agents
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAgentView('system')}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'system' ? 'bg-white dark:bg-[var(--bg-surface)] text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-[var(--text-primary)]'}`}
+                >
+                  System Agents
+                </button>
+              </div>
+            )}
+            {agentView === 'user' && <IconButton icon={Plus} label="New Agent" onClick={openCreate} />}
+          </div>
+        )
       }
     >
       {agentView === 'user' && !creating && !editingAgent && (
@@ -731,7 +740,7 @@ export default function AgentStudioView() {
 
       {/* ── Agent create page / edit modal ── */}
       {(creating || !!editingAgent) && (
-      <AgentFormFrame creating={creating} agentWizardStep={agentWizardStep} form={form}>
+      <AgentFormFrame creating={creating} agentWizardStep={agentWizardStep} form={form} onBack={closeForm}>
         <div className="space-y-6">
           {(creating || editingAgent) && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-300 dark:border-[var(--border)] bg-slate-50/80 dark:bg-[var(--bg-subtle)]/60 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
