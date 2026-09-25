@@ -96,8 +96,8 @@ export default function OrganizationsPage() {
                 <tr key={o.id} onClick={() => setSelectedOrgId(o.id)} className="border-b border-slate-50 last:border-0 cursor-pointer hover:bg-slate-50">
                   <td className="px-5 py-3 font-medium text-slate-700">{o.name}<div className="text-[10px] text-slate-400 font-normal">{o.workspaceName}</div></td>
                   <td className="px-5 py-3">
-                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${o.status === 'Suspended' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                      {o.status || 'Active'}
+                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${String(o.status || '').toLowerCase() === 'suspended' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                      {String(o.status || '').toLowerCase() === 'suspended' ? 'Suspended' : 'Active'}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-slate-500">{o.industry}</td>

@@ -291,8 +291,8 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl font-bold text-slate-900">{detail.name}</h2>
-                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${detail.status === 'Suspended' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                      {detail.status || 'Active'}
+                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${String(detail.status || '').toLowerCase() === 'suspended' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                      {String(detail.status || '').toLowerCase() === 'suspended' ? 'Suspended' : 'Active'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 font-mono mt-1">{detail.workspaceName} · {detail.industry}</p>
