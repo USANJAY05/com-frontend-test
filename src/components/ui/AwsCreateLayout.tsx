@@ -68,9 +68,9 @@ export default function AwsCreateLayout({
                       <span
                         className={
                           active
-                            ? 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-indigo-600 text-white'
+                            ? 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-slate-700 text-white dark:bg-slate-200 dark:text-slate-900'
                             : complete
-                              ? 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                              ? 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-slate-300 text-slate-800 dark:bg-slate-600 dark:text-slate-100'
                               : 'h-6 w-6 rounded-full flex items-center justify-center font-bold bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
                         }
                       >
