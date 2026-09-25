@@ -968,7 +968,8 @@ export default function App() {
   }
 
   return (
-    <div className="grid grid-cols-[auto_1fr] h-screen w-screen overflow-hidden bg-slate-50/50 dark:bg-[var(--bg)]">
+    <ToastProvider>
+      <div className="grid grid-cols-[auto_1fr] h-screen w-screen overflow-hidden bg-slate-50/50 dark:bg-[var(--bg)]">
       {/* Sidebar Rail */}
       <Sidebar
         activeTab={activeTab}
