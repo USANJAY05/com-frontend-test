@@ -287,6 +287,10 @@ interface DialTask {
       // "Completed" while this is false (picked up, said nothing/"wrong
       // number", hung up). See callFinalizer.js.
       callAnswered?: boolean;
+      callbackReason?: string;
+      conversationOutcome?: 'completed' | 'busy' | 'callback_scheduled' | 'enquiry' | 'callback_and_enquiry' | 'no_answer' | 'answering_machine';
+      callbackStatus?: 'none' | 'scheduled' | 'completed';
+      enquiryStatus?: 'none' | 'open' | 'contacted' | 'resolved';
     }
   };
   // Server-side auto-dial runtime state — set by src/crm/autoDialEngine.js
@@ -982,6 +986,10 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
               callId: realCallLog?.callId,
               callbackTime: realCallLog?.callbackTime,
               callAnswered: realCallLog?.callAnswered,
+              callbackReason: realCallLog?.callbackReason,
+              conversationOutcome: realCallLog?.conversationOutcome,
+              callbackStatus: realCallLog?.callbackStatus,
+              enquiryStatus: realCallLog?.enquiryStatus,
             }
           }
         };
