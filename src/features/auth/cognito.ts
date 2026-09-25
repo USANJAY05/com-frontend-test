@@ -24,9 +24,9 @@ export function configureCognito() {
         loginWith: {
           oauth: {
             domain: config.domain,
-            // Keep only scopes currently accepted by this app client. Profile data is read from ID-token claims.\n            scopes: ['openid', 'email', 'aws.cognito.signin.user.admin'],
-            redirectSignIn: [config.redirectSignIn],
-            redirectSignOut: [config.redirectSignOut],
+            // Keep only scopes currently accepted by this app client. Profile data is read from ID-token claims.\n            scopes: ['openid', 'email'],
+            redirectSignIn: [String(config.redirectSignIn).trim()],
+            redirectSignOut: [String(config.redirectSignOut).trim()],
             responseType: 'code',
           },
         },
@@ -37,7 +37,7 @@ export function configureCognito() {
 }
 export async function signInWithCognito(provider?: 'Google' | 'Facebook' | 'Amazon' | 'Apple') {
   configureCognito();
-  await signInWithRedirect(provider ? { provider } : undefined);
+  await signInWithRedirect(provider ? { provider } : {});
 }
 export async function getCognitoToken() {
   configureCognito();
