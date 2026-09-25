@@ -57,6 +57,8 @@ interface SettingsViewProps {
   // Numbers) — phoneCharges is then only an estimate for reference,
   // never something owed to the platform. Defaults true (billable).
   phoneChargesBillable?: boolean;
+  // Recharge-based wallet balance. This is shown only when the organization
+  // is configured for recharge_based billing.
   activeSubTab?: 'numbers' | 'team' | 'billing' | 'api';
   setActiveSubTab?: (sub: string) => void;
   currentUserEmail?: string;
@@ -877,6 +879,29 @@ export default function SettingsView({
           {/* Subtab: Billing info */}
           {subTab === 'billing' && (
             <div className="space-y-6">
+              {orgSettings.billingMethod === 'recharge_based' && (
+                <Widget title="Available Balance" subtitle="Recharge wallet balance available for calls" icon={DollarSign} accent="#10b981" padding="md">
+                  {(() => {
+                    const balance = Number(orgSettings.rechargeBalanceInr ?? 0);
+                    const reserved = Number(orgSettings.rechargeReservedInr ?? 0);
+                    const available = Math.max(0, balance - reserved);
+                    return (
+                      <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 px-5 py-4">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Available balance</p>
+                          <p className="text-xs text-slate-500 dark:text-[var(--text-secondary)] mt-1">
+                            {reserved > 0 ? 'Reserved for active calls' : 'Ready to use'}
+                          </p>
+                        </div>
+                        <strong className="text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-400">
+                          {'₹'}{available.toFixed(2)}
+                        </strong>
+                      </div>
+                    );
+                  })()}
+                </Widget>
+              )}
+
               <Widget title="AI Voice Usage This Period" icon={CreditCard} accent="#10b981" padding="md">
                 <div className="grid grid-cols-3 gap-4 pt-2">
                   <div className="bg-slate-50 p-4 rounded-xl text-center">
