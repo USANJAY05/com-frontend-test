@@ -83,9 +83,18 @@ interface ObjectMetrics {
 // whether the callee actually engaged (see callFinalizer.js's
 // callAnswered heuristic) vs. picked up, said nothing/one word, and hung
 // up. Used for Success Rate and Inbound vs Outbound below.
-function getCallOutcome(status: string, callAnswered?: boolean): string {
-  if (status === 'Completed') return callAnswered === false ? 'Not Answered' : 'Answered';
-  return status;
+function getCallOutcome(status: string, callAnswered?: boolean, conversationOutcome?: CallLog['conversationOutcome']): string {
+  switch (conversationOutcome) {
+    case 'callback_scheduled': return 'Callback Scheduled';
+    case 'callback_and_enquiry': return 'Callback + Enquiry';
+    case 'enquiry': return 'Enquiry';
+    case 'busy': return 'Busy';
+    case 'no_answer': return 'No Answer';
+    case 'answering_machine': return 'Answering Machine';
+    default:
+      if (status === 'Completed') return callAnswered === false ? 'Not Answered' : 'Answered';
+      return status;
+  }
 }
 
 // ── Business-level Call Outcome vs. Call Status ─────────────────────────
@@ -485,7 +494,7 @@ export default function ReportsView({ callLogs, dialerTasks, leads, costPerMinut
     });
     const bucket = (dir: 'inbound' | 'outbound') => {
       const calls = scoped.filter(c => c.direction === dir);
-      const answered = calls.filter(c => getCallOutcome(c.status, c.callAnswered) === 'Answered').length;
+      const answered = calls.filter(c => getCallOutcome(c.status, c.callAnswered, c.conversationOutcome) === 'Answered').length;
       return { direction: dir === 'inbound' ? 'Inbound' : 'Outbound', total: calls.length, answered, notAnswered: calls.length - answered };
     };
     return [bucket('inbound'), bucket('outbound')];
