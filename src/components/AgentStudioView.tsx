@@ -460,14 +460,14 @@ export default function AgentStudioView() {
                 <button
                   type="button"
                   onClick={() => setAgentView('user')}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'user' ? 'bg-white dark:bg-[var(--bg-surface)] text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-slate-500 hover:text-[var(--text-primary)]'}`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'user' ? 'bg-[var(--bg-surface)] text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-slate-500 hover:text-[var(--text-primary)]'}`}
                 >
                   User Agents
                 </button>
                 <button
                   type="button"
                   onClick={() => setAgentView('system')}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'system' ? 'bg-white dark:bg-[var(--bg-surface)] text-[var(--text-primary)]  shadow-sm' : 'text-slate-500 hover:text-[var(--text-primary)]'}`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${agentView === 'system' ? 'bg-[var(--bg-surface)] text-[var(--text-primary)]  shadow-sm' : 'text-slate-500 hover:text-[var(--text-primary)]'}`}
                 >
                   System Agents
                 </button>
@@ -505,7 +505,7 @@ export default function AgentStudioView() {
               {agents.map(agent => (
                 <div
                   key={agent.id}
-                  className="relative flex flex-col rounded-2xl border border-[var(--border)] bg-white hover:border-indigo-300 hover:shadow-md transition-all group overflow-hidden"
+                  className="relative flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-indigo-300 hover:shadow-md transition-all group overflow-hidden"
                 >
                   {/* Top accent bar */}
                   <div className="h-1 w-full bg-gradient-to-r from-indigo-500 to-purple-500" />
@@ -668,7 +668,7 @@ export default function AgentStudioView() {
       {viewingSystemAgent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setViewingSystemAgent(null)}>
           <div
-            className="w-full max-w-xl max-h-[85vh] flex flex-col bg-white dark:bg-[var(--bg-surface)] rounded-2xl shadow-xl overflow-hidden"
+            className="w-full max-w-xl max-h-[85vh] flex flex-col bg-[var(--bg-surface)] rounded-2xl shadow-xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3 p-5 border-b border-slate-100">
@@ -766,12 +766,12 @@ export default function AgentStudioView() {
           {(creating || editingAgent) && (
             <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)]/80  px-4 py-3">
               <div className={`flex items-center gap-2 ${agentWizardStep === 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
-                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${agentWizardStep === 1 ? 'bg-indigo-600 text-white' : 'bg-white border border-[var(--border)]'}`}>1</span>
+                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${agentWizardStep === 1 ? 'bg-indigo-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>1</span>
                 <span className="text-xs font-semibold">Configure</span>
               </div>
               <div className="h-px flex-1 bg-slate-200 dark:bg-[var(--border)]" />
               <div className={`flex items-center gap-2 ${agentWizardStep === 2 ? 'text-indigo-600' : 'text-slate-400'}`}>
-                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${agentWizardStep === 2 ? 'bg-indigo-600 text-white' : 'bg-white border border-[var(--border)]'}`}>2</span>
+                <span className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${agentWizardStep === 2 ? 'bg-indigo-600 text-white' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}>2</span>
                 <span className="text-xs font-semibold">{creating ? 'Review & Create' : 'Review & Save'}</span>
               </div>
             </div>
