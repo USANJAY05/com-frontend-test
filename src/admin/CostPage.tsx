@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, Save, Phone, Cpu, Archive, Zap } from 'lucide-react';
+import { Loader2, Save, Phone, Cpu, Archive, Zap, Wallet } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import Widget from '../components/ui/Widget';
 import KpiCard from '../components/ui/KpiCard';
@@ -75,6 +75,8 @@ export default function CostPage() {
   const [error, setError] = useState('');
   const [archive, setArchive] = useState<CostArchiveEntry[]>([]);
   const [loadingArchive, setLoadingArchive] = useState(true);
+  const [balanceDefaults, setBalanceDefaults] = useState<Record<string, any>>({});
+  const [savingBalance, setSavingBalance] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -82,6 +84,10 @@ export default function CostPage() {
       .then((r) => r.json())
       .then((data) => setProviders(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
+
+    apiFetch('/api/platform/billing/call-balance/defaults')
+      .then((r) => r.json())
+      .then((data) => setBalanceDefaults(data && typeof data === 'object' ? data : {}));
 
     setLoadingArchive(true);
     apiFetch('/api/platform/cost-archive')
@@ -147,6 +153,25 @@ export default function CostPage() {
       <KpiCard colSpan={3} label="Active AI providers" value={activeAiProviderCount} icon={Cpu} iconBg="#4a3aa71a" iconColor="#4a3aa7" />
       <KpiCard colSpan={3} label="Deleted orgs archived" value={archive.length} icon={Archive} iconBg="#b453091a" iconColor="#b45309" />
 
+
+      <CallBalanceDefaultsSection
+        defaults={balanceDefaults}
+        savingKey={savingBalance}
+        onChange={(key, patch) => setBalanceDefaults((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }))}
+        onSave={async (industry, value) => {
+          setSavingBalance(industry);
+          setError('');
+          try {
+            const res = await apiFetch('/api/platform/billing/call-balance/defaults/' + encodeURIComponent(industry), {
+              method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to save call balance default');
+            setBalanceDefaults((prev) => ({ ...prev, [industry]: { ...prev[industry], ...data } }));
+          } catch (err: any) { setError(err.message || 'Failed to save call balance default'); }
+          finally { setSavingBalance(null); }
+        }}
+      />
       <ProviderSection
         title="Call providers"
         description="Telephony providers this codebase integrates with, billed per minute/hour plus tax. The AI voice cost per minute shown across Billing & Usage, Reports, and Dashboard is derived live from whichever provider here is active — Vobiz is the only one wired up today; a future provider becomes that source the moment it's marked active with a rate set."
@@ -402,5 +427,37 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <label className="block text-[10px] font-bold text-slate-400 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1">{label}</label>
       {children}
     </div>
+  );
+}
+
+
+function CallBalanceDefaultsSection({ defaults, savingKey, onChange, onSave }: {
+  defaults: Record<string, any>;
+  savingKey: string | null;
+  onChange: (key: string, patch: any) => void;
+  onSave: (key: string, value: any) => void;
+}) {
+  return (
+    <Widget colSpan={12} title="Minimum call balance by industry" subtitle="Set the minimum wallet amount reserved before a call. The reservation window can also be adjusted per industry. Organizations inherit these defaults unless a Super Admin sets an organization-specific override." icon={Wallet} accent="#f59e0b" padding="md">
+      <div className="space-y-3">
+        {Object.values(defaults).map((p: any) => (
+          <div key={p.industry} className="grid grid-cols-12 gap-3 items-end rounded-xl border border-slate-200 dark:border-[var(--border)] p-3">
+            <div className="col-span-4">
+              <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Industry</label>
+              <div className="mt-1 text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)]">{p.label || p.industry}</div>
+            </div>
+            <label className="col-span-3 text-xs text-slate-500">Minimum balance (₹)
+              <input type="number" min="0" step="0.01" value={p.minimumBalanceInr ?? 0} onChange={(e) => onChange(p.industry, { minimumBalanceInr: Number(e.target.value) })} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] px-3 py-2 text-sm" />
+            </label>
+            <label className="col-span-3 text-xs text-slate-500">Reservation minutes
+              <input type="number" min="1" step="1" value={p.reservationMinutes ?? 1} onChange={(e) => onChange(p.industry, { reservationMinutes: Number(e.target.value) })} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] px-3 py-2 text-sm" />
+            </label>
+            <button disabled={savingKey === p.industry} onClick={() => onSave(p.industry, { minimumBalanceInr: p.minimumBalanceInr, reservationMinutes: p.reservationMinutes })} className="col-span-2 rounded-lg bg-amber-500 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              {savingKey === p.industry ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </Widget>
   );
 }
