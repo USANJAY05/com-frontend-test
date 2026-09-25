@@ -27,7 +27,7 @@ export function configureCognito() {
         userPoolClientId: config.userPoolClientId,
         loginWith: {
           oauth: {
-            domain: String(config.domain).trim().replace(/^https?:\\/\\//, '').replace(/\\/+$/, ''),
+            domain: String(config.domain).trim().replace(/^https?:\/\//, '').replace(/\/+$/, ''),
             scopes: ['openid', 'email'],
             redirectSignIn: [String(config.redirectSignIn).trim()],
             redirectSignOut: [String(config.redirectSignOut).trim()],
