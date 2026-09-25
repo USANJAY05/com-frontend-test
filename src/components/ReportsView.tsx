@@ -51,6 +51,14 @@ interface DialTask {
   id: string;
   name: string;
   workflowId?: string;
+  workflowRunMetadata?: {
+    workflowId: string;
+    workflowName?: string | null;
+    runAt: string;
+    runDate?: string;
+    runTime?: string;
+    timezone?: string;
+  };
   leadIds: string[];
   status: string;
   createdAt: string;
