@@ -764,7 +764,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Voice */}
-          <div className="rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-violet-50/40 dark:bg-violet-500/5 p-4">
+          <div className="rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-violet-50/40 dark:bg-slate-800 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Mic className="h-4 w-4 text-violet-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Voice</p>
@@ -886,7 +886,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Delivery sliders */}
-          <div className="rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50/40 dark:bg-blue-500/5 p-4">
+          <div className="rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50/40 dark:bg-slate-800 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="h-4 w-4 text-blue-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Delivery</p>
