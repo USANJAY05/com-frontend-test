@@ -36,7 +36,6 @@ interface CreateOrgForm {
   subscriptionPlan: string;
   adminEmail: string;
   adminName: string;
-  gcpProjectId: string;
   gcpCredentialsJson: string;
   gcpLocation: string;
   callProvider: string;
@@ -62,7 +61,6 @@ export default function CreateWorkspacePage() {
     subscriptionPlan: 'Starter',
     adminEmail: '',
     adminName: '',
-    gcpProjectId: '',
     gcpCredentialsJson: '',
     gcpLocation: 'us-central1',
     callProvider: 'vobiz',
@@ -100,11 +98,6 @@ export default function CreateWorkspacePage() {
     setError('');
     setLoading(true);
     try {
-      if (!form.gcpProjectId.trim()) {
-        setError('Google Cloud Project ID is required.');
-        return;
-      }
-
       if (!form.gcpCredentialsJson.trim()) {
         setError('Service account credentials JSON is required.');
         return;
@@ -148,7 +141,6 @@ export default function CreateWorkspacePage() {
           featureFlags: selectedFlags,
           gcpProjectMode: 'existing',
           gcpProject: {
-            projectId: form.gcpProjectId.trim(),
             credentials,
             location: form.gcpLocation,
           },
@@ -241,17 +233,13 @@ export default function CreateWorkspacePage() {
           </div>
           <div className="rounded-xl border border-amber-400 bg-white px-3 py-3 ring-1 ring-amber-100 mb-4">
             <p className="text-xs font-semibold text-slate-700">Use an existing Google Cloud project <span className="text-rose-500">(required)</span></p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Enter the project ID, service-account JSON, and Vertex AI region.</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Paste the service-account JSON and select the Vertex AI region. The project ID is extracted automatically from the JSON.</p>
           </div>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Google Cloud Project ID *</label>
-              <input value={form.gcpProjectId} onChange={set('gcpProjectId')} placeholder="my-existing-gcp-project" required autoComplete="off" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500" />
-            </div>
-            <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Google Cloud Service Account JSON *</label>
               <textarea value={form.gcpCredentialsJson} onChange={set('gcpCredentialsJson')} placeholder="Paste the service account JSON here" required rows={7} autoComplete="off" spellCheck={false} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-amber-500 resize-y" />
-              <p className="text-[10px] text-slate-400 mt-1">Paste the service-account JSON for the selected project.</p>
+              <p className="text-[10px] text-slate-400 mt-1">The project_id is read automatically from this service-account JSON.</p>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Region / Location *</label>

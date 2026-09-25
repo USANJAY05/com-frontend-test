@@ -198,12 +198,12 @@ export default function CampaignView({
                     <div className="flex items-center space-x-6 shrink-0">
                       <div className="text-right space-y-1">
                         <span className="text-xs text-slate-400">Connect rate:</span>
-                        <p className="text-xs font-bold text-slate-700">
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {camp.calledLeads > 0 ? Math.round((camp.successfulCalls / camp.calledLeads) * 100) : 0}% ({camp.successfulCalls} / {camp.calledLeads})
                         </p>
                       </div>
 
-                      <div className="w-24 bg-slate-100 rounded-full h-2">
+                      <div className="w-24 bg-[var(--bg-subtle)] rounded-full h-2">
                         <div
                           className="bg-blue-600 h-2 rounded-full"
                           style={{ width: `${progressPercent}%` }}
@@ -213,7 +213,7 @@ export default function CampaignView({
                       <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => handleToggleStatus(camp.id, camp.status)}
-                          className="p-2 hover:bg-slate-200 rounded-full text-slate-500 hover:text-slate-800"
+                          className="p-2 hover:bg-[var(--bg-subtle)] rounded-full text-[var(--text-secondary)] hover:text-slate-800"
                         >
                           {camp.status === 'Running' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                         </button>
@@ -227,11 +227,11 @@ export default function CampaignView({
         </div>
 
         {/* Right Side: Telemetry logs & dials panel */}
-        <div className="bg-slate-950 p-6 rounded-2xl border border-slate-900 shadow-xl flex flex-col h-full min-h-[50vh] text-white">
+        <div className="theme-panel p-6 rounded-2xl border shadow-xl flex flex-col h-full min-h-[50vh]">
           {selectedCampaign ? (
             <div className="space-y-6 flex flex-col justify-between h-full">
               <div className="space-y-4">
-                <div className="flex items-start justify-between border-b border-slate-900 pb-3">
+                <div className="flex items-start justify-between border-b border-[var(--border)] pb-3">
                   <div className="space-y-1">
                     <span className="text-[9px] font-mono text-blue-400 uppercase tracking-widest">Live Campaign Logs</span>
                     <h4 className="text-xs font-bold text-slate-100 truncate max-w-[180px]">{selectedCampaign.name}</h4>
@@ -239,7 +239,7 @@ export default function CampaignView({
                   {selectedCampaign.status === 'Running' && (
                     <button
                       onClick={handleSimulateDialAction}
-                      className="flex items-center px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[10px] rounded-md transition-all cursor-pointer"
+                      className="flex items-center px-2 py-1 bg-blue-600 hover:bg-blue-500 text-[var(--text-primary)] font-semibold text-[10px] rounded-md transition-all cursor-pointer"
                     >
                       <RefreshCw className="h-3 w-3 mr-1" />
                       Simulate Dial
@@ -249,24 +249,24 @@ export default function CampaignView({
 
                 {/* Micro Stats */}
                 <div className="grid grid-cols-3 gap-2 py-2">
-                  <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-900 text-center">
-                    <span className="text-[10px] text-slate-500 block uppercase font-mono">Dials</span>
-                    <strong className="text-sm font-bold text-white font-mono">{selectedCampaign.calledLeads}</strong>
+                  <div className="bg-[var(--bg-subtle)]/70 p-3 rounded-lg border border-[var(--border)] text-center">
+                    <span className="text-[10px] text-[var(--text-secondary)] block uppercase font-mono">Dials</span>
+                    <strong className="text-sm font-bold text-[var(--text-primary)] font-mono">{selectedCampaign.calledLeads}</strong>
                   </div>
-                  <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-900 text-center">
-                    <span className="text-[10px] text-slate-500 block uppercase font-mono">Answers</span>
+                  <div className="bg-[var(--bg-subtle)]/70 p-3 rounded-lg border border-[var(--border)] text-center">
+                    <span className="text-[10px] text-[var(--text-secondary)] block uppercase font-mono">Answers</span>
                     <strong className="text-sm font-bold text-emerald-400 font-mono">{selectedCampaign.successfulCalls}</strong>
                   </div>
-                  <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-900 text-center">
-                    <span className="text-[10px] text-slate-500 block uppercase font-mono">Pool size</span>
-                    <strong className="text-sm font-bold text-slate-300 font-mono">{selectedCampaign.totalLeads}</strong>
+                  <div className="bg-[var(--bg-subtle)]/70 p-3 rounded-lg border border-[var(--border)] text-center">
+                    <span className="text-[10px] text-[var(--text-secondary)] block uppercase font-mono">Pool size</span>
+                    <strong className="text-sm font-bold text-[var(--text-primary)] font-mono">{selectedCampaign.totalLeads}</strong>
                   </div>
                 </div>
 
                 {/* Logs Feed */}
-                <div className="space-y-2 max-h-64 overflow-y-auto font-mono text-[10px] text-slate-400 bg-slate-900/30 p-4 rounded-xl border border-slate-900">
+                <div className="space-y-2 max-h-64 overflow-y-auto font-mono text-[10px] text-slate-400 bg-[var(--bg-subtle)]/50 p-4 rounded-xl border border-[var(--border)]">
                   {logs.map((log, idx) => (
-                    <div key={idx} className="flex items-start space-x-1.5 leading-relaxed border-b border-slate-900 pb-1.5 last:border-b-0">
+                    <div key={idx} className="flex items-start space-x-1.5 leading-relaxed border-b border-[var(--border)] pb-1.5 last:border-b-0">
                       <span className="text-blue-500 select-none">▶</span>
                       <span>{log}</span>
                     </div>
@@ -274,7 +274,7 @@ export default function CampaignView({
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-900 flex items-center justify-between text-[11px] text-slate-500">
+              <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
                 <span className="flex items-center">
                   <Activity className="h-3.5 w-3.5 mr-1 text-emerald-500 animate-pulse" /> Status: {selectedCampaign.status}
                 </span>
@@ -282,7 +282,7 @@ export default function CampaignView({
               </div>
             </div>
           ) : (
-            <p className="text-xs text-slate-500 italic text-center my-auto">Select any active campaign on the left to monitor outbound telemetry logs.</p>
+            <p className="text-xs text-[var(--text-secondary)] italic text-center my-auto">Select any active campaign on the left to monitor outbound telemetry logs.</p>
           )}
         </div>
       </div>
@@ -298,7 +298,7 @@ export default function CampaignView({
                   required
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[var(--bg-subtle)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
                   placeholder="e.g. Q3 Commercial Real-Estate Callbacks"
                 />
               </div>
@@ -308,7 +308,7 @@ export default function CampaignView({
                 <select
                   value={selectedWorkflow}
                   onChange={(e) => setSelectedWorkflow(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none"
+                  className="w-full bg-[var(--bg-subtle)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
                 >
                   {workflows.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -324,7 +324,7 @@ export default function CampaignView({
                   type="number"
                   value={targetLeadsCount}
                   onChange={(e) => setTargetLeadsCount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[var(--bg-subtle)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
                   Limits dialer to target pool. Mapped against existing {totalLeadsCount} leads.
@@ -333,7 +333,7 @@ export default function CampaignView({
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-2.5 rounded-lg shadow-md transition-all mt-4 cursor-pointer"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-[var(--text-primary)] font-semibold text-xs py-2.5 rounded-lg shadow-md transition-all mt-4 cursor-pointer"
               >
                 Initialize Dialer Port
               </button>
