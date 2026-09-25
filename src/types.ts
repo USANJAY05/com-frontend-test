@@ -136,6 +136,9 @@ export interface CallLog {
   // status "Callback Scheduled". See callFinalizer.js's
   // followUp.querySummary.
   callbackReason?: string;
+  conversationOutcome?: 'completed' | 'busy' | 'callback_scheduled' | 'enquiry' | 'callback_and_enquiry' | 'no_answer' | 'answering_machine';
+  callbackStatus?: 'none' | 'scheduled' | 'completed';
+  enquiryStatus?: 'none' | 'open' | 'contacted' | 'resolved';
 }
 
 export interface LoanDocument {

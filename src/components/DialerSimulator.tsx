@@ -232,6 +232,14 @@ interface DialTask {
   // came from the same workflow without string-matching the name).
   workflowId?: string;
   workflowName?: string;
+  workflowRunMetadata?: {
+    workflowId: string;
+    workflowName?: string | null;
+    runAt: string;
+    runDate?: string;
+    runTime?: string;
+    timezone?: string;
+  };
   questions: string[];
   // Short key per question (e.g. "customer_budget"), same order/length as
   // `questions` — set from the workflow builder's WorkflowVariable.name.
@@ -287,6 +295,10 @@ interface DialTask {
       // "Completed" while this is false (picked up, said nothing/"wrong
       // number", hung up). See callFinalizer.js.
       callAnswered?: boolean;
+      callbackReason?: string;
+      conversationOutcome?: 'completed' | 'busy' | 'callback_scheduled' | 'enquiry' | 'callback_and_enquiry' | 'no_answer' | 'answering_machine';
+      callbackStatus?: 'none' | 'scheduled' | 'completed';
+      enquiryStatus?: 'none' | 'open' | 'contacted' | 'resolved';
     }
   };
   // Server-side auto-dial runtime state — set by src/crm/autoDialEngine.js
@@ -982,6 +994,10 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
               callId: realCallLog?.callId,
               callbackTime: realCallLog?.callbackTime,
               callAnswered: realCallLog?.callAnswered,
+              callbackReason: realCallLog?.callbackReason,
+              conversationOutcome: realCallLog?.conversationOutcome,
+              callbackStatus: realCallLog?.callbackStatus,
+              enquiryStatus: realCallLog?.enquiryStatus,
             }
           }
         };
@@ -1799,7 +1815,12 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                     }`}
                   >
                     <div className="flex justify-between items-start w-full gap-2">
-                      <span className="text-xs font-bold text-[var(--text-primary)] line-clamp-1 flex-1">{task.name}</span>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-xs font-bold text-[var(--text-primary)] line-clamp-1 block">{task.name}</span>
+                        <span className="text-[9px] text-[var(--text-muted)] block mt-0.5">
+                          Workflow run · {new Date(task.workflowRunMetadata?.runAt || task.createdAt).toLocaleString()}
+                        </span>
+                      </div>
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                         task.status === 'Completed'
                           ? 'bg-emerald-700 text-emerald-50'

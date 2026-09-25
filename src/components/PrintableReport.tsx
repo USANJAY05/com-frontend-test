@@ -77,6 +77,7 @@ function CallRow({ c, cpm }: { c: CallLog; cpm: number }) {
       </td>
       <td style={{ padding: '8px 10px', fontSize: 11, color: '#475569', whiteSpace: 'nowrap' }}>{fmt(c.duration)}</td>
       <td style={{ padding: '8px 10px', fontSize: 11, color: '#475569' }}>{formatInr(callCostInr(c.duration, cpm))}</td>
+      <td style={{ padding: '8px 10px', fontSize: 10, color: '#475569', fontWeight: 700 }}>{c.conversationOutcome === 'callback_scheduled' ? 'Callback Scheduled' : c.conversationOutcome === 'callback_and_enquiry' ? 'Callback + Enquiry' : c.conversationOutcome === 'enquiry' ? 'Enquiry' : c.conversationOutcome === 'busy' ? 'Busy' : c.conversationOutcome === 'no_answer' ? 'No Answer' : c.conversationOutcome === 'answering_machine' ? 'Answering Machine' : c.status}</td>
       <td style={{ padding: '8px 10px' }}>
         <span style={{ fontSize: 10, fontWeight: 700, color: sentimentColor(c.sentiment), background: sentimentColor(c.sentiment) + '18', padding: '2px 8px', borderRadius: 100 }}>
           {c.sentiment}
@@ -123,12 +124,13 @@ export default function PrintableReport({
   };
 
   const handleCSV = () => {
-    const headers = ['Name', 'Direction', 'Duration (s)', 'Cost (INR)', 'Status', 'Sentiment', 'Intent', 'Summary', 'Date'];
+    const headers = ['Name', 'Direction', 'Duration (s)', 'Cost (INR)', 'Outcome', 'Status', 'Sentiment', 'Intent', 'Summary', 'Date'];
     const rows = visibleCalls.map(c => [
       c.leadName,
       c.direction || 'unknown',
       c.duration,
       callCostInr(c.duration, costPerMinuteInr).toFixed(2),
+      c.conversationOutcome || c.status,
       c.status,
       c.sentiment,
       c.intent,
@@ -270,7 +272,7 @@ export default function PrintableReport({
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                   <thead>
                     <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                      {['Name', 'Dir', 'Duration', 'Cost', 'Sentiment', 'Intent', 'Summary', 'When'].map(h => (
+                      {['Name', 'Dir', 'Duration', 'Cost', 'Outcome', 'Sentiment', 'Intent', 'Summary', 'When'].map(h => (
                         <th key={h} style={{ padding: '9px 10px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                       ))}
                     </tr>
@@ -312,7 +314,7 @@ export default function PrintableReport({
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                         <thead>
                           <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                            {['Lead', 'Phone', 'Status', 'Duration', 'Sentiment', 'Intent', 'Summary'].map(h => (
+                            {['Lead', 'Phone', 'Status', 'Outcome', 'Duration', 'Sentiment', 'Intent', 'Summary'].map(h => (
                               <th key={h} style={{ padding: '7px 8px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
                             ))}
                           </tr>
@@ -327,6 +329,7 @@ export default function PrintableReport({
                                   {r.status || 'Pending'}
                                 </span>
                               </td>
+                              <td style={{ padding: '7px 8px', color: '#475569', fontWeight: 700 }}>{r.conversationOutcome === 'callback_scheduled' ? 'Callback Scheduled' : r.conversationOutcome === 'callback_and_enquiry' ? 'Callback + Enquiry' : r.conversationOutcome === 'enquiry' ? 'Enquiry' : r.conversationOutcome === 'busy' ? 'Busy' : r.conversationOutcome === 'no_answer' ? 'No Answer' : r.conversationOutcome === 'answering_machine' ? 'Answering Machine' : r.status || '—'}</td>
                               <td style={{ padding: '7px 8px', color: '#475569' }}>{fmt(r.duration || 0)}</td>
                               <td style={{ padding: '7px 8px' }}>
                                 <span style={{ fontSize: 10, fontWeight: 700, color: sentimentColor(r.sentiment || 'Unknown') }}>{r.sentiment || '—'}</span>
