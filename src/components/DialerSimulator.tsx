@@ -2300,7 +2300,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               <div className="space-y-6">
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
-                          <div className="space-y-4 rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50/30 dark:bg-slate-800 p-4">
+                          <div className="space-y-4 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Workflow</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active workflows with question tasks are shown — activate a workflow in Workflow Builder to make it available here.</p>
@@ -2324,7 +2324,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                           onClick={() => setWizardWorkflowId(flow.id)}
                           className={`w-full text-left p-4 rounded-xl border transition-all cursor-pointer ${
                             isSelected
-                              ? 'border-blue-500 bg-blue-50/40 shadow-sm'
+                              ? 'border-slate-400 bg-slate-100 shadow-sm'
                               : 'border-[var(--border)] bg-[var(--bg-surface)] hover:border-blue-300 hover:bg-[var(--bg-subtle)]'
                           }`}
                         >
@@ -2364,7 +2364,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             <div className="h-px bg-[var(--border)]" />
 
             {/* ── Step 2: Select Agent ──────────────────────────────────────── */}
-                          <div className="space-y-4 rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-violet-50/30 dark:bg-slate-800 p-4">
+                          <div className="space-y-4 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Outbound Agent</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active agents with an outbound number assigned are shown — configure and enable agents in Agent Studio.</p>
@@ -2392,20 +2392,20 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                           onClick={() => setWizardAgentId(agent.id)}
                           className={`w-full text-left p-4 rounded-xl border transition-all cursor-pointer ${
                             isSelected
-                              ? 'border-blue-500 bg-blue-50/40 shadow-sm'
+                              ? 'border-slate-400 bg-slate-100 shadow-sm'
                               : 'border-[var(--border)] bg-[var(--bg-surface)] hover:border-blue-300 hover:bg-[var(--bg-subtle)]'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className={`h-9 w-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${isSelected ? 'bg-blue-100 text-blue-700' : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'}`}>
+                              <div className={`h-9 w-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${isSelected ? 'bg-blue-100 text-slate-700' : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'}`}>
                                 {agent.name.charAt(0).toUpperCase()}
                               </div>
                               <div className="min-w-0">
                                 <p className="text-sm font-bold text-[var(--text-primary)] truncate">{agent.name}</p>
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                   <PhoneCall className="h-3 w-3 text-emerald-500 shrink-0" />
-                                  <span className="text-[10px] font-mono text-emerald-600 truncate">{agent.outboundNumber?.number}</span>
+                                  <span className="text-[10px] font-mono text-slate-600 truncate">{agent.outboundNumber?.number}</span>
                                   {agent.activeVoice && (
                                     <>
                                       <span className="text-[var(--text-muted)] text-[10px]">•</span>
@@ -2430,7 +2430,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             <div className="h-px bg-[var(--border)]" />
 
             {/* ── Step 3: Add Contacts ──────────────────────────────────────── */}
-                          <div className="space-y-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/30 dark:bg-slate-800 p-4">
+                          <div className="space-y-4 rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Select from your contact database or add new contacts manually. You can mix both.</p>
@@ -2504,7 +2504,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                               checked ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
                             )}
                             className={`p-2.5 rounded-lg text-left border transition-all flex items-center justify-between cursor-pointer ${
-                              checked ? 'border-blue-500 bg-blue-50/40' : 'border-[var(--border)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]'
+                              checked ? 'border-slate-400 bg-slate-100' : 'border-[var(--border)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]'
                             }`}
                           >
                             <div className="min-w-0">
@@ -2624,22 +2624,22 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
                   {/* Agent summary */}
                   <div className="flex items-start gap-3 pb-3 border-b border-[var(--border)]">
-                    <div className="h-8 w-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-bold text-violet-700">{selectedAgent?.name.charAt(0).toUpperCase()}</span>
+                    <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-slate-700">{selectedAgent?.name.charAt(0).toUpperCase()}</span>
                     </div>
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Agent</p>
                       <p className="text-sm font-bold text-[var(--text-primary)] mt-0.5">{selectedAgent?.name ?? '—'}</p>
                       {selectedAgent?.outboundNumber && (
-                        <p className="text-xs text-emerald-600 font-mono mt-0.5">{selectedAgent.outboundNumber.number}</p>
+                        <p className="text-xs text-slate-600 font-mono mt-0.5">{selectedAgent.outboundNumber.number}</p>
                       )}
                     </div>
                   </div>
 
                   {/* Contacts summary */}
                   <div className="flex items-start gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                      <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                    <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                      <FileSpreadsheet className="h-4 w-4 text-slate-600" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Contacts</p>
