@@ -863,6 +863,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
           // happens well after this tab may have moved on or closed.
           taskId: selectedTask?.id || undefined,
           leadId: lead.id,
+          retryPolicy: selectedTask?.retryConfig || undefined,
         })
       });
       const data = await res.json();
