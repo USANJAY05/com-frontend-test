@@ -411,17 +411,38 @@ export default function AgentStudioView() {
 
   return (
     <PageShell
-      title={creating
-        ? 'Agent Studio / Create Agent'
-        : editingAgent
-          ? 'Agent Studio / Edit Agent'
-          : 'Agent Studio'}
+      title={creating || editingAgent
+        ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                type="button"
+                onClick={closeForm}
+                className="text-xs font-medium text-slate-400 hover:text-slate-700 dark:text-[var(--text-muted)] dark:hover:text-[var(--text-primary)] transition-colors shrink-0"
+              >
+                Agent Studio
+              </button>
+              <span className="text-slate-300 dark:text-slate-600">/</span>
+              <span className="text-lg font-semibold text-slate-900 dark:text-[var(--text-primary)] truncate">
+                {creating ? 'Create Agent' : 'Edit Agent'}
+              </span>
+            </div>
+          )
+        : 'Agent Studio'}
       subtitle={creating || editingAgent
         ? undefined
         : agentView === 'user'
           ? 'Create AI calling agents — each with its own voice, persona, and phone number.'
           : 'Built-in AI agents that run automatically after every call — no phone number, no voice, just a system prompt.'}
-      onRefresh={creating || editingAgent ? undefined : () => loadData()}
+      onRefresh={() => loadData()}
+      titleActions={
+        creating || editingAgent ? (
+          <IconButton
+            icon={ArrowLeft}
+            label="Back to Agent Studio"
+            onClick={closeForm}
+          />
+        ) : undefined
+      }
       action={
         creating || editingAgent ? (
           <button
