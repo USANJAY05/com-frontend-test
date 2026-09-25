@@ -757,14 +757,14 @@ export default function AgentStudioView() {
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               placeholder="e.g. Sales Agent, Support Bot, Loan Advisor"
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-4 py-2.5 text-sm placeholder:text-slate-400 dark:placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
+              className="w-full bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-4 py-2.5 text-sm placeholder:text-slate-400 dark:placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
             />
           </div>
 
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Voice */}
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-4">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Mic className="h-4 w-4 text-violet-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Voice</p>
@@ -778,7 +778,7 @@ export default function AgentStudioView() {
                   className={`py-2.5 text-sm font-semibold rounded-xl border-2 transition-all cursor-pointer ${
                     form.activeVoice === v
                       ? 'bg-slate-700 text-white border-slate-700 shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-secondary)] dark:text-[var(--text-secondary)] border-slate-300 dark:border-[var(--border)] hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                      : 'bg-slate-800 dark:bg-slate-800 text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-secondary)] dark:text-[var(--text-secondary)] border-slate-300 dark:border-[var(--border)] hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                   }`}
                 >
                   {v}
@@ -792,7 +792,7 @@ export default function AgentStudioView() {
           {/* Voice-agent prompt configuration: industry, language, dialect,
               call type, business context — assembled into the two master
               prompts (INBOUND/OUTBOUND) via /api/agents/generate-prompt. */}
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-4">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Bot className="h-4 w-4 text-indigo-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Agent Configuration</p>
@@ -824,7 +824,7 @@ export default function AgentStudioView() {
                       outboundNumber: nextCallType === 'INBOUND' ? null : f.outboundNumber,
                     }));
                   }}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
+                  className="w-full bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
                 >
                   {CALL_TYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
@@ -838,7 +838,7 @@ export default function AgentStudioView() {
                     const validDialects = (dialectsByLanguage[nextLanguage] || []).map(d => d.dialect);
                     setForm(f => ({ ...f, language: nextLanguage, dialect: validDialects[0] || '' }));
                   }}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
+                  className="w-full bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
                 >
                   {Object.keys(dialectsByLanguage).length === 0
                     ? <option value={form.language}>{form.language}</option>
@@ -850,7 +850,7 @@ export default function AgentStudioView() {
                 <select
                   value={form.dialect ?? ''}
                   onChange={e => setForm(f => ({ ...f, dialect: e.target.value }))}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
+                  className="w-full bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
                 >
                   <option value="">Standard / none</option>
                   {(dialectsByLanguage[form.language] || []).map(d => (
@@ -866,14 +866,14 @@ export default function AgentStudioView() {
                 onChange={e => setForm(f => ({ ...f, businessContext: e.target.value }))}
                 rows={4}
                 placeholder="Services, products, business hours, policies, eligibility rules, escalation process, callback rules, compliance rules — only what's written here is available to the agent on a call."
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-slate-400 dark:placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all resize-none"
+                className="w-full bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-slate-400 dark:placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all resize-none"
               />
             </div>
             <button
               type="button"
               onClick={handleGeneratePrompt}
               disabled={generatingPrompt}
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 cursor-pointer transition-colors"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-800 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 cursor-pointer transition-colors"
             >
               {generatingPrompt ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
               Generate Prompt
@@ -886,7 +886,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Delivery sliders */}
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-4">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="h-4 w-4 text-blue-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Delivery</p>
@@ -901,7 +901,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* System Prompt */}
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-4">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-4 w-4 text-amber-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">System Prompt</p>
@@ -910,7 +910,7 @@ export default function AgentStudioView() {
               value={form.systemPrompt}
               onChange={e => setForm(f => ({ ...f, systemPrompt: e.target.value }))}
               rows={5}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-4 py-3 text-xs font-mono text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-slate-400 dark:placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all resize-none"
+              className="w-full bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl px-4 py-3 text-xs font-mono text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-slate-400 dark:placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all resize-none"
               placeholder="Write the agent's system prompt here, or use Generate Prompt above…"
             />
             <p className="text-[10px] text-slate-400 dark:text-[var(--text-muted)] mt-1.5">
@@ -925,7 +925,7 @@ export default function AgentStudioView() {
           {/* Inbound Number — exclusive (one number → one agent). Hidden
               when Call Type is Outbound: the generated prompt assumes one
               direction per agent, so it shouldn't also answer inbound calls. */}
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-1">
               <Phone className="h-4 w-4 text-emerald-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Inbound Number</p>
@@ -934,7 +934,7 @@ export default function AgentStudioView() {
               Incoming calls to this number are routed exclusively to this agent. A number can only have one inbound agent.
             </p>
             {numbers.length === 0 ? (
-              <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl text-xs text-slate-500 dark:text-[var(--text-secondary)]">
+              <div className="flex items-center gap-3 px-4 py-3 bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl text-xs text-slate-500 dark:text-[var(--text-secondary)]">
                 <PhoneOff className="h-4 w-4 shrink-0 text-slate-400 dark:text-[var(--text-muted)]" />
                 No virtual numbers yet. Add one in <span className="font-semibold">Settings → Virtual Numbers</span>.
               </div>
@@ -944,7 +944,7 @@ export default function AgentStudioView() {
                   type="button"
                   onClick={() => setForm(f => ({ ...f, assignedNumber: null }))}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                    !form.assignedNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                    !form.assignedNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-800 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                   }`}
                 >
                   <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
@@ -966,10 +966,10 @@ export default function AgentStudioView() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, assignedNumber: n }))}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                      form.assignedNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      form.assignedNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-800 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
-                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.assignedNumber?.id === n.id ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.assignedNumber?.id === n.id ? 'bg-slate-800 dark:bg-slate-800' : 'bg-slate-100 dark:bg-slate-800'}`}>
                       <Phone className={`h-4 w-4 ${form.assignedNumber?.id === n.id ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400 dark:text-[var(--text-muted)]'}`} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -1000,7 +1000,7 @@ export default function AgentStudioView() {
 
           {/* Outbound Number — shared (many agents can use the same number).
               Hidden when Call Type is Inbound, for the same reason as above. */}
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-1">
               <Zap className="h-4 w-4 text-violet-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Outbound Number</p>
@@ -1009,7 +1009,7 @@ export default function AgentStudioView() {
               Caller ID used when this agent makes outbound calls. Multiple agents can share the same number.
             </p>
             {numbers.length === 0 ? (
-              <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl text-xs text-slate-500 dark:text-[var(--text-secondary)]">
+              <div className="flex items-center gap-3 px-4 py-3 bg-slate-800 dark:bg-slate-800 border border-slate-300 dark:border-[var(--border)] rounded-xl text-xs text-slate-500 dark:text-[var(--text-secondary)]">
                 <PhoneOff className="h-4 w-4 shrink-0 text-slate-400 dark:text-[var(--text-muted)]" />
                 No virtual numbers yet. Add one in <span className="font-semibold">Settings → Virtual Numbers</span>.
               </div>
@@ -1019,7 +1019,7 @@ export default function AgentStudioView() {
                   type="button"
                   onClick={() => setForm(f => ({ ...f, outboundNumber: null }))}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                    !form.outboundNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                    !form.outboundNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-800 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                   }`}
                 >
                   <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
@@ -1041,10 +1041,10 @@ export default function AgentStudioView() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, outboundNumber: n }))}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                      form.outboundNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      form.outboundNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-800 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
-                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.outboundNumber?.id === n.id ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.outboundNumber?.id === n.id ? 'bg-slate-800 dark:bg-slate-800' : 'bg-slate-100 dark:bg-slate-800'}`}>
                       <Phone className={`h-4 w-4 ${form.outboundNumber?.id === n.id ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-[var(--text-muted)]'}`} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -1069,7 +1069,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Knowledge Base — connect to the whole org KB, specific documents, or none */}
-          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-1">
               <BookOpen className="h-4 w-4 text-emerald-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Knowledge Base</p>
@@ -1082,10 +1082,10 @@ export default function AgentStudioView() {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, knowledgeBaseMode: 'all' }))}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                  form.knowledgeBaseMode === 'all' ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  form.knowledgeBaseMode === 'all' ? 'border-slate-400 dark:border-slate-500 bg-slate-800 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.knowledgeBaseMode === 'all' ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.knowledgeBaseMode === 'all' ? 'bg-slate-800 dark:bg-slate-800' : 'bg-slate-100 dark:bg-slate-800'}`}>
                   <BookOpen className={`h-4 w-4 ${form.knowledgeBaseMode === 'all' ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400 dark:text-[var(--text-muted)]'}`} />
                 </div>
                 <div>
@@ -1103,10 +1103,10 @@ export default function AgentStudioView() {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, knowledgeBaseMode: 'specific' }))}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                  form.knowledgeBaseMode === 'specific' ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  form.knowledgeBaseMode === 'specific' ? 'border-slate-400 dark:border-slate-500 bg-slate-800 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.knowledgeBaseMode === 'specific' ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.knowledgeBaseMode === 'specific' ? 'bg-slate-800 dark:bg-slate-800' : 'bg-slate-100 dark:bg-slate-800'}`}>
                   <FileText className={`h-4 w-4 ${form.knowledgeBaseMode === 'specific' ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400 dark:text-[var(--text-muted)]'}`} />
                 </div>
                 <div>
@@ -1147,7 +1147,7 @@ export default function AgentStudioView() {
                             };
                           })}
                           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg border text-left transition-all cursor-pointer ${
-                            selected ? 'border-slate-400 dark:border-slate-500 bg-slate-100' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400'
+                            selected ? 'border-slate-400 dark:border-slate-500 bg-slate-100' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-400'
                           }`}
                         >
                           <div className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${selected ? 'bg-slate-500 border-slate-500' : 'border-slate-300 dark:border-[var(--border)]'}`}>
@@ -1166,7 +1166,7 @@ export default function AgentStudioView() {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, knowledgeBaseMode: 'none' }))}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                  form.knowledgeBaseMode === 'none' ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                  form.knowledgeBaseMode === 'none' ? 'border-slate-400 dark:border-slate-500 bg-slate-800 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-800 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                 }`}
               >
                 <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
