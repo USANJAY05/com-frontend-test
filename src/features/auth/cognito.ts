@@ -27,7 +27,7 @@ export function configureCognito() {
         userPoolClientId: config.userPoolClientId,
         loginWith: {
           oauth: {
-            domain: String(config.domain).trim().replace(/\\/+$/, ''),
+            domain: String(config.domain).trim().replace(/^https?:\\/\\//, '').replace(/\\/+$/, ''),
             scopes: ['openid', 'email'],
             redirectSignIn: [String(config.redirectSignIn).trim()],
             redirectSignOut: [String(config.redirectSignOut).trim()],
@@ -42,7 +42,7 @@ export function configureCognito() {
 }
 export async function signInWithCognito(provider?: 'Google' | 'Facebook' | 'Amazon' | 'Apple') {
   configureCognito();
-  await signInWithRedirect(provider ? { provider } : {});
+  if (provider) { await signInWithRedirect({ provider }); return; }\n  await signInWithRedirect();
 }
 export async function getCognitoToken() {
   configureCognito();
