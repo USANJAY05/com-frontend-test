@@ -214,6 +214,15 @@ function buildQuestionsPayload(task: DialTask | null | undefined): { label: stri
   return task.questions.map((q, i) => ({ question: q, label: task.questionLabels?.[i] || q, dataType: task.questionDataTypes?.[i] }));
 }
 
+interface RetryConfig {
+  enabled: boolean;
+  strategy: 'fixed' | 'exponential';
+  intervalMinutes: number;
+  maxRetries: number;
+  quietHoursStart: string;
+  quietHoursEnd: string;
+}
+
 interface DialTask {
   id: string;
   name: string;
@@ -244,6 +253,7 @@ interface DialTask {
   language?: string;
   assignedTeamMemberId?: string;
   starhealthEnabled?: boolean;
+  retryConfig?: RetryConfig;
   callResults: {
     [leadId: string]: {
       // "Callback Scheduled" — the caller said they're busy and asked to
@@ -461,6 +471,14 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
   const [wizardContactTab, setWizardContactTab] = useState<'existing' | 'new'>('existing');
   const [wizardContactGroups, setWizardContactGroups] = useState<ContactGroup[]>([]);
   const [wizardGroupFilter, setWizardGroupFilter] = useState('All');
+  const [wizardRetryConfig, setWizardRetryConfig] = useState<RetryConfig>({
+    enabled: true,
+    strategy: 'exponential',
+    intervalMinutes: 120,
+    maxRetries: 3,
+    quietHoursStart: '21:00',
+    quietHoursEnd: '08:00',
+  });
 
   // Call simulator live states
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
@@ -713,6 +731,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
       callResults: {},
       language: agent?.language || DEFAULT_TASK_LANGUAGE,
       assignedTeamMemberId: wizardAgentId || undefined,
+      retryConfig: wizardRetryConfig,
     };
 
     setTasks(prev => [...prev, newTask]);
@@ -2617,6 +2636,87 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                 )}
 
               </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Retry unanswered calls</h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Automatically retry No Answer / Answering Machine calls. Caller-requested callbacks are handled separately.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={wizardRetryConfig.enabled}
+                  onClick={() => setWizardRetryConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
+                  className={`relative h-6 w-11 rounded-full transition-colors ${wizardRetryConfig.enabled ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
+                >
+                  <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${wizardRetryConfig.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+
+              {wizardRetryConfig.enabled && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label className="block">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Retry pattern</span>
+                      <select
+                        value={wizardRetryConfig.strategy}
+                        onChange={e => setWizardRetryConfig(prev => ({ ...prev, strategy: e.target.value as RetryConfig['strategy'] }))}
+                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] px-3 py-2 text-xs text-[var(--text-primary)]"
+                      >
+                        <option value="exponential">Gradual — 2h, 4h, 8h…</option>
+                        <option value="fixed">Same interval each time</option>
+                      </select>
+                    </label>
+
+                    <label className="block">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">First retry after</span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={0.25}
+                          max={24}
+                          step={0.25}
+                          value={wizardRetryConfig.intervalMinutes / 60}
+                          onChange={e => setWizardRetryConfig(prev => ({ ...prev, intervalMinutes: Math.max(15, Number(e.target.value || 2) * 60) }))}
+                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] px-3 py-2 text-xs text-[var(--text-primary)]"
+                        />
+                        <span className="text-xs text-[var(--text-muted)] shrink-0">hours</span>
+                      </div>
+                    </label>
+
+                    <label className="block">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Maximum retries</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={10}
+                        step={1}
+                        value={wizardRetryConfig.maxRetries}
+                        onChange={e => setWizardRetryConfig(prev => ({ ...prev, maxRetries: Math.max(0, Math.min(10, Number(e.target.value || 0))) }))}
+                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] px-3 py-2 text-xs text-[var(--text-primary)]"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="flex items-start gap-2 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 px-3 py-2.5">
+                    <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                    <div className="text-[11px] text-amber-800 dark:text-amber-200">
+                      <span className="font-semibold">Quiet hours: 9:00 PM–8:00 AM.</span> Automatic retries are delayed until 8:00 AM in the contact's local timezone, so the campaign will not call people late at night.
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-[var(--text-muted)]">
+                    {wizardRetryConfig.strategy === 'exponential'
+                      ? `With ${wizardRetryConfig.intervalMinutes / 60}h as the base, retries increase gradually: ${wizardRetryConfig.intervalMinutes / 60}h → ${wizardRetryConfig.intervalMinutes / 30}h → ${wizardRetryConfig.intervalMinutes / 15}h…`
+                      : `Each retry waits ${wizardRetryConfig.intervalMinutes / 60}h.`}
+                    {' '}The initial call is not counted as a retry.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
               <p className="text-[11px] text-[var(--text-muted)]">
