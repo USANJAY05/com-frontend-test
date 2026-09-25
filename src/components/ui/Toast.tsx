@@ -24,7 +24,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     window.setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== id));
     }, duration);
-  }, []);
+  }, [])
+
+  // Allow app-wide background events (for example server-side auto-dial
+  // billing/compliance blocks received through SSE) to surface through the
+  // same toast system even when the originating action completed
+  // asynchronously in a worker.
+  useEffect(() => {
+    const handleGlobalToast = (event: Event) => {
+      const detail = (event as CustomEvent<{ message?: string; type?: ToastType; duration?: number }>).detail;
+      if (!detail?.message) return;
+      showToast(detail.message, detail.type || 'info', detail.duration || 5000);
+    };
+    window.addEventListener('chiefvoice:toast', handleGlobalToast);
+    return () => window.removeEventListener('chiefvoice:toast', handleGlobalToast);
+  }, [showToast]);;
 
   const dismiss = (id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
