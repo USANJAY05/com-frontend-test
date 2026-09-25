@@ -26,6 +26,10 @@ interface ScheduledCallback {
   createdAt: string;
   workflowName?: string | null;
   workflowQuestions?: string[];
+  callerTimezone?: string;
+  callbackTimeLocalLabel?: string;
+  nextRetryAtLocalLabel?: string;
+  scheduleLocalLabel?: string;
 }
 
 const KIND_CHIP: Record<'callback' | 'not_answered', { label: string; className: string }> = {
@@ -124,14 +128,18 @@ export default function ScheduledCallbacksView() {
                         <div>
                           {r.kind === 'callback' && (
                             <div className="text-slate-700 font-medium whitespace-nowrap">
-                              {r.callbackTime
-                                ? new Date(r.callbackTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
-                                : 'Not specified'}
+                              {r.callbackTimeLocalLabel || r.scheduleLocalLabel
+                                || (r.callbackTime
+                                  ? new Date(r.callbackTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                                  : 'Not specified')}
                             </div>
                           )}
                           {r.nextRetryAt && (
                             <div className={r.kind === 'callback' ? 'text-[10px] text-slate-400 mt-0.5 whitespace-nowrap' : 'text-xs text-slate-700 font-medium whitespace-nowrap'}>
-                              {r.kind === 'callback' ? 'Next attempt: ' : 'Retries at '}{new Date(r.nextRetryAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                              {r.kind === 'callback' ? 'Next attempt: ' : 'Retries at '}
+                              {r.nextRetryAtLocalLabel
+                                || new Date(r.nextRetryAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                              {r.callerTimezone ? ` (${r.callerTimezone})` : ''}
                             </div>
                           )}
                         </div>
