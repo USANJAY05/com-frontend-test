@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { AlertCircle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -40,30 +40,29 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const styleByType = {
     success: {
       icon: 'text-emerald-600 dark:text-emerald-400',
-      border: 'border-emerald-200 dark:border-emerald-800/70',
-      background: 'bg-emerald-50 dark:bg-emerald-950/30',
+      border: 'border-emerald-300 dark:border-emerald-700',
+      background: 'bg-emerald-50 dark:bg-emerald-950',
     },
     error: {
       icon: 'text-rose-600 dark:text-rose-400',
-      border: 'border-rose-200 dark:border-rose-800/70',
-      background: 'bg-rose-50 dark:bg-rose-950/30',
+      border: 'border-rose-300 dark:border-rose-700',
+      background: 'bg-rose-50 dark:bg-rose-950',
     },
     warning: {
       icon: 'text-amber-600 dark:text-amber-400',
-      border: 'border-amber-200 dark:border-amber-800/70',
-      background: 'bg-amber-50 dark:bg-amber-950/30',
+      border: 'border-amber-300 dark:border-amber-700',
+      background: 'bg-amber-50 dark:bg-amber-950',
     },
     info: {
       icon: 'text-blue-600 dark:text-blue-400',
-      border: 'border-blue-200 dark:border-blue-800/70',
-      background: 'bg-blue-50 dark:bg-blue-950/30',
+      border: 'border-blue-300 dark:border-blue-700',
+      background: 'bg-blue-50 dark:bg-blue-950',
     },
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-
       <div className="pointer-events-none fixed right-5 top-5 z-[1000] flex w-[min(380px,calc(100vw-2rem))] flex-col gap-2">
         {toasts.map(toast => {
           const Icon = iconByType[toast.type];
@@ -95,8 +94,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 export function useToast() {
   const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used inside ToastProvider');
-  }
+  if (!context) throw new Error('useToast must be used inside ToastProvider');
   return context;
 }
