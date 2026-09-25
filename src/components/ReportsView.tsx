@@ -44,6 +44,7 @@ interface DialTaskCallResult {
   callbackTime?: string;
   // True only when the callee actually engaged — see callFinalizer.js.
   callAnswered?: boolean;
+  conversationOutcome?: string;
 }
 
 interface DialTask {
@@ -274,7 +275,13 @@ export default function ReportsView({ callLogs, dialerTasks, leads, costPerMinut
         leadId,
         leadName: lead?.name || 'Unknown',
         phone: lead?.phone || '—',
-        status: result.status,
+        status: result.conversationOutcome === 'callback_scheduled' ? 'Callback Scheduled'
+          : result.conversationOutcome === 'callback_and_enquiry' ? 'Callback + Enquiry'
+          : result.conversationOutcome === 'enquiry' ? 'Enquiry'
+          : result.conversationOutcome === 'busy' ? 'Busy'
+          : result.conversationOutcome === 'no_answer' ? 'No Answer'
+          : result.conversationOutcome === 'answering_machine' ? 'Answering Machine'
+          : result.status,
         sentiment: result.sentiment,
         answers,
       };
