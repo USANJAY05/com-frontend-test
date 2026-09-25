@@ -62,6 +62,7 @@ import KnowledgeBaseView from './components/KnowledgeBaseView';
 import AuditLogView from './components/AuditLogView';
 import EnquiriesView from './components/EnquiriesView';
 import NotificationBell, { AppNotification } from './components/NotificationBell';
+import { ToastProvider } from './components/ui/Toast';
 
 // Debounced sync: collapses multiple rapid state changes into one POST.
 // Without this, setting 8 state vars at load triggers 8 simultaneous syncs.
@@ -1030,6 +1031,7 @@ export default function App() {
           </RefreshProvider>
         </div>
       </main>
-    </div>
+      </div>
+    </ToastProvider>
   );
 }
