@@ -237,8 +237,11 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
 
   const handleToggleSuspend = async () => {
     if (!detail) return;
-    const suspending = detail.status !== 'Suspended';
-    if (!window.confirm(suspending ? `Suspend "${detail.name}"? Their team will be locked out immediately.` : `Reactivate "${detail.name}"?`)) return;
+    // Keep the action correct even if the API returns the status with a
+    // different casing (for example "suspended" instead of "Suspended").
+    const isSuspended = String(detail.status || '').toLowerCase() === 'suspended';
+    const suspending = !isSuspended;
+    if (!window.confirm(suspending ? `Suspend "${detail.name}"? Their team will be locked out immediately.` : `Revoke the suspension for "${detail.name}"?`)) return;
     setBusy(true);
     setActionError(null);
     try {
@@ -308,11 +311,15 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                   onClick={handleToggleSuspend}
                   disabled={busy}
                   className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50 ${
-                    detail.status === 'Suspended' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                    String(detail.status || '').toLowerCase() === 'suspended'
+                      ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                      : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
                   }`}
                 >
-                  {detail.status === 'Suspended' ? <PlayCircle className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
-                  {detail.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
+                  {String(detail.status || '').toLowerCase() === 'suspended'
+                    ? <PlayCircle className="h-3.5 w-3.5" />
+                    : <Ban className="h-3.5 w-3.5" />}
+                  {String(detail.status || '').toLowerCase() === 'suspended' ? 'Revoke Suspension' : 'Suspend'}
                 </button>
                 <button
                   onClick={openDeleteModal}
