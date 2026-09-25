@@ -48,7 +48,14 @@ export async function getCognitoUser() {
   configureCognito();
   try {
     const user = await getCurrentUser();
-    const attributes = await fetchUserAttributes();
+    // Profile attributes are optional. Never let an attribute lookup failure
+    // turn a valid Cognito OAuth session into "Authentication unavailable".
+    let attributes: Record<string, string> = {};
+    try {
+      attributes = await fetchUserAttributes();
+    } catch (err) {
+      console.warn('Cognito profile attributes unavailable; continuing with token claims:', err);
+    }
     return { ...user, attributes };
   } catch { return null; }
 }
