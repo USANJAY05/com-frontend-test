@@ -1642,25 +1642,37 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
   return (
     <PageShell
       title={taskPage
-        ? 'Voice Simulator / Assign Dialing Task'
+        ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                type="button"
+                onClick={() => setShowAssignTask(false)}
+                className="text-xs font-medium text-slate-400 hover:text-slate-700 dark:text-[var(--text-muted)] dark:hover:text-[var(--text-primary)] transition-colors shrink-0"
+              >
+                Voice Simulator
+              </button>
+              <span className="text-slate-300 dark:text-slate-600">/</span>
+              <span className="text-lg font-semibold text-slate-900 dark:text-[var(--text-primary)] truncate">Assign Dialing Task</span>
+            </div>
+          )
         : <BreadcrumbTitle group="Campaign" page={dialerMode === 'outbound' ? 'Outbound Campaigns' : 'Inbound Virtual Center'} />}
       subtitle={taskPage
         ? undefined
         : 'Configure automated workflows, initiate sequential campaigns, or trigger dynamic incoming calls to your virtual phone lines.'}
       layout={taskPage ? 'grid' : 'fill'}
-      onRefresh={taskPage ? undefined : undefined}
+      onRefresh={taskPage ? () => {} : undefined}
+      titleActions={
+        taskPage ? (
+          <IconButton
+            icon={ArrowLeft}
+            label="Back to Voice Simulator"
+            onClick={() => setShowAssignTask(false)}
+          />
+        ) : undefined
+      }
       action={
         taskPage
-          ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={ArrowLeft}
-                onClick={() => setShowAssignTask(false)}
-              >
-                Back to Voice Simulator
-              </Button>
-            )
+          ? undefined
           : dialerMode === 'outbound' ? (
               <IconButton
                 icon={Plus}
