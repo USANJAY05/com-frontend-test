@@ -2430,7 +2430,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             <div className="h-px bg-[var(--border)]" />
 
             {/* ── Step 3: Add Contacts ──────────────────────────────────────── */}
-                          <div className="space-y-4">
+                          <div className="space-y-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-500/5 p-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Contacts <span className="text-blue-600">({totalContacts} selected)</span></h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Select from your contact database or add new contacts manually. You can mix both.</p>
