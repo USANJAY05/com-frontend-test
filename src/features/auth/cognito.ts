@@ -24,7 +24,7 @@ export function configureCognito() {
         loginWith: {
           oauth: {
             domain: config.domain,
-            scopes: ['openid', 'email', 'profile'],
+            // Keep only scopes currently accepted by this app client. Profile data is read from ID-token claims.\n            scopes: ['openid', 'email'],
             redirectSignIn: [config.redirectSignIn],
             redirectSignOut: [config.redirectSignOut],
             responseType: 'code',
