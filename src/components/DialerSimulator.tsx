@@ -904,7 +904,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
       }
     } catch (err: any) {
       setCallState('idle');
-      alert(`Vobiz call failed: ${err.message}`);
+      showToast(err?.message || 'Vobiz call failed', /insufficient recharge balance/i.test(String(err?.message || '')) ? 'warning' : 'error');
     }
   };
 
@@ -1285,7 +1285,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
       if (!res.ok) throw new Error(updated.error || 'Failed to start server-side auto-dial');
       setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, ...updated } : t)));
     } catch (err: any) {
-      alert(`Couldn't start background auto-dial: ${err.message}`);
+      showToast(err?.message || 'Couldn\'t start background auto-dial', /insufficient recharge balance/i.test(String(err?.message || '')) ? 'warning' : 'error');
     } finally {
       setServerAutoDialBusy(false);
     }
