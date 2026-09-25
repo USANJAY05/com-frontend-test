@@ -27,6 +27,13 @@ type PromptPayload = {
   system: SystemPrompt[];
 };
 
+type LanguagePrompt = { id: string; language: string; prompt: string };
+type DialectPrompt = { id: string; dialect: string; prompt: string; examples: string[] };
+type LanguageDialectCatalog = {
+  languages: LanguagePrompt[];
+  dialectsByLanguage: Record<string, DialectPrompt[]>;
+};
+
 export default function PromptsPage() {
   const [data, setData] = useState<PromptPayload>({ voice: [], system: [] });
   const [loading, setLoading] = useState(true);
@@ -37,19 +44,46 @@ export default function PromptsPage() {
   const [saving, setSaving] = useState<'voice' | 'system' | null>(null);
   const [saved, setSaved] = useState<'voice' | 'system' | null>(null);
   const [error, setError] = useState('');
+  const [catalog, setCatalog] = useState<LanguageDialectCatalog>({ languages: [], dialectsByLanguage: {} });
+  const [activeLanguage, setActiveLanguage] = useState('');
+  const [activeDialect, setActiveDialect] = useState('');
+  const [languageDraft, setLanguageDraft] = useState('');
+  const [dialectDraft, setDialectDraft] = useState('');
+  const [examplesDraft, setExamplesDraft] = useState('');
+  const [savingLanguage, setSavingLanguage] = useState(false);
+  const [savingDialect, setSavingDialect] = useState(false);
 
   const load = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await apiFetch('/api/platform/prompts');
+      const [res, catalogRes] = await Promise.all([
+        apiFetch('/api/platform/prompts'),
+        apiFetch('/api/platform/prompts/languages-dialects'),
+      ]);
       const body = await res.json();
+      const catalogBody = await catalogRes.json();
+      if (!catalogRes.ok) throw new Error(catalogBody?.error || 'Failed to load language and dialect prompts');
       if (!res.ok) throw new Error(body?.error || 'Failed to load prompts');
       const next: PromptPayload = {
         voice: Array.isArray(body.voice) ? body.voice : [],
         system: Array.isArray(body.system) ? body.system : [],
       };
       setData(next);
+      const nextCatalog: LanguageDialectCatalog = {
+        languages: Array.isArray(catalogBody.languages) ? catalogBody.languages : [],
+        dialectsByLanguage: catalogBody.dialectsByLanguage || {},
+      };
+      setCatalog(nextCatalog);
+      const firstLanguage = activeLanguage && nextCatalog.languages.some(x => x.language === activeLanguage)
+        ? activeLanguage : nextCatalog.languages[0]?.language || '';
+      const firstDialect = (nextCatalog.dialectsByLanguage[firstLanguage] || []).some(x => x.dialect === activeDialect)
+        ? activeDialect : (nextCatalog.dialectsByLanguage[firstLanguage] || [])[0]?.dialect || '';
+      setActiveLanguage(firstLanguage);
+      setActiveDialect(firstDialect);
+      setLanguageDraft(nextCatalog.languages.find(x => x.language === firstLanguage)?.prompt || '');
+      setDialectDraft((nextCatalog.dialectsByLanguage[firstLanguage] || []).find(x => x.dialect === firstDialect)?.prompt || '');
+      setExamplesDraft(((nextCatalog.dialectsByLanguage[firstLanguage] || []).find(x => x.dialect === firstDialect)?.examples || []).join('\n'));
       const voice = next.voice.find(p => p.callType === activeVoice);
       setVoiceDraft(voice?.prompt || '');
       const firstSystem = activeSystem && next.system.some(p => p.id === activeSystem)
@@ -159,6 +193,87 @@ export default function PromptsPage() {
     } finally { setSaving(null); }
   };
 
+
+
+  const currentLanguage = catalog.languages.find(x => x.language === activeLanguage) || null;
+  const currentDialect = (catalog.dialectsByLanguage[activeLanguage] || []).find(x => x.dialect === activeDialect) || null;
+
+  const selectLanguage = (language: string) => {
+    setActiveLanguage(language);
+    const item = catalog.languages.find(x => x.language === language);
+    const dialect = (catalog.dialectsByLanguage[language] || [])[0]?.dialect || '';
+    setActiveDialect(dialect);
+    setLanguageDraft(item?.prompt || '');
+    const d = (catalog.dialectsByLanguage[language] || []).find(x => x.dialect === dialect);
+    setDialectDraft(d?.prompt || '');
+    setExamplesDraft((d?.examples || []).join('\n'));
+    setSaved(null);
+  };
+
+  const selectDialect = (dialect: string) => {
+    setActiveDialect(dialect);
+    const d = (catalog.dialectsByLanguage[activeLanguage] || []).find(x => x.dialect === dialect);
+    setDialectDraft(d?.prompt || '');
+    setExamplesDraft((d?.examples || []).join('\n'));
+    setSaved(null);
+  };
+
+  const saveLanguage = async () => {
+    if (!currentLanguage) return;
+    setSavingLanguage(true); setError('');
+    try {
+      const res = await apiFetch(`/api/platform/prompts/languages/${encodeURIComponent(activeLanguage)}`, {
+        method: 'PUT', body: JSON.stringify({ prompt: languageDraft }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error || 'Failed to save language prompt');
+      setCatalog(body); setSaved('voice');
+    } catch (e: any) { setError(e.message || 'Failed to save language prompt'); }
+    finally { setSavingLanguage(false); }
+  };
+
+  const saveDialect = async () => {
+    if (!currentDialect) return;
+    setSavingDialect(true); setError('');
+    try {
+      const res = await apiFetch(`/api/platform/prompts/languages/${encodeURIComponent(activeLanguage)}/dialects/${encodeURIComponent(activeDialect)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ prompt: dialectDraft, examples: examplesDraft.split('\n').map(x => x.trim()).filter(Boolean) }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error || 'Failed to save dialect prompt');
+      setCatalog(body); setSaved('voice');
+    } catch (e: any) { setError(e.message || 'Failed to save dialect prompt'); }
+    finally { setSavingDialect(false); }
+  };
+
+  const addLanguage = async () => {
+    const language = prompt('New language name');
+    if (!language?.trim()) return;
+    try {
+      const res = await apiFetch('/api/platform/prompts/languages', {
+        method: 'POST', body: JSON.stringify({ language: language.trim() }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error || 'Failed to add language');
+      setCatalog(body); selectLanguage(language.trim());
+    } catch (e: any) { setError(e.message || 'Failed to add language'); }
+  };
+
+  const addDialect = async () => {
+    if (!activeLanguage) return;
+    const dialect = prompt(`New dialect for ${activeLanguage}`);
+    if (!dialect?.trim()) return;
+    try {
+      const res = await apiFetch(`/api/platform/prompts/languages/${encodeURIComponent(activeLanguage)}/dialects`, {
+        method: 'POST', body: JSON.stringify({ dialect: dialect.trim(), prompt: '' }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error || 'Failed to add dialect');
+      setCatalog(body); selectDialect(dialect.trim());
+    } catch (e: any) { setError(e.message || 'Failed to add dialect'); }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center py-20 text-slate-400"><Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading prompts…</div>;
   }
@@ -202,6 +317,67 @@ export default function PromptsPage() {
                 {saving === 'voice' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save prompt
               </button>
             </div>
+          </div>
+        </div>
+      </Widget>
+
+
+
+      <Widget title="Language & dialect prompts" subtitle="Manage language and dialect guidance from the admin panel. New languages and dialects are stored in the platform settings, so Agent Studio can support them without a code deployment.">
+        <div className="flex flex-col lg:flex-row min-h-[540px]">
+          <div className="lg:w-56 shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-[var(--border)] p-2">
+            <div className="flex items-center justify-between px-2 py-1 mb-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Languages</span>
+              <button onClick={addLanguage} className="text-[11px] font-semibold text-amber-600 hover:text-amber-700">+ Add</button>
+            </div>
+            {catalog.languages.map(lang => (
+              <button key={lang.language} onClick={() => selectLanguage(lang.language)}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm mb-1 ${activeLanguage === lang.language ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)]'}`}>
+                {lang.language}
+              </button>
+            ))}
+          </div>
+          <div className="flex-1 p-5 space-y-5">
+            {currentLanguage ? <>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800 dark:text-[var(--text-primary)]">Language prompt · {activeLanguage}</div>
+                    <div className="text-[11px] text-slate-400">Use {'{{language}}'} when the language name should be inserted dynamically.</div>
+                  </div>
+                  <button onClick={saveLanguage} disabled={savingLanguage} className="flex items-center gap-2 bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50">
+                    {savingLanguage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save language
+                  </button>
+                </div>
+                <textarea value={languageDraft} onChange={e => setLanguageDraft(e.target.value)} className="w-full h-28 resize-none rounded-xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-[var(--bg-subtle)] px-4 py-3 text-xs font-mono leading-5 text-slate-700 dark:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-amber-400" />
+              </div>
+
+              <div className="border-t border-slate-200 dark:border-[var(--border)] pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800 dark:text-[var(--text-primary)]">Dialect prompt</div>
+                    <div className="text-[11px] text-slate-400">Speech, vocabulary, regional rules and examples for the selected dialect.</div>
+                  </div>
+                  <button onClick={addDialect} className="text-[11px] font-semibold text-amber-600 hover:text-amber-700">+ Add dialect</button>
+                </div>
+                <select value={activeDialect} onChange={e => selectDialect(e.target.value)} className="w-full mb-2 rounded-xl border border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] px-3 py-2 text-xs text-slate-700 dark:text-[var(--text-primary)]">
+                  {!activeDialect && <option value="">No dialect configured</option>}
+                  {(catalog.dialectsByLanguage[activeLanguage] || []).map(d => <option key={d.dialect} value={d.dialect}>{d.dialect}</option>)}
+                </select>
+                {currentDialect ? <>
+                  <textarea value={dialectDraft} onChange={e => setDialectDraft(e.target.value)} className="w-full h-36 resize-none rounded-xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-[var(--bg-subtle)] px-4 py-3 text-xs font-mono leading-5 text-slate-700 dark:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  <div className="mt-3">
+                    <div className="text-[11px] font-semibold text-slate-500 mb-1">Natural phrasing examples · one per line</div>
+                    <textarea value={examplesDraft} onChange={e => setExamplesDraft(e.target.value)} className="w-full h-24 resize-none rounded-xl border border-slate-200 dark:border-[var(--border)] bg-slate-50 dark:bg-[var(--bg-subtle)] px-4 py-3 text-xs font-mono leading-5 text-slate-700 dark:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <button onClick={saveDialect} disabled={savingDialect} className="flex items-center gap-2 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl disabled:opacity-50">
+                      {savingDialect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save dialect
+                    </button>
+                  </div>
+                </> : <div className="rounded-xl border border-dashed border-slate-200 dark:border-[var(--border)] p-8 text-center text-xs text-slate-400">Add a dialect to configure dialect-specific speech guidance.</div>}
+              </div>
+            </> : <div className="p-10 text-center text-xs text-slate-400">No languages configured.</div>}
           </div>
         </div>
       </Widget>
