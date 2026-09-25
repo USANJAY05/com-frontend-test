@@ -16,6 +16,10 @@ export function isCognitoConfigured() {
 }
 export function configureCognito() {
   if (configured || !isCognitoConfigured()) return;
+
+  // Use the exact Amplify v6 OAuth configuration shape. Keep this object
+  // minimal while testing the business application so an optional OAuth
+  // setting cannot break sign-in before Cognito is reached.
   Amplify.configure({
     Auth: {
       Cognito: {
@@ -23,8 +27,8 @@ export function configureCognito() {
         userPoolClientId: config.userPoolClientId,
         loginWith: {
           oauth: {
-            domain: config.domain,
-            // Keep only scopes currently accepted by this app client. Profile data is read from ID-token claims.\n            scopes: ['openid', 'email'],
+            domain: String(config.domain).trim().replace(/^https?:\\/\\//, '').replace(/\\/+$/, ''),
+            scopes: ['openid', 'email'],
             redirectSignIn: [String(config.redirectSignIn).trim()],
             redirectSignOut: [String(config.redirectSignOut).trim()],
             responseType: 'code',
@@ -33,11 +37,12 @@ export function configureCognito() {
       },
     },
   });
+
   configured = true;
 }
 export async function signInWithCognito(provider?: 'Google' | 'Facebook' | 'Amazon' | 'Apple') {
   configureCognito();
-  await signInWithRedirect(provider ? { provider } : {});
+  if (provider) { await signInWithRedirect({ provider }); return; }\n  await signInWithRedirect();
 }
 export async function getCognitoToken() {
   configureCognito();
