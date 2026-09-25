@@ -37,6 +37,8 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
   const [backupBusy, setBackupBusy] = useState(false);
   const [rechargeAmount, setRechargeAmount] = useState('');
   const [rechargeBusy, setRechargeBusy] = useState(false);
+  const [callBalancePolicy, setCallBalancePolicy] = useState<any>(null);
+  const [callBalanceBusy, setCallBalanceBusy] = useState(false);
 
   const loadNumbers = () => {
     setNumbersLoading(true);
@@ -182,6 +184,43 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
     }
   };
 
+  const loadCallBalancePolicy = () => {
+    apiFetch(`/api/platform/organizations/${orgId}/billing/call-balance`)
+      .then(r => r.json())
+      .then(d => setCallBalancePolicy(d))
+      .catch(() => setCallBalancePolicy(null));
+  };
+
+  const saveCallBalancePolicy = async (minimumBalanceInr: number, reservationMinutes: number) => {
+    setCallBalanceBusy(true);
+    setActionError(null);
+    try {
+      const res = await apiFetch(`/api/platform/organizations/${orgId}/billing/call-balance`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ minimumBalanceInr, reservationMinutes }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to save call balance policy');
+      setCallBalancePolicy(data);
+    } catch (err: any) {
+      setActionError(err?.message || 'Failed to save call balance policy');
+    } finally { setCallBalanceBusy(false); }
+  };
+
+  const resetCallBalancePolicy = async () => {
+    setCallBalanceBusy(true);
+    setActionError(null);
+    try {
+      const res = await apiFetch(`/api/platform/organizations/${orgId}/billing/call-balance`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to reset call balance policy');
+      setCallBalancePolicy(data);
+    } catch (err: any) {
+      setActionError(err?.message || 'Failed to reset call balance policy');
+    } finally { setCallBalanceBusy(false); }
+  };
+
   const load = () => {
     setLoading(true);
     apiFetch(`/api/platform/organizations/${orgId}`)
@@ -201,7 +240,7 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); loadFlags(); loadNumbers(); loadGcpProject(); loadRetention(); }, [orgId]);
+  useEffect(() => { load(); loadFlags(); loadNumbers(); loadGcpProject(); loadRetention(); loadCallBalancePolicy(); }, [orgId]);
 
   const handleSaveEdit = async () => {
     setBusy(true);
@@ -457,6 +496,55 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                         className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
                       >{rechargeBusy ? 'Recharging…' : 'Recharge'}</button>
                     </div>
+                  </>
+                )}
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-5">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Minimum Call Balance</h4>
+                {callBalancePolicy && (
+                  <>
+                    <p className="text-[11px] text-slate-500 mb-3">
+                      Industry default: <span className="font-semibold">₹{Number(callBalancePolicy.industryDefault?.minimumBalanceInr || 0).toFixed(2)}</span>
+                      {' · '}{Number(callBalancePolicy.industryDefault?.reservationMinutes || 1)} min reservation
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className="text-[11px] text-slate-500">Organization minimum (₹)
+                        <input
+                          type="number" min="0" step="0.01"
+                          defaultValue={callBalancePolicy.override?.minimumBalanceInr ?? callBalancePolicy.industryDefault?.minimumBalanceInr ?? 0}
+                          id={`call-balance-${orgId}`}
+                          className="mt-1 w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5"
+                        />
+                      </label>
+                      <label className="text-[11px] text-slate-500">Reservation minutes
+                        <input
+                          type="number" min="1" step="1"
+                          defaultValue={callBalancePolicy.override?.reservationMinutes ?? callBalancePolicy.industryDefault?.reservationMinutes ?? 1}
+                          id={`call-minutes-${orgId}`}
+                          className="mt-1 w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5"
+                        />
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2 mt-3">
+                      <button
+                        disabled={callBalanceBusy}
+                        onClick={() => {
+                          const amount = Number((document.getElementById(`call-balance-${orgId}`) as HTMLInputElement)?.value);
+                          const minutes = Number((document.getElementById(`call-minutes-${orgId}`) as HTMLInputElement)?.value);
+                          saveCallBalancePolicy(amount, minutes);
+                        }}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-white disabled:opacity-50"
+                      >{callBalanceBusy ? 'Saving…' : 'Save override'}</button>
+                      {callBalancePolicy.override && (
+                        <button disabled={callBalanceBusy} onClick={resetCallBalancePolicy} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 disabled:opacity-50">
+                          Use industry default
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-2">
+                      Effective minimum: ₹{Number(callBalancePolicy.effective?.minimumBalanceInr || 0).toFixed(2)} · {Number(callBalancePolicy.effective?.reservationMinutes || 1)} min
+                    </p>
                   </>
                 )}
               </div>
