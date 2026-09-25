@@ -777,8 +777,8 @@ export default function AgentStudioView() {
                   onClick={() => setForm(f => ({ ...f, activeVoice: v }))}
                   className={`py-2.5 text-sm font-semibold rounded-xl border-2 transition-all cursor-pointer ${
                     form.activeVoice === v
-                      ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-                      : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-secondary)] dark:text-[var(--text-secondary)] border-slate-300 dark:border-[var(--border)] hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                      ? 'bg-slate-700 text-white border-slate-700 shadow-sm'
+                      : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-secondary)] dark:text-[var(--text-secondary)] border-slate-300 dark:border-[var(--border)] hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                   }`}
                 >
                   {v}
@@ -944,7 +944,7 @@ export default function AgentStudioView() {
                   type="button"
                   onClick={() => setForm(f => ({ ...f, assignedNumber: null }))}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                    !form.assignedNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                    !form.assignedNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                   }`}
                 >
                   <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
@@ -966,7 +966,7 @@ export default function AgentStudioView() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, assignedNumber: n }))}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                      form.assignedNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      form.assignedNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
                     <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.assignedNumber?.id === n.id ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
@@ -979,7 +979,7 @@ export default function AgentStudioView() {
                       </p>
                     </div>
                     {form.assignedNumber?.id === n.id && (
-                      <div className="ml-auto h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                      <div className="ml-auto h-4 w-4 rounded-full bg-slate-500 flex items-center justify-center shrink-0">
                         <Check className="h-2.5 w-2.5 text-white" />
                       </div>
                     )}
@@ -1019,7 +1019,7 @@ export default function AgentStudioView() {
                   type="button"
                   onClick={() => setForm(f => ({ ...f, outboundNumber: null }))}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                    !form.outboundNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                    !form.outboundNumber ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                   }`}
                 >
                   <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
@@ -1041,7 +1041,7 @@ export default function AgentStudioView() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, outboundNumber: n }))}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                      form.outboundNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      form.outboundNumber?.id === n.id ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
                     <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.outboundNumber?.id === n.id ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
@@ -1054,7 +1054,7 @@ export default function AgentStudioView() {
                       </p>
                     </div>
                     {form.outboundNumber?.id === n.id && (
-                      <div className="ml-auto h-4 w-4 rounded-full bg-violet-500 flex items-center justify-center shrink-0">
+                      <div className="ml-auto h-4 w-4 rounded-full bg-slate-500 flex items-center justify-center shrink-0">
                         <Check className="h-2.5 w-2.5 text-white" />
                       </div>
                     )}
@@ -1082,7 +1082,7 @@ export default function AgentStudioView() {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, knowledgeBaseMode: 'all' }))}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                  form.knowledgeBaseMode === 'all' ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  form.knowledgeBaseMode === 'all' ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
                 <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.knowledgeBaseMode === 'all' ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
@@ -1093,7 +1093,7 @@ export default function AgentStudioView() {
                   <p className="text-[10px] text-slate-400 dark:text-[var(--text-muted)]">Every document in the org's knowledge base</p>
                 </div>
                 {form.knowledgeBaseMode === 'all' && (
-                  <div className="ml-auto h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                  <div className="ml-auto h-4 w-4 rounded-full bg-slate-500 flex items-center justify-center shrink-0">
                     <Check className="h-2.5 w-2.5 text-white" />
                   </div>
                 )}
@@ -1103,7 +1103,7 @@ export default function AgentStudioView() {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, knowledgeBaseMode: 'specific' }))}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                  form.knowledgeBaseMode === 'specific' ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  form.knowledgeBaseMode === 'specific' ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-700' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
                 <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${form.knowledgeBaseMode === 'specific' ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
@@ -1118,7 +1118,7 @@ export default function AgentStudioView() {
                   </p>
                 </div>
                 {form.knowledgeBaseMode === 'specific' && (
-                  <div className="ml-auto h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                  <div className="ml-auto h-4 w-4 rounded-full bg-slate-500 flex items-center justify-center shrink-0">
                     <Check className="h-2.5 w-2.5 text-white" />
                   </div>
                 )}
@@ -1147,10 +1147,10 @@ export default function AgentStudioView() {
                             };
                           })}
                           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg border text-left transition-all cursor-pointer ${
-                            selected ? 'border-slate-400 dark:border-slate-500 bg-slate-100' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-emerald-200'
+                            selected ? 'border-slate-400 dark:border-slate-500 bg-slate-100' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-400'
                           }`}
                         >
-                          <div className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${selected ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-[var(--border)]'}`}>
+                          <div className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${selected ? 'bg-slate-500 border-slate-500' : 'border-slate-300 dark:border-[var(--border)]'}`}>
                             {selected && <Check className="h-2.5 w-2.5 text-white" />}
                           </div>
                           <span className="text-xs font-medium text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] truncate flex-1">{doc.title}</span>
@@ -1166,7 +1166,7 @@ export default function AgentStudioView() {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, knowledgeBaseMode: 'none' }))}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                  form.knowledgeBaseMode === 'none' ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
+                  form.knowledgeBaseMode === 'none' ? 'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-800' : 'border-slate-300 dark:border-[var(--border)] bg-slate-50 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-[var(--border)] hover:bg-slate-100 dark:hover:bg-[var(--bg-subtle)] dark:hover:bg-[var(--bg-subtle)]'
                 }`}
               >
                 <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
