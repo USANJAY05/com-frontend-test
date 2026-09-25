@@ -272,7 +272,7 @@ export default function PrintableReport({
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                   <thead>
                     <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                      {['Name', 'Dir', 'Duration', 'Cost', 'Sentiment', 'Intent', 'Summary', 'When'].map(h => (
+                      {['Name', 'Dir', 'Duration', 'Cost', 'Outcome', 'Sentiment', 'Intent', 'Summary', 'When'].map(h => (
                         <th key={h} style={{ padding: '9px 10px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                       ))}
                     </tr>
