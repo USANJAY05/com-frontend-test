@@ -750,7 +750,7 @@ export default function AgentStudioView() {
           {agentWizardStep === 1 && (
             <>
           {/* Agent Name */}
-          <div>
+          <div className="rounded-2xl border border-slate-200 dark:border-[var(--border)] bg-slate-50/80 dark:bg-[var(--bg-subtle)]/70 p-4">
             <label className="block text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-secondary)] dark:text-[var(--text-secondary)] mb-1.5">Agent Name</label>
             <input
               autoFocus
@@ -764,7 +764,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Voice */}
-          <div>
+          <div className="rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-violet-50/40 dark:bg-violet-500/5 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Mic className="h-4 w-4 text-violet-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Voice</p>
@@ -792,7 +792,7 @@ export default function AgentStudioView() {
           {/* Voice-agent prompt configuration: industry, language, dialect,
               call type, business context — assembled into the two master
               prompts (INBOUND/OUTBOUND) via /api/agents/generate-prompt. */}
-          <div>
+          <div className="rounded-2xl border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-500/5 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Bot className="h-4 w-4 text-indigo-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Agent Configuration</p>
@@ -886,7 +886,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* Delivery sliders */}
-          <div>
+          <div className="rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50/40 dark:bg-blue-500/5 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="h-4 w-4 text-blue-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">Delivery</p>
@@ -901,7 +901,7 @@ export default function AgentStudioView() {
           <div className="border-t border-slate-100 dark:border-[var(--border)]" />
 
           {/* System Prompt */}
-          <div>
+          <div className="rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-amber-50/40 dark:bg-amber-500/5 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-4 w-4 text-amber-500" />
               <p className="text-xs font-semibold text-slate-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)] uppercase tracking-widest">System Prompt</p>
