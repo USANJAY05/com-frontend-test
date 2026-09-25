@@ -250,4 +250,9 @@ export interface OrganizationSettings {
   // "settings" JSONB column on the backend, no schema change needed) like
   // every other org-level preference.
   defaultOutboundNumber?: string;
+  // Recharge-based wallet billing. Only populated/displayed for organizations
+  // whose billingMethod is recharge_based.
+  billingMethod?: 'pay_as_you_go' | 'recharge_based';
+  rechargeBalanceInr?: number;
+  rechargeReservedInr?: number;
 }
