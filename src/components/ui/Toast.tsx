@@ -37,38 +37,53 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     info: Info,
   };
 
-  const colorByType = {
-    success: 'text-emerald-500',
-    error: 'text-rose-500',
-    warning: 'text-amber-500',
-    info: 'text-blue-500',
+  const styleByType = {
+    success: {
+      icon: 'text-emerald-600 dark:text-emerald-400',
+      border: 'border-emerald-200 dark:border-emerald-800/70',
+      background: 'bg-emerald-50 dark:bg-emerald-950/30',
+    },
+    error: {
+      icon: 'text-rose-600 dark:text-rose-400',
+      border: 'border-rose-200 dark:border-rose-800/70',
+      background: 'bg-rose-50 dark:bg-rose-950/30',
+    },
+    warning: {
+      icon: 'text-amber-600 dark:text-amber-400',
+      border: 'border-amber-200 dark:border-amber-800/70',
+      background: 'bg-amber-50 dark:bg-amber-950/30',
+    },
+    info: {
+      icon: 'text-blue-600 dark:text-blue-400',
+      border: 'border-blue-200 dark:border-blue-800/70',
+      background: 'bg-blue-50 dark:bg-blue-950/30',
+    },
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
 
-      <div className="pointer-events-none fixed right-5 top-5 z-[1000] flex w-[min(420px,calc(100vw-2rem))] flex-col gap-2.5">
+      <div className="pointer-events-none fixed right-5 top-5 z-[1000] flex w-[min(380px,calc(100vw-2rem))] flex-col gap-2">
         {toasts.map(toast => {
           const Icon = iconByType[toast.type];
           return (
             <div
               key={toast.id}
               role="status"
-              className="pointer-events-auto flex items-start gap-3 rounded-xl border bg-white px-4 py-3.5 shadow-xl dark:bg-[var(--bg-surface)]"
-              style={{ borderColor: 'var(--border)' }}
+              className={`pointer-events-auto flex items-center gap-2.5 rounded-lg border px-3 py-2 shadow-lg ${styleByType[toast.type].border} ${styleByType[toast.type].background}`}
             >
-              <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${colorByType[toast.type]}`} />
-              <p className="min-w-0 flex-1 text-sm font-medium leading-5 text-slate-700 dark:text-[var(--text-primary)]">
+              <Icon className={`h-4 w-4 shrink-0 ${styleByType[toast.type].icon}`} />
+              <p className="min-w-0 flex-1 text-xs font-medium leading-4 text-slate-700 dark:text-[var(--text-primary)]">
                 {toast.message}
               </p>
               <button
                 type="button"
                 onClick={() => dismiss(toast.id)}
-                className="shrink-0 rounded-md p-0.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                className="shrink-0 rounded-md p-0.5 text-slate-400 transition-colors hover:bg-black/5 hover:text-slate-600 dark:hover:bg-white/5 dark:hover:text-slate-200"
                 aria-label="Dismiss notification"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           );
