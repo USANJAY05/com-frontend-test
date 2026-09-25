@@ -42,7 +42,8 @@ export function configureCognito() {
 }
 export async function signInWithCognito(provider?: 'Google' | 'Facebook' | 'Amazon' | 'Apple') {
   configureCognito();
-  if (provider) { await signInWithRedirect({ provider }); return; }\n  await signInWithRedirect();
+  if (provider) { await signInWithRedirect({ provider }); return; }
+  await signInWithRedirect();
 }
 export async function getCognitoToken() {
   configureCognito();
