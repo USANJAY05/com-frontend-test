@@ -1059,7 +1059,7 @@ export default function ReportsView({ callLogs, dialerTasks, leads, costPerMinut
               {campaignOptions.length === 0 && <option value="">No campaigns yet</option>}
               {campaignOptions.map(t => (
                 <option key={t.id} value={t.id}>
-                  {t.name} — {new Date(t.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {t.name} — {new Date(t.workflowRunMetadata?.runAt || t.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
                 </option>
               ))}
             </select>
