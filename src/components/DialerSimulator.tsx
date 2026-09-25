@@ -556,7 +556,7 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
   // code, spaces, dashes) between a lead's saved number and what Vobiz
   // stored on the call_logs row still match up.
   const [retryStatuses, setRetryStatuses] = useState<Record<string, {
-    status: string; attemptNumber: number; nextRetryAt: string | null; retryStatus: string;
+    status: string; attemptNumber: number; nextRetryAt: string | null; retryStatus: string; retryConfig?: RetryConfig;
   }>>({});
   const normalizePhone = (p: string) => (p || '').replace(/\D/g, '').slice(-10);
   useEffect(() => {
@@ -1992,7 +1992,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                           if (retry.retryStatus === 'exhausted') {
                             return (
                               <p className="text-[9px] text-[var(--text-muted)] mt-1">
-                                Auto-redial gave up after {retry.attemptNumber}/3 attempts
+                                Auto-redial gave up after {retry.attemptNumber} attempt{retry.attemptNumber !== 1 ? 's' : ''}
                               </p>
                             );
                           }
@@ -2001,7 +2001,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                             const label = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
                             return (
                               <p className="text-[9px] text-blue-500 mt-1">
-                                Auto-redial {retry.attemptNumber}/3 · next in {label}
+                                Auto-redial {retry.attemptNumber} · next in {label}
                               </p>
                             );
                           }
