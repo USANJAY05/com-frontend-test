@@ -589,7 +589,23 @@ export default function App() {
             // it here is simpler and can't drift out of sync with whatever
             // shape a given progress event happens to carry.
             refreshDialerTasks();
-            if (data.message) pushNotification(data.type, data.message);
+            if (data.message) {
+              pushNotification(data.type, data.message);
+
+              // Server-side auto-dial failures happen asynchronously after
+              // the Start request has already returned 200. Broadcast them
+              // through the shared toast bus so billing/compliance blocks
+              // are visible immediately instead of only appearing in logs.
+              if (data.reason === 'insufficient_balance' || data.severity === 'warning') {
+                window.dispatchEvent(new CustomEvent('chiefvoice:toast', {
+                  detail: {
+                    message: data.message,
+                    type: 'warning',
+                    duration: 6500,
+                  },
+                }));
+              }
+            }
           } else if (data.message) {
             pushNotification(data.type || 'info', data.message);
           }
