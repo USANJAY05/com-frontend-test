@@ -27,6 +27,18 @@ const SENTIMENT_COLOR: Record<string, 'green' | 'rose' | 'slate'> = {
   Unknown: 'slate',
 };
 
+function formatCallOutcome(c: CallLog): { label: string; color: 'green' | 'amber' | 'rose' | 'blue' | 'slate' } {
+  switch (c.conversationOutcome) {
+    case 'callback_scheduled': return { label: 'Callback Scheduled', color: 'blue' };
+    case 'callback_and_enquiry': return { label: 'Callback + Enquiry', color: 'blue' };
+    case 'enquiry': return { label: 'Enquiry', color: 'amber' };
+    case 'busy': return { label: 'Busy', color: 'slate' };
+    case 'no_answer': return { label: 'No Answer', color: 'rose' };
+    case 'answering_machine': return { label: 'Answering Machine', color: 'rose' };
+    default: return { label: c.status, color: c.status === 'Completed' ? 'green' : 'slate' };
+  }
+}
+
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -231,7 +243,10 @@ export default function CallLogsView({ callLogs, costPerMinuteInr, leads = [] }:
             },
             { key: 'duration', header: 'Duration', cell: (c) => <span className="font-mono">{formatDuration(c.duration)}</span> },
             { key: 'cost', header: 'Cost', cell: (c) => <span className="font-mono">{formatInr(callCostInr(c.duration, costPerMinuteInr))}</span> },
-            { key: 'status', header: 'Status', cell: (c) => <>{c.status}</> },
+            { key: 'status', header: 'Status', cell: (c) => {
+  const outcome = formatCallOutcome(c);
+  return <Badge color={outcome.color}>{outcome.label}</Badge>;
+} },
             { key: 'sentiment', header: 'Sentiment', cell: (c) => <Badge color={SENTIMENT_COLOR[c.sentiment] ?? 'slate'}>{c.sentiment}</Badge> },
             { key: 'when', header: 'When', cell: (c) => <span style={{ color: 'var(--text-muted)' }}>{new Date(c.createdAt).toLocaleString()}</span> },
             {
@@ -273,9 +288,14 @@ export default function CallLogsView({ callLogs, costPerMinuteInr, leads = [] }:
             )}
 
             {/* Meta row */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
                 { label: 'Status',    value: selected.status },
+                { label: 'Outcome',   value: formatCallOutcome(selected).label },
+                { label: 'Callback',  value: selected.callbackStatus === 'scheduled' && selected.callbackTime
+                    ? new Date(selected.callbackTime).toLocaleString()
+                    : 'None' },
+                { label: 'Enquiry',   value: selected.enquiryStatus === 'open' ? 'Open' : 'None' },
                 { label: 'Sentiment', value: selected.sentiment },
                 { label: 'Intent',    value: selected.intent },
               ].map(item => (
