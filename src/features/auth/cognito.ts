@@ -1,5 +1,5 @@
 import { Amplify } from 'aws-amplify';
-import { fetchAuthSession, getCurrentUser, fetchUserAttributes, signInWithRedirect, signOut } from 'aws-amplify/auth';
+import { fetchAuthSession, getCurrentUser, signInWithRedirect, signOut } from 'aws-amplify/auth';
 
 const config = {
   userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID ?? '',
@@ -47,16 +47,11 @@ export async function getCognitoToken() {
 export async function getCognitoUser() {
   configureCognito();
   try {
-    const user = await getCurrentUser();
-    // Profile attributes are optional. Never let an attribute lookup failure
-    // turn a valid Cognito OAuth session into "Authentication unavailable".
-    let attributes: Record<string, string> = {};
-    try {
-      attributes = await fetchUserAttributes();
-    } catch (err) {
-      console.warn('Cognito profile attributes unavailable; continuing with token claims:', err);
-    }
-    return { ...user, attributes };
+    // For OAuth/Hosted UI sessions, use the ID-token claims for the profile.
+    // Do not call fetchUserAttributes() during bootstrap: that can hit
+    // Cognito's UserInfo endpoint and fail when the access token scopes do
+    // not match the endpoint requirements. Authentication itself is valid.
+    return await getCurrentUser();
   } catch { return null; }
 }
 export async function signOutCognito() {
