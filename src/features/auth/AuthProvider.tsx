@@ -81,7 +81,7 @@ function extractCognitoUser(user: any, claims: Record<string, any>): AuthUser {
   const rawRole = claims['custom:role']
     ?? claims.role
     ?? (claims.platformAdmin === true || claims.admin === true ? 'platform-admin' : 'user');
-  return { id: user.userId ?? claims.sub ?? '', email: claims.email ?? '', name: claims.name ?? claims['cognito:username'] ?? null, role: mapRole(rawRole), tokenParsed: claims };
+  return { id: user.userId ?? claims.sub ?? '', email: claims.email ?? '', name: claims.name ?? [claims.given_name, claims.family_name].filter(Boolean).join(' ') || user.attributes?.name || [user.attributes?.given_name, user.attributes?.family_name].filter(Boolean).join(' ') || null, role: mapRole(rawRole), tokenParsed: claims };
 }
 
 function LoadingSplash() {
@@ -212,7 +212,7 @@ function CognitoAuthProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.removeItem('cognito_signin_attempted');
         const session = await (await import('aws-amplify/auth')).fetchAuthSession();
         const claims = session.tokens?.idToken?.payload ?? {};
-        setUser(extractCognitoUser(current, claims));
+        setUser(extractCognitoUser(current, { ...claims, ...(current.attributes ?? {}) }));
         setInitState('ready');
       } catch (err: any) { setErrorMsg(err?.message ?? 'Could not connect to AWS Cognito.'); setInitState('error'); }
     })();

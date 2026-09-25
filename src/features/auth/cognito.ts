@@ -1,5 +1,5 @@
 import { Amplify } from 'aws-amplify';
-import { fetchAuthSession, getCurrentUser, signInWithRedirect, signOut } from 'aws-amplify/auth';
+import { fetchAuthSession, getCurrentUser, fetchUserAttributes, signInWithRedirect, signOut } from 'aws-amplify/auth';
 
 const config = {
   userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID ?? '',
@@ -24,7 +24,7 @@ export function configureCognito() {
         loginWith: {
           oauth: {
             domain: config.domain,
-            scopes: ['openid', 'email'],
+            scopes: ['openid', 'email', 'profile'],
             redirectSignIn: [config.redirectSignIn],
             redirectSignOut: [config.redirectSignOut],
             responseType: 'code',
@@ -46,7 +46,11 @@ export async function getCognitoToken() {
 }
 export async function getCognitoUser() {
   configureCognito();
-  try { return await getCurrentUser(); } catch { return null; }
+  try {
+    const user = await getCurrentUser();
+    const attributes = await fetchUserAttributes();
+    return { ...user, attributes };
+  } catch { return null; }
 }
 export async function signOutCognito() {
   configureCognito();
