@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Sparkles, Loader2, Mic, Check, Plus, Trash2, Edit2,
   Phone, PhoneOff, Bot, Zap, ToggleRight, ToggleLeft, BookOpen, FileText, MoreVertical,
-  Cpu, Wrench, X,
+  Cpu, Wrench, X, ArrowLeft,
 } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { isDevEnv } from '../lib/env';
@@ -130,16 +130,27 @@ interface AgentFormFrameProps {
   creating: boolean;
   agentWizardStep: number;
   form: Omit<Agent, 'id'>;
+  onBack: () => void;
 }
 
-function AgentFormFrame({ children, creating, agentWizardStep, form }: AgentFormFrameProps) {
+function AgentFormFrame({ children, creating, agentWizardStep, form, onBack }: AgentFormFrameProps) {
   return (
     <AwsCreateLayout
       breadcrumb={creating ? 'Agent Studio / Create Agent' : 'Agent Studio / Edit Agent'}
-      title={creating ? 'Create agent' : 'Edit agent'}
-      description={creating ? 'Configure the voice agent and review its launch configuration before creating it.' : 'Update the voice agent configuration and review the changes before saving.'}
-      steps={[{ label: 'Configure' }, { label: creating ? 'Review & Create' : 'Review & Save' }]}
+      title=""
+      description=""
+      steps={[]}
       activeStep={agentWizardStep}
+      action={(
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-500 bg-slate-700 text-white hover:bg-slate-600 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Agent Studio
+        </button>
+      )}
     >
       {children}
     </AwsCreateLayout>
@@ -731,7 +742,7 @@ export default function AgentStudioView() {
 
       {/* ── Agent create page / edit modal ── */}
       {(creating || !!editingAgent) && (
-      <AgentFormFrame creating={creating} agentWizardStep={agentWizardStep} form={form}>
+      <AgentFormFrame creating={creating} agentWizardStep={agentWizardStep} form={form} onBack={closeForm}>
         <div className="space-y-6">
           {(creating || editingAgent) && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-300 dark:border-[var(--border)] bg-slate-50/80 dark:bg-[var(--bg-subtle)]/60 dark:bg-[var(--bg-subtle)]/50 px-4 py-3">
