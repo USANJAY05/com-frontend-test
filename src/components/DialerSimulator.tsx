@@ -2300,7 +2300,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               <div className="space-y-6">
 
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
-                          <div className="space-y-4">
+                          <div className="space-y-4 rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50/30 dark:bg-blue-500/5 p-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Workflow</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active workflows with question tasks are shown — activate a workflow in Workflow Builder to make it available here.</p>
@@ -2364,7 +2364,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             <div className="h-px bg-[var(--border)]" />
 
             {/* ── Step 2: Select Agent ──────────────────────────────────────── */}
-                          <div className="space-y-4">
+                          <div className="space-y-4 rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-violet-50/30 dark:bg-violet-500/5 p-4">
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Outbound Agent</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active agents with an outbound number assigned are shown — configure and enable agents in Agent Studio.</p>
