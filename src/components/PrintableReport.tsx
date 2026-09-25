@@ -77,6 +77,7 @@ function CallRow({ c, cpm }: { c: CallLog; cpm: number }) {
       </td>
       <td style={{ padding: '8px 10px', fontSize: 11, color: '#475569', whiteSpace: 'nowrap' }}>{fmt(c.duration)}</td>
       <td style={{ padding: '8px 10px', fontSize: 11, color: '#475569' }}>{formatInr(callCostInr(c.duration, cpm))}</td>
+      <td style={{ padding: '8px 10px', fontSize: 10, color: '#475569', fontWeight: 700 }}>{c.conversationOutcome === 'callback_scheduled' ? 'Callback Scheduled' : c.conversationOutcome === 'callback_and_enquiry' ? 'Callback + Enquiry' : c.conversationOutcome === 'enquiry' ? 'Enquiry' : c.conversationOutcome === 'busy' ? 'Busy' : c.conversationOutcome === 'no_answer' ? 'No Answer' : c.conversationOutcome === 'answering_machine' ? 'Answering Machine' : c.status}</td>
       <td style={{ padding: '8px 10px' }}>
         <span style={{ fontSize: 10, fontWeight: 700, color: sentimentColor(c.sentiment), background: sentimentColor(c.sentiment) + '18', padding: '2px 8px', borderRadius: 100 }}>
           {c.sentiment}
@@ -123,12 +124,13 @@ export default function PrintableReport({
   };
 
   const handleCSV = () => {
-    const headers = ['Name', 'Direction', 'Duration (s)', 'Cost (INR)', 'Status', 'Sentiment', 'Intent', 'Summary', 'Date'];
+    const headers = ['Name', 'Direction', 'Duration (s)', 'Cost (INR)', 'Outcome', 'Status', 'Sentiment', 'Intent', 'Summary', 'Date'];
     const rows = visibleCalls.map(c => [
       c.leadName,
       c.direction || 'unknown',
       c.duration,
       callCostInr(c.duration, costPerMinuteInr).toFixed(2),
+      c.conversationOutcome || c.status,
       c.status,
       c.sentiment,
       c.intent,
