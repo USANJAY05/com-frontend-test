@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, Loader2, Phone, MessageCircleQuestion, GitBranch, ArrowUpRight, ArrowDownLeft, PhoneMissed, CalendarClock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Clock, Loader2, Phone, MessageCircleQuestion, Megaphone, ArrowUpRight, ArrowDownLeft, PhoneMissed, CalendarClock } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { formatPhone } from '../lib/phone';
 import PageShell from './ui/PageShell';
@@ -24,7 +25,11 @@ interface ScheduledCallback {
   callbackReason?: string;
   nextRetryAt?: string;
   createdAt: string;
+  campaignId?: string | null;
+  campaignName?: string | null;
+  /** @deprecated use campaignName — same dialer task name */
   workflowName?: string | null;
+  campaignQuestions?: string[];
   workflowQuestions?: string[];
   callerTimezone?: string;
   callbackTimeLocalLabel?: string;
@@ -38,6 +43,7 @@ const KIND_CHIP: Record<'callback' | 'not_answered', { label: string; className:
 };
 
 export default function ScheduledCallbacksView() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState<ScheduledCallback[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -146,18 +152,38 @@ export default function ScheduledCallbacksView() {
                       ),
                     },
                     {
-                      key: 'workflow',
-                      header: 'Workflow',
-                      cell: (r) => r.workflowName
-                        ? (
-                          <button
-                            onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline cursor-pointer"
-                          >
-                            <GitBranch className="h-3 w-3" /> {r.workflowName}
-                          </button>
-                        )
-                        : <span className="text-slate-300 italic text-xs">No workflow (inbound)</span>,
+                      key: 'campaign',
+                      header: 'Campaign',
+                      cell: (r) => {
+                        const name = r.campaignName || r.workflowName;
+                        const campaignId = r.campaignId;
+                        if (!name) {
+                          return <span className="text-slate-300 italic text-xs">No campaign (inbound)</span>;
+                        }
+                        return (
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (campaignId) {
+                                  navigate(`/voice-simulator/outbound?campaign=${encodeURIComponent(campaignId)}`);
+                                }
+                              }}
+                              className={`inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline cursor-pointer text-left ${campaignId ? '' : 'pointer-events-none'}`}
+                              title={campaignId ? 'Open this campaign in Voice Simulator' : undefined}
+                            >
+                              <Megaphone className="h-3 w-3 shrink-0" /> {name}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
+                              className="text-[10px] text-slate-400 hover:text-indigo-600 text-left"
+                            >
+                              View questions
+                            </button>
+                          </div>
+                        );
+                      },
                     },
                     {
                       key: 'scheduled',
@@ -177,14 +203,16 @@ export default function ScheduledCallbacksView() {
                       />
                       {expandedId && (() => {
                         const row = rows.find((r) => r.id === expandedId);
-                        if (!row || !row.workflowQuestions?.length) return null;
+                        const questions = row.campaignQuestions || row.workflowQuestions;
+                        const campaignLabel = row.campaignName || row.workflowName;
+                        if (!row || !questions?.length) return null;
                         return (
                           <div className="border-t border-slate-100 p-4 bg-slate-50/60">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
-                              <MessageCircleQuestion className="h-3.5 w-3.5" /> {row.workflowName} — Questions
+                              <MessageCircleQuestion className="h-3.5 w-3.5" /> {campaignLabel} — Questions
                             </div>
                             <ol className="space-y-1 text-xs text-slate-600 list-decimal list-inside">
-                              {row.workflowQuestions.map((q, i) => <li key={i}>{q}</li>)}
+                              {questions.map((q, i) => <li key={i}>{q}</li>)}
                             </ol>
                           </div>
                         );

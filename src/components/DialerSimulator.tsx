@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   PhoneCall,
   PhoneOff,
@@ -404,11 +405,21 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
   // Tasks — real, persisted via App.tsx (props), not localStorage.
 
   // Active Selected Task
+  const [searchParams] = useSearchParams();
   const [selectedTaskId, setSelectedTaskId] = useState<string>(() => {
     return tasks[0]?.id || '';
   });
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) || tasks[0];
+
+  // Deep-link from Leads / Scheduled Callbacks (?campaign=<dialer task id>).
+  useEffect(() => {
+    const campaignId = searchParams.get('campaign');
+    if (!campaignId) return;
+    if (tasks.some((t) => t.id === campaignId)) {
+      setSelectedTaskId(campaignId);
+    }
+  }, [searchParams, tasks]);
 
   // Campaign list: normal mode (Lead Contact/Value/Survey Status/AI
   // Sentiment/Survey Outcome) vs. a per-workflow-variable detail view —
