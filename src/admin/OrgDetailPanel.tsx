@@ -7,6 +7,7 @@ import SlideOver from '../components/ui/SlideOver';
 import Modal from '../components/ui/Modal';
 import { FEATURE_REGISTRY } from '../features/feature-flags/registry';
 import FlagGroupPicker from '../components/ui/FlagGroupPicker';
+import OrgBillingConsole from './OrgBillingConsole';
 
 export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: string; onClose: () => void; onChanged: () => void }) {
   const [detail, setDetail] = useState<OrgDetail | null>(null);
@@ -498,6 +499,9 @@ export default function OrgDetailPanel({ orgId, onClose, onChanged }: { orgId: s
                     </div>
                   </>
                 )}
+                <div className="mt-6 border-t border-slate-100 pt-4">
+                  <OrgBillingConsole orgId={orgId} onRecharge={() => { load(); onChanged(); }} />
+                </div>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-2xl p-5">

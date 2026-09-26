@@ -1,5 +1,6 @@
 import React from 'react';
-import { UserPlus, Phone, ArrowRightCircle, CheckCircle2, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { UserPlus, Phone, ArrowRightCircle, CheckCircle2, Download, Megaphone, Clock } from 'lucide-react';
 import { Lead } from '../types';
 import { formatPhone } from '../lib/phone';
 import { usePipelineStages, stageLabel } from '../lib/pipelineStages';
@@ -62,20 +63,29 @@ function latestCallIdForLead(leadId: string, dialerTasks: CampaignTask[]): strin
   return withCallId[0]?.callResults?.[leadId]?.callId ?? null;
 }
 
-// The most recent campaign/workflow this lead was actually dialed as part
-// of — a lead can belong to more than one task over time (re-run
-// campaigns), so this picks the newest one by the task's own createdAt.
-// `task.name` is the real field (see the paired backend fix to
-// db.getScheduledCallbacks/Dashboard/Reports — dialer_tasks has no
-// separate "workflowName" column, only `name`).
-function latestCampaignForLead(leadId: string, dialerTasks: CampaignTask[]): string | null {
-  const candidates = [...dialerTasks]
+// The dialer task (campaign) this lead was most recently dialed under —
+// prefer tasks that already have callResults for this lead (actual dial)
+// over tasks that only list the lead in leadIds, since the same workflow
+// can spawn multiple campaigns and membership alone is ambiguous.
+function latestCampaignTaskForLead(leadId: string, dialerTasks: CampaignTask[]): CampaignTask | null {
+  const byCreated = (a: CampaignTask, b: CampaignTask) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  const dialed = [...dialerTasks]
+    .filter((t) => t.callResults && leadId in t.callResults)
+    .sort(byCreated);
+  if (dialed[0]) return dialed[0];
+  const listed = [...dialerTasks]
     .filter((t) => t.leadIds?.includes(leadId))
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  return candidates[0]?.name ?? null;
+    .sort(byCreated);
+  return listed[0] ?? null;
+}
+
+function latestCampaignForLead(leadId: string, dialerTasks: CampaignTask[]): string | null {
+  return latestCampaignTaskForLead(leadId, dialerTasks)?.name ?? null;
 }
 
 export default function LeadsView({ leads, setLeads, dialerTasks = [] }: LeadsViewProps) {
+  const navigate = useNavigate();
   const { stages } = usePipelineStages();
   const [advancingId, setAdvancingId] = React.useState<string | null>(null);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -118,7 +128,7 @@ export default function LeadsView({ leads, setLeads, dialerTasks = [] }: LeadsVi
     { key: 'phone', label: 'Phone', getValue: (l) => formatPhone(l.phone) || l.phone },
     { key: 'email', label: 'Email', getValue: (l) => l.email },
     { key: 'source', label: 'Source', getValue: (l) => l.source },
-    { key: 'workflow', label: 'Workflow', getValue: (l) => latestCampaignForLead(l.id, dialerTasks) || '' },
+    { key: 'campaign', label: 'Campaign', getValue: (l) => latestCampaignForLead(l.id, dialerTasks) || '' },
     { key: 'stage', label: 'Stage', getValue: (l) => stageLabel(stages, l.pipelineStage) },
     { key: 'status', label: 'CRM Status', getValue: (l) => l.status },
     { key: 'score', label: 'AI Score', getValue: (l) => l.score },
@@ -145,13 +155,40 @@ export default function LeadsView({ leads, setLeads, dialerTasks = [] }: LeadsVi
     },
     { key: 'source', header: 'Source', cell: (l) => <span className="text-xs text-slate-500 dark:text-[var(--text-secondary)]">{l.source}</span> },
     {
-      key: 'workflow',
-      header: 'Workflow',
+      key: 'callbackTime',
+      header: 'Advisor callback',
+      cell: (l) => (
+        l.callbackTime
+          ? (
+            <span className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-[var(--text-secondary)]">
+              <Clock className="h-3 w-3 shrink-0" />
+              {new Date(l.callbackTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+            </span>
+          )
+          : <span className="text-xs text-slate-300 dark:text-[var(--text-muted)]">—</span>
+      ),
+    },
+    {
+      key: 'campaign',
+      header: 'Campaign',
       cell: (l) => {
-        const name = latestCampaignForLead(l.id, dialerTasks);
-        return name
-          ? <span className="text-xs text-slate-500 dark:text-[var(--text-secondary)]">{name}</span>
-          : <span className="text-xs text-slate-300 dark:text-[var(--text-muted)]">—</span>;
+        const task = latestCampaignTaskForLead(l.id, dialerTasks);
+        if (!task?.name) {
+          return <span className="text-xs text-slate-300 dark:text-[var(--text-muted)]">—</span>;
+        }
+        return (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/voice-simulator/outbound?campaign=${encodeURIComponent(task.id)}`);
+            }}
+            className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline cursor-pointer"
+            title="Open campaign in Voice Simulator"
+          >
+            <Megaphone className="h-3 w-3 shrink-0" /> {task.name}
+          </button>
+        );
       },
     },
     {

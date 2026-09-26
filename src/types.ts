@@ -32,6 +32,8 @@ export interface Lead {
   // them is answered; advanced manually (via `status`) into opportunity/
   // client. Missing/undefined reads as "contact", the starting stage.
   pipelineStage?: 'contact' | 'campaign' | 'lead' | 'opportunity' | 'client';
+  // Preferred time for a human advisor to speak with this contact (from questionnaire).
+  callbackTime?: string;
 }
 
 // One of the 5 universal pipeline stage keys, worded for this org's

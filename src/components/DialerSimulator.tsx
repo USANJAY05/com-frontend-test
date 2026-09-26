@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   PhoneCall,
+  PhoneIncoming,
   PhoneOff,
   MessageSquare,
   Mic,
@@ -32,6 +34,7 @@ import {
   GitBranch,
   Bot,
   User,
+  Megaphone,
 } from 'lucide-react';
 import { Lead, CallLog, VirtualNumber, TeamMember, ContactGroup, OrganizationSettings } from '../types';
 import { QuestionFlow } from '../features/workflows/types';
@@ -404,11 +407,21 @@ Real Tamil speakers do not say the "correct" written form of a word. They contra
   // Tasks — real, persisted via App.tsx (props), not localStorage.
 
   // Active Selected Task
+  const [searchParams] = useSearchParams();
   const [selectedTaskId, setSelectedTaskId] = useState<string>(() => {
     return tasks[0]?.id || '';
   });
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) || tasks[0];
+
+  // Deep-link from Leads / Scheduled Callbacks (?campaign=<dialer task id>).
+  useEffect(() => {
+    const campaignId = searchParams.get('campaign');
+    if (!campaignId) return;
+    if (tasks.some((t) => t.id === campaignId)) {
+      setSelectedTaskId(campaignId);
+    }
+  }, [searchParams, tasks]);
 
   // Campaign list: normal mode (Lead Contact/Value/Survey Status/AI
   // Sentiment/Survey Outcome) vs. a per-workflow-variable detail view —
@@ -1422,7 +1435,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
       <div className="space-y-5 font-sans text-[var(--text-primary)]">
         <div className="flex items-center gap-2">
           <Badge color="blue" className="font-mono uppercase tracking-widest">Archive Room</Badge>
-          <Badge color="green" className="font-mono uppercase tracking-widest">{isOutbound ? 'Outbound Dial' : 'Inbound Line'}</Badge>
+          <Badge color="green" className="font-mono uppercase tracking-widest">{isOutbound ? 'Outbound campaign' : 'Inbound call'}</Badge>
           {/* Picked up but never actually engaged — still status
               "Completed" but no real conversation happened. */}
           {activeTapeResult.status === 'Completed' && activeTapeResult.callAnswered === false && (
@@ -1703,6 +1716,16 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
     ? Math.round((Object.keys(selectedTask.callResults).map(k => selectedTask.callResults[k]).filter(r => r.intent === 'Interested').length / completedLeadsInTask) * 100)
     : 0;
 
+  const selectedCampaignScriptName =
+    selectedTask?.workflowName
+    || selectedTask?.workflowRunMetadata?.workflowName
+    || null;
+
+  const dialerPageTitle = dialerMode === 'outbound' ? 'Outbound Campaigns' : 'Inbound Calls';
+  const dialerPageSubtitle = dialerMode === 'outbound'
+    ? 'Create and run outbound campaigns (each run is its own dialer task). Monitor the queue, auto-dial, and review extracted answers per campaign.'
+    : 'Monitor calls to your virtual numbers. Inbound calls are not tied to an outbound campaign, but use the same analysis and extracted answers panels.';
+
   return (
     <PageShell
       title={taskPage
@@ -1716,13 +1739,13 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                 Voice Simulator
               </button>
               <span className="text-slate-300 dark:text-slate-600">/</span>
-              <span className="text-lg font-semibold text-slate-900 dark:text-[var(--text-primary)] truncate">Assign Dialing Task</span>
+              <span className="text-lg font-semibold text-slate-900 dark:text-[var(--text-primary)] truncate">New outbound campaign</span>
             </div>
           )
-        : <BreadcrumbTitle group="Campaign" page={dialerMode === 'outbound' ? 'Outbound Campaigns' : 'Inbound Virtual Center'} />}
+        : <BreadcrumbTitle group="Campaign" page={dialerPageTitle} />}
       subtitle={taskPage
-        ? undefined
-        : 'Configure automated workflows, initiate sequential campaigns, or trigger dynamic incoming calls to your virtual phone lines.'}
+        ? 'Choose a call script (workflow), agent, and contacts. Each create action starts a new campaign run with its own queue and callbacks.'
+        : dialerPageSubtitle}
       layout={taskPage ? 'grid' : 'fill'}
       onRefresh={taskPage ? () => {} : undefined}
       titleActions={
@@ -1740,7 +1763,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           : dialerMode === 'outbound' ? (
               <IconButton
                 icon={Plus}
-                label="Assign Dialing Task"
+                label="New outbound campaign"
                 onClick={() => setShowAssignTask(true)}
               />
             ) : undefined
@@ -1783,15 +1806,15 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
         {/* Left Column: Today's Assigned Tasks list */}
         <Widget
           colSpan={4}
-          title="Today's Assigned lists"
-          icon={FileSpreadsheet}
+          title="Campaigns"
+          icon={Megaphone}
           className="min-h-[60vh]"
           action={
-            <Badge color="blue" className="font-mono">{tasks.length} Active</Badge>
+            <Badge color="blue" className="font-mono">{tasks.length} total</Badge>
           }
         >
           <div className="space-y-4">
-            <p className="text-xs text-[var(--text-muted)]">Select an active call-list scheduled for today to monitor agent progress.</p>
+            <p className="text-xs text-[var(--text-muted)]">Each row is one outbound campaign run. Select a campaign to view its queue, callbacks, and results.</p>
 
             <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
               {tasks.map((task) => {
@@ -1818,7 +1841,10 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                       <div className="min-w-0 flex-1">
                         <span className="text-xs font-bold text-[var(--text-primary)] line-clamp-1 block">{task.name}</span>
                         <span className="text-[9px] text-[var(--text-muted)] block mt-0.5">
-                          Workflow run · {new Date(task.workflowRunMetadata?.runAt || task.createdAt).toLocaleString()}
+                          Started {new Date(task.workflowRunMetadata?.runAt || task.createdAt).toLocaleString()}
+                          {(task.workflowName || task.workflowRunMetadata?.workflowName)
+                            ? ` · Script: ${task.workflowName || task.workflowRunMetadata?.workflowName}`
+                            : ''}
                         </span>
                       </div>
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
@@ -1854,32 +1880,40 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
           {!selectedTask ? (
             <EmptyState
               icon={FileSpreadsheet}
-              heading="No dialing tasks yet"
-              message="Assign a daily dialing task to start calling real leads."
+              heading="No outbound campaigns yet"
+              message="Create a campaign to dial contacts with a call script and track results per run."
               action={
                 <Button variant="primary" size="sm" icon={Plus} onClick={() => setShowAssignTask(true)}>
-                  Assign Dialing Task
+                  New outbound campaign
                 </Button>
               }
             />
           ) : (
           <div className="flex flex-col h-full gap-4">
             <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-widest">Active Campaign List</h3>
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
+                  <Megaphone className="h-5 w-5 text-blue-600 shrink-0" />
+                  <span className="truncate">{selectedTask.name}</span>
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  Campaign queue
+                  {selectedCampaignScriptName ? ` · Call script: ${selectedCampaignScriptName}` : ''}
+                  {' · '}{selectedTask.leadIds.length} contact{selectedTask.leadIds.length === 1 ? '' : 's'}
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <Button
                   variant={showWorkflowDetailView ? 'primary' : 'secondary'}
                   size="sm"
-                  icon={GitBranch}
+                  icon={MessageCircleQuestion}
                   onClick={() => setShowWorkflowDetailView((v) => !v)}
                   title={showWorkflowDetailView
-                    ? 'Switch back to the normal list — Lead Contact / Value / Survey Status / AI Sentiment / Survey Outcome'
-                    : 'Show every extracted workflow answer as its own column, for every lead in this campaign'}
+                    ? 'Switch back to the dial queue — status, sentiment, and outcomes per contact'
+                    : 'Show one column per extracted answer for every contact in this campaign'}
                 >
-                  {showWorkflowDetailView ? 'Normal View' : 'Workflow View'}
+                  {showWorkflowDetailView ? 'Queue view' : 'Answer columns'}
                 </Button>
               {selectedTask.status !== 'Completed' && (
                 <Button
@@ -1907,7 +1941,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             <div className="flex-1 min-h-0">
             {showWorkflowDetailView ? (
               workflowDetailLoading ? (
-                <div className="flex items-center justify-center py-16 text-[var(--text-muted)] text-sm">Loading workflow details…</div>
+                <div className="flex items-center justify-center py-16 text-[var(--text-muted)] text-sm">Loading campaign answers…</div>
               ) : workflowDetailRows.length === 0 ? (
                 <EmptyState heading="No completed calls in this campaign yet" />
               ) : (() => {
@@ -2225,13 +2259,17 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
         /* REAL INBOUND CALL HISTORY */
         <>
         <div className="grid grid-cols-3 gap-4">
-          <KpiCard colSpan={1} label="Inbound Volume" value={realInboundCallLogs.length} className="!rounded-xl !min-h-0 !p-3.5" />
+          <KpiCard colSpan={1} label="Calls Received" value={realInboundCallLogs.length} icon={PhoneIncoming} iconPosition="right" iconBg="var(--bg-subtle)" iconColor="var(--text-muted)" className="!rounded-xl !min-h-0 !p-3.5" />
           <KpiCard
             colSpan={1}
-            label="Average Duration"
+            label="Avg. Duration"
             value={`${realInboundCallLogs.length > 0
               ? Math.round(realInboundCallLogs.reduce((acc, l) => acc + l.duration, 0) / realInboundCallLogs.length)
               : 0}s`}
+            icon={Clock}
+            iconPosition="right"
+            iconBg="var(--bg-subtle)"
+            iconColor="var(--text-muted)"
             className="!rounded-xl !min-h-0 !p-3.5"
           />
           <KpiCard
@@ -2240,22 +2278,28 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             value={`${realInboundCallLogs.length > 0
               ? Math.round((realInboundCallLogs.filter(l => l.sentiment === 'Positive').length / realInboundCallLogs.length) * 100)
               : 0}%`}
+            icon={Smile}
+            iconPosition="right"
+            iconBg="var(--bg-subtle)"
+            iconColor="#059669"
             className="!rounded-xl !min-h-0 !p-3.5"
           />
         </div>
 
         <div className="grid grid-cols-12 gap-6 items-stretch">
-          {/* LEFT COLUMN: Active Inbound Virtual Numbers */}
+          {/* LEFT COLUMN: numbers that receive inbound calls */}
           <div className="col-span-12 lg:col-span-4 flex flex-col h-full space-y-6">
             <Widget
-              className="flex-1"
-              title="Active Inbound Numbers"
+              className="flex-1 min-h-[60vh]"
+              title="Inbound numbers"
               icon={PhoneForwarded}
               action={
                 <Badge color="blue" className="font-mono">{activeVirtualNumbers.length} Online</Badge>
               }
             >
-              <div className="space-y-3.5">
+              <div className="space-y-4">
+                <p className="text-xs text-[var(--text-muted)]">Virtual lines that accept incoming calls. Outbound campaigns use different caller IDs from Agent Studio.</p>
+                <div className="space-y-3.5">
                 {activeVirtualNumbers.map((vNum) => (
                   <div
                     key={vNum.id}
@@ -2278,23 +2322,25 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                 {activeVirtualNumbers.length === 0 && (
                   <div className="text-center py-8 border border-dashed border-[var(--border)] rounded-xl bg-[var(--bg-subtle)]/50 space-y-2">
                     <PhoneForwarded className="h-6 w-6 text-slate-300 mx-auto" />
-                    <p className="text-[11px] text-[var(--text-muted)]">No virtual numbers connected yet. Add one under Settings to start receiving real inbound calls.</p>
+                    <p className="text-[11px] text-[var(--text-muted)]">No inbound numbers yet. Add a virtual number under Administration to receive calls here.</p>
                   </div>
                 )}
+                </div>
               </div>
             </Widget>
           </div>
 
-          {/* RIGHT COLUMN: Real Inbound Call History */}
+          {/* RIGHT COLUMN: inbound call history (parallel to outbound campaign queue) */}
           <div className="col-span-12 lg:col-span-8 flex flex-col h-full space-y-6">
-            <Widget showHeader={false} className="h-full min-h-[580px]" bodyClassName="flex flex-col h-full">
+            <Widget showHeader={false} className="h-full min-h-[60vh]" bodyClassName="flex flex-col h-full">
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between shrink-0">
-                  <div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-1.5">
-                      <History className="h-4.5 w-4.5 text-blue-600" /> Inbound Dialogue History
+                <div className="flex items-center justify-between shrink-0 border-b border-[var(--border)] pb-4">
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
+                      <PhoneIncoming className="h-5 w-5 text-blue-600 shrink-0" />
+                      Call history
                     </h3>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">Real recorded calls answered on your virtual numbers, with AI-extracted summaries and full transcripts.</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Recorded inbound conversations with summaries, sentiment, and extracted answers (same analysis panel as outbound campaigns).</p>
                   </div>
                 </div>
 
@@ -2374,9 +2420,9 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
 
         const WizardFrame: any = AwsCreateLayout;
         const frameProps: any = {
-          breadcrumb: 'Voice Simulator / Assign Dialing Task',
-          title: 'Assign dialing task',
-          description: 'Configure the workflow, outbound agent, and contacts for this dialing run.',
+          breadcrumb: 'Campaign / New outbound campaign',
+          title: 'New outbound campaign',
+          description: 'Pick a call script from Workflow Builder, assign an outbound agent, and choose contacts. This creates a new campaign run with its own queue and scheduled callbacks.',
           steps: [{ label: 'Configure' }, { label: 'Review' }],
           activeStep: wizardStep,
           action: (
@@ -2394,8 +2440,8 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
             {/* ── Step 1: Select Workflow ───────────────────────────────────── */}
                           <div className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Workflow</h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Only active workflows with question tasks are shown — activate a workflow in Workflow Builder to make it available here.</p>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Call script (workflow)</h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">The script defines what the agent asks. Each campaign run reuses a workflow; runs are listed separately under Outbound Campaigns.</p>
                 </div>
 
                 {workflowsWithQuestions.length === 0 ? (
@@ -2744,7 +2790,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               <p className="text-[11px] text-[var(--text-muted)]">
                 {wizardWorkflowId && wizardAgentId && totalContacts > 0
                   ? `${totalContacts} contact${totalContacts !== 1 ? 's' : ''} ready to review`
-                  : 'Select a workflow, agent, and at least one contact to continue.'}
+                  : 'Select a call script, agent, and at least one contact to continue.'}
               </p>
               <Button
                 variant="primary"
@@ -2762,27 +2808,27 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
               <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-bold text-[var(--text-primary)]">Review & Create</h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Confirm the details below, then create the dialing task.</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Confirm the campaign details below, then create the run.</p>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Task Name</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Campaign name</label>
                   <div className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] rounded-xl bg-[var(--bg-subtle)] text-[var(--text-secondary)] font-mono">
                     {selectedWorkflow.name}
                   </div>
                   <p className="text-[11px] text-[var(--text-muted)] mt-1">
-                    Named after the workflow. This run will be created at <span className="font-semibold">{new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span> — that date/time is tracked separately, so in Reports &gt; Report by Task you can see all of this workflow's runs together or narrow down to a specific day.
+                    Defaults to the call script name. This run starts at <span className="font-semibold">{new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span> — each run is a separate campaign so callbacks and results stay tied to this run, even when you reuse the same script later.
                   </p>
                 </div>
 
                 <div className="space-y-3 bg-[var(--bg-subtle)] rounded-xl p-4 border border-[var(--border)]">
-                  {/* Workflow summary */}
+                  {/* Call script summary */}
                   <div className="flex items-start gap-3 pb-3 border-b border-[var(--border)]">
                     <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                      <ChevronRight className="h-4 w-4 text-blue-600" />
+                      <GitBranch className="h-4 w-4 text-blue-600" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Workflow</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Call script</p>
                       <p className="text-sm font-bold text-[var(--text-primary)] mt-0.5">{selectedWorkflow.name}</p>
                       <p className="text-xs text-[var(--text-muted)] mt-0.5">{(selectedWorkflow.variables ?? []).length} questions</p>
                       <div className="flex flex-col gap-1 mt-1.5">
@@ -2848,7 +2894,7 @@ Currently on question ${nextIndex} out of ${selectedTask.questions.length}. Next
                     icon={PhoneCall}
                     className="shadow-md"
                   >
-                    Create & Load Dialing Task
+                    Create campaign
                   </Button>
                 </div>
               </div>

@@ -63,7 +63,7 @@ const SIDEBAR_GROUPS: SidebarGroup[] = [
     icon: PhoneCall,
     subItems: [
       { id: 'outbound',  label: 'Outbound Campaigns',       icon: PhoneCall },
-      { id: 'inbound',   label: 'Inbound Virtual Center',   icon: PhoneIncoming },
+      { id: 'inbound',   label: 'Inbound Calls',            icon: PhoneIncoming },
       { id: 'scheduled', label: 'Scheduled Callbacks',      icon: Clock },
     ],
   },
