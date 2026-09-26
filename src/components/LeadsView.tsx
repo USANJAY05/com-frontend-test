@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, Phone, ArrowRightCircle, CheckCircle2, Download, Megaphone } from 'lucide-react';
+import { UserPlus, Phone, ArrowRightCircle, CheckCircle2, Download, Megaphone, Clock } from 'lucide-react';
 import { Lead } from '../types';
 import { formatPhone } from '../lib/phone';
 import { usePipelineStages, stageLabel } from '../lib/pipelineStages';
@@ -154,6 +154,20 @@ export default function LeadsView({ leads, setLeads, dialerTasks = [] }: LeadsVi
       ),
     },
     { key: 'source', header: 'Source', cell: (l) => <span className="text-xs text-slate-500 dark:text-[var(--text-secondary)]">{l.source}</span> },
+    {
+      key: 'callbackTime',
+      header: 'Advisor callback',
+      cell: (l) => (
+        l.callbackTime
+          ? (
+            <span className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-[var(--text-secondary)]">
+              <Clock className="h-3 w-3 shrink-0" />
+              {new Date(l.callbackTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+            </span>
+          )
+          : <span className="text-xs text-slate-300 dark:text-[var(--text-muted)]">—</span>
+      ),
+    },
     {
       key: 'campaign',
       header: 'Campaign',
